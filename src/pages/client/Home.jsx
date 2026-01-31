@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import moodTracker from "../../assets/moodtracker.jpg";
-import moodTracker1 from "../../assets/moodtracker1.jpg";
-import blogImg from "../../assets/blogimg.jpg";
+import moodTracker from "../../assets/moodTracker.jpg";
+import moodTracker1 from "../../assets/moodTracker1.jpg";
+import blogImg from "../../assets/blogImg.jpg";
 import blogImg1 from "../../assets/blogImg1.jpg";
-import aiChatBot from "../../assets/aichatbot.jpg";
-import aiChatBot1 from "../../assets/aichatbot1.jpg";
+import aiChatBot from "../../assets/aiChatbot.jpg";
+import aiChatBot1 from "../../assets/aiChatbot1.jpg";
 
 // Import ảnh mũi tên của bạn
 import arrowFirst from "../../assets/arrowfirst.png";
