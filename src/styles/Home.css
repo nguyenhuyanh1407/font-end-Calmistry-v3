@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
 /* Card chính */
 .therapy-card {
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -620,8 +622,6 @@ font-family: var(--font-body);
 #pricing-section {
   scroll-margin-top: 40px; /* đúng bằng height navbar */
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
   :root {
     --font-heading: 'Lora', serif;
