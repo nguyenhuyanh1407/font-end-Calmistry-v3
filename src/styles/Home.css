@@ -65,6 +65,7 @@
 }
 
 .btn-get-matched {
+font-family: var(--font-body);
   background-color: #a6e2a1;
   color: #324d3e;
   border: none;
@@ -620,3 +621,35 @@
   scroll-margin-top: 40px; /* đúng bằng height navbar */
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+  :root {
+    --font-heading: 'Lora', serif;
+    --font-body: 'Rubik', sans-serif;
+  }
+
+  body, p, span, li, button, div {
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, .display-3, .display-4, .display-5 {
+    font-family: var(--font-heading) !important;
+  }
+
+  .btn-get-matched-refined {
+    background-color: #324d3e;
+    color: #ffffff;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-family: 'Rubik', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(50, 77, 62, 0.15);
+  }
+
+  .btn-get-matched-refined:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(50, 77, 62, 0.25);
+    background-color: #3d5a4a;
+  }

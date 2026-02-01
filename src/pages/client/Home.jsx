@@ -110,13 +110,8 @@ const Home = () => {
               className="onboarding-arrow-animation"
               style={{ width: '120px' }}
             />
-            <p
-              className="fw-bold text-white mt-2 mb-0"
-              style={{
-                textAlign: 'left',
-                marginLeft: '-62px'
-              }}
-            >
+            <p className="fw-bold text-white mt-2 mb-0"
+               style={{ textAlign: 'left', marginLeft: '-62px', fontFamily: 'Rubik, sans-serif' }}>
               Khám phá ngay!
             </p>
 
@@ -153,7 +148,7 @@ const Home = () => {
       subOptions: [
         { title: "Đặt lịch tham gia workshop", icon: <People /> },
         { title: "Nhóm chat chữa lành", icon: <ChatDots />, action: () => navigate("/group-chat") },
-        { title: "Hãy chia sẽ câu chuyện của bạn", icon: <Stars />, action: () => navigate("/shareStories") }
+        { title: "Chia sẽ câu chuyện của bạn", icon: <Stars />, action: () => navigate("/shareStories") }
       ]
     },
     {
@@ -164,7 +159,7 @@ const Home = () => {
       img: aiChatBot,
       activeImg: aiChatBot1,
       subOptions: [
-        { title: "AI cá nhân hóa đồng hành cùng bạn", icon: <Robot /> },
+        { title: "AI cá nhân hóa", icon: <Robot /> },
       ]
     }
   ];
@@ -254,7 +249,7 @@ const Home = () => {
 
       <div style={{ backgroundColor: brandGreen, overflowX: 'hidden' }}>
         <section className="container py-5 text-white" style={{ position: 'relative', zIndex: 1 }}>
-          <header className="text-center mb-5 pt-4">
+          <header className="text-center mb-5" style={{ paddingTop: '80px' }}>
             <h1 className="display-3 fw-normal mb-3">
               Mọi người đều xứng đáng được hạnh phúc.
             </h1>
@@ -322,17 +317,28 @@ const Home = () => {
               <div className="col-lg-6 mb-5 mb-lg-0">
                 <FadeInUp>
                   <div className="pe-lg-5">
-                    <h2 className="display-4 fw-normal mb-4" style={{ color: '#324d3e', lineHeight: '1.1' }}>
-                      Các chuyên gia trị liệu chuyên nghiệp và có trình độ, những người bạn có thể tin tưởng.
+                    {/* Badge nhỏ tạo điểm nhấn chuyên nghiệp */}
+                    <span className="text-uppercase fw-bold mb-3 d-inline-block"
+                          style={{ color: '#74c655', letterSpacing: '2px', fontSize: '0.85rem' }}>
+                      Đội ngũ chuyên gia
+                    </span>
+
+                    <h2 className="display-4 mb-4" style={{ color: '#324d3e', lineHeight: '1.2', fontWeight: '600' }}>
+                      Chuyên gia trị liệu <br/> bạn có thể tin tưởng.
                     </h2>
-                    <p className="fs-5 mb-5" style={{ color: '#4a5e54', lineHeight: '1.6' }}>
-                      Hãy kết nối với mạng lưới các nhà tư vấn tâm lí có trình độ và kinh nghiệm,
-                      những người có thể giúp bạn giải quyết nhiều vấn đề bao gồm trầm cảm, lo âu, các vấn đề về mối quan hệ,
-                      chấn thương tâm lý, đau buồn và nhiều hơn nữa. Với các nhà trị liệu của chúng tôi, bạn sẽ nhận được sự chuyên nghiệp và
-                      chất lượng tương tự như khi gặp nhà trị liệu trực tiếp tại văn phòng, nhưng với khả năng
-                      giao tiếp khi nào và theo cách bạn muốn.
+
+                    {/* Chia nhỏ nội dung bằng list để dễ đọc hơn thay vì một đoạn văn dài */}
+                    <p className="fs-5 mb-4" style={{ color: '#4a5e54', lineHeight: '1.7', textAlign: 'justify' }}>
+                      Kết nối với mạng lưới nhà tư vấn tâm lý có trình độ, giúp bạn vượt qua trầm cảm, lo âu và tìm lại sự cân bằng trong cuộc sống.
                     </p>
-                    <button className="btn-get-matched">
+
+                    <ul className="list-unstyled mb-5" style={{ color: '#4a5e54' }}>
+                      <li className="mb-2"><i className="bi bi-check2-circle me-2 text-success"></i> Chuyên gia có bằng cấp quốc tế</li>
+                      <li className="mb-2"><i className="bi bi-check2-circle me-2 text-success"></i> Bảo mật thông tin tuyệt đối</li>
+                      <li className="mb-2"><i className="bi bi-check2-circle me-2 text-success"></i> Thời gian linh hoạt theo ý bạn</li>
+                    </ul>
+
+                    <button className="btn-get-matched-refined">
                       Tìm người trị liệu phù hợp
                     </button>
                   </div>
@@ -351,7 +357,10 @@ const Home = () => {
 
                   {/* Các ảnh nhỏ xung quanh */}
                   <div className="img-wrapper sub-img top-left shadow-sm">
-                    <img src="https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200" alt="Therapist" />
+                      <img
+                        src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200"
+                        alt="Therapist 1"
+                      />
                   </div>
                   <div className="img-wrapper sub-img top-right shadow-sm">
                     <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=200" alt="Therapist" />
@@ -369,6 +378,8 @@ const Home = () => {
                   </div>
                 </div>
               </div>
+
+
 
             </div>
           </div>
@@ -542,7 +553,7 @@ const Home = () => {
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Group Healing Workshops</li>
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Priority Chat Support</li>
                     </ul>
-                    <button className="btn btn-light w-100 rounded-pill py-3 fw-bold" style={{ color: brandGreen }}>Get Started</button>
+                    <button className="btn btn-light w-100 rounded-pill py-3 fw-bold" style={{ color: brandGreen }}>Bắt đầu ngay</button>
                   </div>
                 </FadeInUp>
               </div>
@@ -562,7 +573,7 @@ const Home = () => {
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> 24/7 Crisis Support</li>
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Family Account (Up to 3)</li>
                     </ul>
-                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Upgrade to Diamond</button>
+                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Nâng cấp lên gói kim cương</button>
                   </div>
                 </FadeInUp>
               </div>

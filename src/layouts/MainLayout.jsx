@@ -20,6 +20,7 @@ const MainLayout = () => {
 
   const brandGreen = '#324d3e';
   const lightGreen = '#74c655';
+  const softBg = '#f4f7f5';
 
   // Scroll effect
   useEffect(() => {
@@ -64,7 +65,7 @@ const MainLayout = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Rubik', sans-serif" }}>
       {/* Navbar */}
       <nav
         className={`navbar navbar-expand-lg fixed-top px-4 py-2 ${isScrolled ? 'shadow-sm' : ''}`}
@@ -226,32 +227,186 @@ const MainLayout = () => {
         <Outlet />
       </main>
 
-      {/* Footer (Giữ nguyên logic của bạn) */}
-      <footer style={{ position: 'relative', backgroundColor: brandGreen, marginTop: 'auto' }}>
-        <div style={{ lineHeight: 0, width: '100%', backgroundColor: sectionAboveColor, overflow: 'hidden' }}>
-          <svg viewBox="0 0 1440 120" preserveAspectRatio="none" style={{ width: '100%', height: '100px', display: 'block', transform: 'scale(1.02)' }}>
-            <path d="M0,80 C320,130 720,30 1120,90 C1280,115 1440,100 1440,100 L1440,120 L0,120 Z" fill={lightGreen} />
-            <path d="M0,100 C360,150 720,50 1080,110 C1260,130 1440,120 1440,120 L1440,120 L0,120 Z" fill={brandGreen} />
-          </svg>
-        </div>
+    {/* Footer */}
+    <footer style={{
+      position: 'relative',
+      backgroundColor: brandGreen,
+      marginTop: 'auto',
+      fontFamily: "'Rubik', sans-serif" // Phông chữ mặc định cho toàn bộ footer
+    }}>
+      {/* Import Google Fonts */}
+      <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet" />
 
-        <div className="container" style={{ paddingTop: '40px', paddingBottom: '40px', color: '#ffffff' }}>
-          {/* Nội dung Footer của bạn giữ nguyên ở đây... */}
-          <div className="row g-5">
-            <div className="col-lg-4 col-md-12">
-              <div className="d-flex align-items-center mb-4">
-                <img src={logoCalmWhite} alt="Logo" style={{ height: '40px', marginRight: '12px' }} />
-                <span className="fs-3 fw-bold">Calmistry</span>
-              </div>
-              <p className="opacity-75">Trải nghiệm trị liệu tâm lý trực tuyến 100%.</p>
+      <div style={{ lineHeight: 0, width: '100%', backgroundColor: softBg, overflow: 'hidden' }}>
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" style={{ width: '100%', height: '100px', display: 'block', transform: 'scale(1.02)' }}>
+          <path d="M0,80 C320,130 720,30 1120,90 C1280,115 1440,100 1440,100 L1440,120 L0,120 Z" fill={lightGreen} />
+          <path d="M0,100 C360,150 720,50 1080,110 C1260,130 1440,120 1440,120 L1440,120 L0,120 Z" fill={brandGreen} />
+        </svg>
+      </div>
+
+      <div className="container" style={{ paddingTop: '60px', paddingBottom: '40px', color: '#ffffff' }}>
+        <div className="row g-5">
+          {/* Cột 1: Thương hiệu & Newsletter */}
+          <div className="col-lg-5 col-md-12">
+            <div className="d-flex align-items-center mb-4">
+              <img src={logoCalmWhite} alt="Logo" style={{ height: '40px', marginRight: '12px' }} />
+              <span style={{
+                fontFamily: "'Lora', serif",
+                fontSize: '32px',
+                fontWeight: '700',
+                letterSpacing: '-0.5px'
+              }}>Calmistry</span>
             </div>
-            {/* ... Các cột khác ... */}
+            <p className="opacity-75 mb-4" style={{ maxWidth: '380px', fontSize: '15px', lineHeight: '1.7' }}>
+              Trải nghiệm trị liệu tâm lý trực tuyến 100%. Đồng hành cùng bạn trên hành trình chăm sóc sức khỏe tinh thần bền vững.
+            </p>
+
+            {/* PHẦN NHẬP EMAIL */}
+            <div className="newsletter-box" style={{ maxWidth: '400px' }}>
+              <h5 className="mb-3" style={{
+                fontFamily: "'Lora', serif",
+                fontSize: '18px',
+                fontWeight: '600'
+              }}>Nhận bản tin từ chuyên gia</h5>
+              <div style={{
+                display: 'flex',
+                backgroundColor: 'rgba(255,255,255,0.08)',
+                borderRadius: '16px',
+                padding: '6px',
+                border: '1px solid rgba(255,255,255,0.15)',
+                transition: 'all 0.3s ease'
+              }} className="input-group-custom">
+                <input
+                  type="email"
+                  placeholder="Email của bạn..."
+                  style={{
+                    flex: 1,
+                    background: 'none',
+                    border: 'none',
+                    padding: '10px 15px',
+                    color: '#fff',
+                    outline: 'none',
+                    fontSize: '14px',
+                    fontFamily: "'Rubik', sans-serif"
+                  }}
+                />
+                <button style={{
+                  backgroundColor: lightGreen,
+                  color: brandGreen,
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '10px 25px',
+                  fontWeight: '700',
+                  fontFamily: "'Rubik', sans-serif",
+                  fontSize: '14px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(142, 195, 57, 0.2)'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.filter = 'brightness(1.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.filter = 'brightness(1)';
+                }}
+                >
+                  Đăng ký
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Cột 2 & 3: Links */}
+          <div className="col-lg-2 col-md-4 col-6">
+            <h5 className="mb-4" style={{ fontFamily: "'Lora', serif", fontWeight: '700' }}>Dịch vụ</h5>
+            <ul className="list-unstyled opacity-75" style={{ fontSize: '15px', lineHeight: '2.4' }}>
+              <li><a href="#" className="footer-link">Trị liệu cá nhân</a></li>
+              <li><a href="#" className="footer-link">Tư vấn cặp đôi</a></li>
+              <li><a href="#" className="footer-link">Trị liệu nhóm</a></li>
+              <li><a href="#" className="footer-link">Test tâm lý</a></li>
+            </ul>
+          </div>
+
+          <div className="col-lg-2 col-md-4 col-6">
+            <h5 className="mb-4" style={{ fontFamily: "'Lora', serif", fontWeight: '700' }}>Thông tin</h5>
+            <ul className="list-unstyled opacity-75" style={{ fontSize: '15px', lineHeight: '2.4' }}>
+              <li><a href="#" className="footer-link">Về Calmistry</a></li>
+              <li><a href="#" className="footer-link">Blog sức khỏe</a></li>
+              <li><a href="#" className="footer-link">Chính sách</a></li>
+              <li><a href="#" className="footer-link">Liên hệ</a></li>
+            </ul>
+          </div>
+
+          {/* Cột 4: Social & Địa chỉ */}
+          <div className="col-lg-3 col-md-4">
+            <h5 className="mb-4" style={{ fontFamily: "'Lora', serif", fontWeight: '700' }}>Theo dõi</h5>
+            <div className="d-flex gap-3 mb-4">
+              <a href="#" className="social-icon-btn"><i className="bi bi-facebook"></i></a>
+              <a href="#" className="social-icon-btn"><i className="bi bi-instagram"></i></a>
+              <a href="#" className="social-icon-btn"><i className="bi bi-linkedin"></i></a>
+            </div>
+            <div style={{ fontSize: '14px' }} className="opacity-75">
+              <p className="mb-2"><i className="bi bi-envelope-fill me-2"></i> hello@calmistry.vn</p>
+              <p><i className="bi bi-geo-alt-fill me-2"></i> Quận 1, TP. Hồ Chí Minh</p>
+            </div>
           </div>
         </div>
-      </footer>
+
+        <hr style={{ margin: '50px 0 25px', borderColor: 'rgba(255,255,255,0.1)' }} />
+
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 opacity-50" style={{ fontSize: '13px' }}>
+          <span>© 2026 Calmistry. All rights reserved.</span>
+          <div className="d-flex gap-4">
+            <span>Privacy Policy</span>
+            <span>Terms of Service</span>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        .footer-link {
+          color: white;
+          text-decoration: none;
+          transition: opacity 0.2s ease;
+        }
+        .footer-link:hover {
+          opacity: 1;
+          color: #8ec339;
+        }
+        .social-icon-btn {
+          width: 40px;
+          height: 40px;
+          background-color: rgba(255,255,255,0.1);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          font-size: 18px;
+        }
+        .social-icon-btn:hover {
+          background-color: #8ec339;
+          color: #3a5a40;
+          transform: scale(1.1);
+        }
+        .input-group-custom:focus-within {
+          border-color: #8ec339 !important;
+          background-color: rgba(255,255,255,0.12) !important;
+        }
+      `}</style>
+    </footer>
 
       {/* CSS Hovers - Bạn có thể đưa vào file .css riêng */}
       <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+          .navbar-brand, .user-greeting, .footer-brand-text {
+            font-family: 'Lora', serif !important;
+          }
+
        /* Hover cho nút Login khi chưa cuộn (Nền xanh) */
        .login-target:hover {
          background-color: #ffffff !important;
@@ -291,5 +446,7 @@ const MainLayout = () => {
 };
 
 export default MainLayout;
+
+
 
 

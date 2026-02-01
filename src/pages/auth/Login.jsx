@@ -279,3 +279,4 @@ const AuthPages = () => {
 };
 
 export default AuthPages;
+
