@@ -401,7 +401,6 @@ const MainLayout = () => {
 
       {/* CSS Hovers - Bạn có thể đưa vào file .css riêng */}
       <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
           .navbar-brand, .user-greeting, .footer-brand-text {
             font-family: 'Lora', serif !important;
