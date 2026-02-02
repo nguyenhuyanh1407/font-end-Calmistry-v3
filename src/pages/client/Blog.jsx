@@ -175,7 +175,7 @@ const Blog = () => {
                   className="btn btn-light rounded-pill px-4 py-2 fw-bold shadow-sm"
                   style={{ color: brandGreen }}
                 >
-                  + Viết bài chia sẻ
+                  + Đăng bài
                 </button>
 
                 {/* Approve Button (Only for ADMIN/EXPERT) */}
