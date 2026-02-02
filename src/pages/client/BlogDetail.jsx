@@ -18,8 +18,12 @@ import {
   ChevronRight,
   BookmarkPlus,
   Eye,
-  Tag
+  Tag,
+  Edit,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -33,6 +37,9 @@ const BlogDetail = () => {
   const [likeCount, setLikeCount] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Comment states
   const [comments, setComments] = useState([]);
@@ -59,6 +66,13 @@ const BlogDetail = () => {
         const commentsData = await service.getComments(id);
         setComments(commentsData);
 
+        // Fetch user info if logged in
+        if (isLoggedIn) {
+          const authService = await import('../../services/authService').then(m => m.default);
+          const userData = await authService.getCurrentUser();
+          setCurrentUser(userData.result);
+        }
+
       } catch (e) {
         console.error("Failed to fetch blog detail", e);
       } finally {
@@ -66,7 +80,41 @@ const BlogDetail = () => {
       }
     };
     if (id) fetchBlogDetail();
-  }, [id]);
+  }, [id, isLoggedIn]);
+
+  const canEditDelete = () => {
+    if (!currentUser || !article) {
+      console.log("Missing data for permission check:", { hasUser: !!currentUser, hasArticle: !!article });
+      return false;
+    }
+
+    // Handle both array of strings and array of objects
+    const roles = currentUser.roles.map(r => typeof r === 'string' ? r : (r.name || r.authority || ''));
+    const isAdmin = roles.includes('ADMIN');
+
+    // Check ownership: author OR tagged expert
+    const isOwner = article.authorId === currentUser.id || article.expertUserId === currentUser.id;
+
+    if (isAdmin) return true;
+    if (roles.includes('EXPERT') && isOwner) return true;
+    return false;
+  };
+
+  const handleDeleteBlog = async () => {
+    setIsDeleting(true);
+    try {
+      const service = await import('../../services/blogService').then(m => m.blogService);
+      await service.deleteBlog(id, getToken());
+      toast.success("Xóa bài viết thành công!");
+      navigate('/blog');
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      toast.error("Xóa bài viết thất bại. Vui lòng thử lại.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   const handleLikeBlog = async () => {
     if (!isLoggedIn) {
@@ -384,6 +432,31 @@ const BlogDetail = () => {
           <div className="container">
             <div className="row justify-content-center">
               <div className="col-lg-8">
+
+                {/* Management tools */}
+                {canEditDelete() && (
+                  <div className="d-flex gap-2 mb-4 p-3 rounded-3 bg-light border align-items-center">
+                    <div className="me-auto d-flex align-items-center">
+                      <AlertTriangle size={18} className="text-warning me-2" />
+                      <span className="text-muted small fw-medium">Công cụ quản lý bài viết</span>
+                    </div>
+                    <button
+                      className="btn btn-sm px-3 rounded-pill d-flex align-items-center gap-2"
+                      onClick={() => navigate(`/blog/edit/${id}`)}
+                      style={{ backgroundColor: `${brandGreen}10`, color: brandGreen, border: `1px solid ${brandGreen}20` }}
+                    >
+                      <Edit size={16} /> Sửa
+                    </button>
+                    <button
+                      className="btn btn-sm px-3 rounded-pill d-flex align-items-center gap-2 text-danger"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      style={{ backgroundColor: '#fee', border: '1px solid #fcc' }}
+                    >
+                      <Trash2 size={16} /> Xóa
+                    </button>
+                  </div>
+                )}
+
                 <article className="article-content" style={{ fontSize: '18px', lineHeight: '1.8', color: '#212529' }}>
                   <div dangerouslySetInnerHTML={{ __html: article.content }} />
                 </article>
@@ -499,6 +572,52 @@ const BlogDetail = () => {
         {/* Related Posts is kept simple for now */}
 
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div
+          className="modal fade show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '20px' }}>
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">Xác nhận xóa</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowDeleteConfirm(false)}
+                ></button>
+              </div>
+              <div className="modal-body py-4">
+                Bạn có chắc chắn muốn xóa bài viết <strong>"{article.title}"</strong>?
+                <p className="text-danger small mt-2 mb-0">
+                  <AlertTriangle size={14} className="me-1" /> Hành động này không thể hoàn tác.
+                </p>
+              </div>
+              <div className="modal-footer border-0 pt-0">
+                <button
+                  type="button"
+                  className="btn btn-light rounded-pill px-4"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger rounded-pill px-4"
+                  onClick={handleDeleteBlog}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Đang xóa...' : 'Xác nhận xóa'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Calendar, Clock, User, Tag, TrendingUp, Heart, MessageCircle, Share2, ChevronRight } from 'lucide-react';
+import { Search, Calendar, Clock, User, Tag, TrendingUp, Heart, MessageCircle, Share2, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import BlogCard from '../../components/blog/BlogCard';
 import SearchBar from '../../components/blog/SearchBar';
@@ -119,6 +119,32 @@ const Blog = () => {
     navigate(`/blog/${postId}`);
   };
 
+  const canManagePost = (post) => {
+    if (!user) return false;
+    const roles = user.roles.map(r => typeof r === 'string' ? r : (r.name || r.authority || ''));
+    const isAdmin = roles.includes('ADMIN');
+
+    // Check ownership: author OR tagged expert
+    const isOwner = post.authorId === user.id || post.expertUserId === user.id;
+
+    return isAdmin || (roles.includes('EXPERT') && isOwner);
+  };
+
+  const handleQuickDelete = async (e, post) => {
+    e.stopPropagation();
+    if (window.confirm(`Bạn có chắc muốn xóa bài viết "${post.title}"?`)) {
+      try {
+        const service = await import('../../services/blogService').then(m => m.blogService);
+        await service.deleteBlog(post.id, api.getToken());
+        setBlogs(prev => prev.filter(b => b.id !== post.id));
+        alert("Đã xóa bài viết.");
+      } catch (error) {
+        console.error(error);
+        alert("Xóa thất bại.");
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -179,14 +205,18 @@ const Blog = () => {
                 </button>
 
                 {/* Approve Button (Only for ADMIN/EXPERT) */}
-                {user && user.roles && (user.roles.includes('ADMIN') || user.roles.includes('EXPERT')) && (
-                  <button
-                    onClick={() => navigate('/blog/approval')}
-                    className="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm ms-2"
-                  >
-                    Duyệt bài viết
-                  </button>
-                )}
+                {user && user.roles && (() => {
+                  const roles = user.roles.map(r => typeof r === 'string' ? r : (r.name || r.authority || ''));
+                  const canApprove = roles.includes('ADMIN') || roles.includes('EXPERT');
+                  return canApprove && (
+                    <button
+                      onClick={() => navigate('/blog/approval')}
+                      className="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm ms-2"
+                    >
+                      Duyệt bài viết
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -413,10 +443,32 @@ const Blog = () => {
                                 {post.likeCount || 0} {/* Map likes */}
                               </span>
                               <span className="d-flex align-items-center gap-1">
-                                <MessageCircle size={14} />
                                 {post.commentCount || 0} {/* Map comments */}
                               </span>
                             </div>
+
+                            {/* Management Quick Actions */}
+                            {canManagePost(post) && (
+                              <div className="d-flex gap-2">
+                                <button
+                                  className="btn btn-sm btn-outline-secondary p-1 rounded-circle"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/blog/edit/${post.id}`);
+                                  }}
+                                  title="Sửa"
+                                >
+                                  <Edit size={14} /> {/* Updated icon */}
+                                </button>
+                                <button
+                                  className="btn btn-sm btn-outline-danger p-1 rounded-circle"
+                                  onClick={(e) => handleQuickDelete(e, post)}
+                                  title="Xóa"
+                                >
+                                  <Trash2 size={14} className="text-danger" /> {/* Updated icon */}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

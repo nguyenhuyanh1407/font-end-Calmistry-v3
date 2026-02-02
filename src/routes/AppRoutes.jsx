@@ -10,6 +10,7 @@ import Blog from "../pages/client/Blog";
 import CreateBlog from "../pages/client/CreateBlog";
 import BlogApproval from "../pages/client/BlogApproval";
 import BlogDetail from "../pages/client/BlogDetail";
+import EditBlog from "../pages/client/EditBlog";
 import Journal from "../pages/client/Journal";
 import SleepManagement from "../pages/client/SleepManagement";
 import UserDashboard from "../pages/client/UserDashboard";
@@ -55,6 +56,13 @@ function AppRoutes() {
                 <CreateBlog />
               </PrivateRoute>
             } />
+
+            {/* Edit Blog - Protected */}
+            <Route path="/blog/edit/:id" element={
+              <PrivateRoute>
+                <EditBlog />
+              </PrivateRoute>
+            } />
             {/* Approve Blog - Protected (Ideally should verify role in PrivateRoute or component) */}
             <Route path="/blog/approval" element={
               <PrivateRoute>
@@ -76,10 +84,10 @@ function AppRoutes() {
             <Route path="/shareStories" element={<ShareStories />} />
             <Route path="/group-chat" element={<GroupChat />} />
             <Route path="/checkout" element={<Checkout />} />
-                        <Route path="/admin/accounts" element={<AccountManagement />} />
+            <Route path="/admin/accounts" element={<AccountManagement />} />
 
             {/* Admin Route - Account Management */}
-                        {/* Admin Route - Account Management
+            {/* Admin Route - Account Management
  <Route path="/admin/accounts" element={
               <PrivateRoute>
                 <AccountManagement />

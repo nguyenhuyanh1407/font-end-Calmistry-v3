@@ -60,7 +60,8 @@ const authService = {
    */
   logout: async () => {
     try {
-      await api.post('/auth/logout');
+      const token = api.getToken();
+      await api.post('/auth/logout', { token });
     } catch (error) {
       console.error('Logout API error:', error);
     } finally {

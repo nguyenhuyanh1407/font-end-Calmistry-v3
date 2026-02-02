@@ -102,6 +102,32 @@ export const blogService = {
         }
     },
 
+    // Authenticated - Update Blog
+    updateBlog: async (id, blogData, token) => {
+        try {
+            const response = await axios.put(`${API_URL}/blogs/${id}`, blogData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return response.data.result;
+        } catch (error) {
+            console.error(`Error updating blog ${id}:`, error);
+            throw error;
+        }
+    },
+
+    // Authenticated - Delete Blog
+    deleteBlog: async (id, token) => {
+        try {
+            const response = await axios.delete(`${API_URL}/blogs/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            return response.data.result;
+        } catch (error) {
+            console.error(`Error deleting blog ${id}:`, error);
+            throw error;
+        }
+    },
+
     // Authenticated (Expert) - Get my blogs or pending blogs (If backend supports)
     // Currently backend 'getAllBlogs' returns ALL. Expert might need a filter for 'Pending'.
 
