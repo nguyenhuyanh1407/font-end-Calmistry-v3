@@ -76,7 +76,20 @@ export const blogService = {
         }
     },
 
-    // Authenticated - Create Blog
+    // Public - Upload Multiple Images
+    uploadImages: async (files) => {
+        try {
+            const uploadPromises = Array.from(files).map(file =>
+                blogService.uploadImage(file)
+            );
+            return await Promise.all(uploadPromises);
+        } catch (error) {
+            console.error("Error uploading images:", error);
+            throw error;
+        }
+    },
+
+    // Authenticated - Create Blog (accepts imageUrls array)
     createBlog: async (blogData, token) => {
         try {
             const response = await axios.post(`${API_URL}/blogs`, blogData, {

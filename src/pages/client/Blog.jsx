@@ -365,14 +365,21 @@ const Blog = () => {
                           e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
                         }}
                       >
-                        <div style={{ height: '200px', overflow: 'hidden' }}>
+                        <div style={{
+                          height: '200px',
+                          overflow: 'hidden',
+                          backgroundColor: '#f8f9fa',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
                           <img
-                            src={post.thumbnailUrl || 'https://via.placeholder.com/800x500'} // Map image
+                            src={(post.imageUrls && post.imageUrls[0]) || 'https://via.placeholder.com/800x500'} // Use first image
                             alt={post.title}
                             style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
+                              maxWidth: '100%',
+                              maxHeight: '100%',
+                              objectFit: 'contain'
                             }}
                           />
                         </div>

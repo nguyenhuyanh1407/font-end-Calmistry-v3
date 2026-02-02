@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Save, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { Save, ArrowLeft, X, Upload } from 'lucide-react';
 import { toast } from 'react-toastify';
-import api from '../../services/api'; // To get token
+import api from '../../services/api';
 import { blogService } from '../../services/blogService';
 
 const CreateBlog = () => {
@@ -11,14 +11,14 @@ const CreateBlog = () => {
     const brandGreen = '#324d3e';
 
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        categoryId: 1, // Default to first category
-        thumbnailUrl: ''
+        categoryId: 1,
+        imageUrls: []
     });
 
-    // Hardcoded categories for now (should match Backend)
     const categories = [
         { id: 1, name: 'Sức khỏe tâm lý' },
         { id: 2, name: 'Thiền định' },
@@ -28,6 +28,44 @@ const CreateBlog = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleImageUpload = async (e) => {
+        const files = Array.from(e.target.files);
+
+        if (files.length === 0) return;
+
+        // Check total count
+        const totalImages = formData.imageUrls.length + files.length;
+        if (totalImages > 7) {
+            toast.error(`Tối đa 7 ảnh. Bạn đã có ${formData.imageUrls.length} ảnh.`);
+            return;
+        }
+
+        setUploading(true);
+        try {
+            const uploadedUrls = await blogService.uploadImages(files);
+            setFormData(prev => ({
+                ...prev,
+                imageUrls: [...prev.imageUrls, ...uploadedUrls]
+            }));
+            toast.success(`Đã upload ${files.length} ảnh thành công!`);
+        } catch (error) {
+            console.error("Upload failed", error);
+            toast.error('Upload ảnh thất bại.');
+        } finally {
+            setUploading(false);
+            // Reset input
+            e.target.value = '';
+        }
+    };
+
+    const handleRemoveImage = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            imageUrls: prev.imageUrls.filter((_, i) => i !== index)
+        }));
+        toast.info('Đã xóa ảnh');
     };
 
     const handleSubmit = async (e) => {
@@ -117,40 +155,75 @@ const CreateBlog = () => {
                                     </select>
                                 </div>
 
-                                {/* Thumbnail URL */}
+                                {/* Images Upload */}
                                 <div className="mb-4">
-                                    <label className="form-label fw-bold text-muted">Ảnh bìa</label>
-                                    <div className="input-group">
-                                        <input
-                                            type="file"
-                                            className="form-control"
-                                            accept="image/*"
-                                            onChange={async (e) => {
-                                                const file = e.target.files[0];
-                                                if (file) {
-                                                    try {
-                                                        const url = await blogService.uploadImage(file);
-                                                        setFormData(prev => ({ ...prev, thumbnailUrl: url }));
-                                                        toast.success('Upload ảnh thành công!');
-                                                    } catch (error) {
-                                                        console.error("Upload failed", error);
-                                                        toast.error('Upload ảnh thất bại.');
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                    {formData.thumbnailUrl && (
-                                        <div className="mt-3">
-                                            <img
-                                                src={formData.thumbnailUrl}
-                                                alt="Preview"
-                                                className="img-fluid rounded shadow-sm"
-                                                style={{ maxHeight: '200px', objectFit: 'cover' }}
-                                            />
+                                    <label className="form-label fw-bold text-muted">
+                                        Ảnh bài viết ({formData.imageUrls.length}/7)
+                                    </label>
+
+                                    {/* Upload Button */}
+                                    {formData.imageUrls.length < 7 && (
+                                        <div className="mb-3">
+                                            <label
+                                                className="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2"
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <Upload size={20} />
+                                                {uploading ? 'Đang upload...' : 'Chọn ảnh'}
+                                                <input
+                                                    type="file"
+                                                    className="d-none"
+                                                    accept="image/*"
+                                                    multiple
+                                                    onChange={handleImageUpload}
+                                                    disabled={uploading}
+                                                />
+                                            </label>
+                                            <small className="text-muted d-block mt-2">
+                                                Bạn có thể chọn nhiều ảnh cùng lúc (tối đa {7 - formData.imageUrls.length} ảnh)
+                                            </small>
                                         </div>
                                     )}
-                                    {/* HIDDEN URL INPUT (to keep compatibility if needed, or just rely on state) */}
+
+                                    {/* Image Preview Carousel */}
+                                    {formData.imageUrls.length > 0 && (
+                                        <div className="row g-3">
+                                            {formData.imageUrls.map((url, index) => (
+                                                <div key={index} className="col-md-4">
+                                                    <div className="position-relative">
+                                                        <img
+                                                            src={url}
+                                                            alt={`Preview ${index + 1}`}
+                                                            className="img-fluid rounded shadow-sm"
+                                                            style={{
+                                                                height: '200px',
+                                                                width: '100%',
+                                                                objectFit: 'contain',
+                                                                backgroundColor: '#f8f9fa'
+                                                            }}
+                                                        />
+                                                        {/* Delete button */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveImage(index)}
+                                                            className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle"
+                                                            style={{ width: '32px', height: '32px', padding: 0 }}
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                        {/* First image badge */}
+                                                        {index === 0 && (
+                                                            <span
+                                                                className="badge bg-primary position-absolute bottom-0 start-0 m-2"
+                                                            >
+                                                                Ảnh đại diện
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Content */}

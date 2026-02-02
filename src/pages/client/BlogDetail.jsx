@@ -313,17 +313,67 @@ const BlogDetail = () => {
           </div>
         </section>
 
-        {/* Featured Image */}
+        {/* Featured Image Carousel */}
         <section className="py-4" style={{ backgroundColor: '#ffffff' }}>
           <div className="container">
             <div className="row justify-content-center">
               <div className="col-lg-10">
-                <img
-                  src={article.thumbnailUrl || 'https://via.placeholder.com/1200x600'}
-                  alt={article.title}
-                  className="w-100 rounded-3 shadow-sm"
-                  style={{ maxHeight: '500px', objectFit: 'cover' }}
-                />
+                {article.imageUrls && article.imageUrls.length > 0 && (
+                  article.imageUrls.length === 1 ? (
+                    /* Single image - no carousel needed */
+                    <img
+                      src={article.imageUrls[0]}
+                      alt={article.title}
+                      className="w-100 rounded-3 shadow-sm"
+                      style={{
+                        height: '500px',
+                        objectFit: 'contain',
+                        backgroundColor: '#f8f9fa'
+                      }}
+                    />
+                  ) : (
+                    /* Multiple images - show carousel */
+                    <div id="blogImageCarousel" className="carousel slide" data-bs-ride="carousel">
+                      <div className="carousel-indicators">
+                        {article.imageUrls.map((_, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            data-bs-target="#blogImageCarousel"
+                            data-bs-slide-to={index}
+                            className={index === 0 ? 'active' : ''}
+                            aria-current={index === 0 ? 'true' : 'false'}
+                            aria-label={`Slide ${index + 1}`}
+                          ></button>
+                        ))}
+                      </div>
+                      <div className="carousel-inner rounded-3 shadow-sm" style={{ backgroundColor: '#f8f9fa' }}>
+                        {article.imageUrls.map((url, index) => (
+                          <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
+                            <img
+                              src={url}
+                              className="d-block w-100"
+                              alt={`${article.title} - Ảnh ${index + 1}`}
+                              style={{
+                                height: '500px',
+                                objectFit: 'contain',
+                                backgroundColor: '#f8f9fa'
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <button className="carousel-control-prev" type="button" data-bs-target="#blogImageCarousel" data-bs-slide="prev">
+                        <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span className="visually-hidden">Previous</span>
+                      </button>
+                      <button className="carousel-control-next" type="button" data-bs-target="#blogImageCarousel" data-bs-slide="next">
+                        <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span className="visually-hidden">Next</span>
+                      </button>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>
