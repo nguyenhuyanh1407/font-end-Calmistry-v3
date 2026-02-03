@@ -26,6 +26,15 @@ const userService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    completeOnboarding: async (onboardingData) => {
+        try {
+            const response = await api.post('/users/onboarding', onboardingData);
+            return response.result;
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

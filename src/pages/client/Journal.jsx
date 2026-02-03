@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Search, Smile, Meh, Frown, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { Calendar, Search, Smile, Meh, Frown, Plus, Edit2, Trash2, X, Save, Sparkles, BarChart3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import journalService from '../../services/journalService';
 import '../../styles/Journal.css';
@@ -13,9 +13,13 @@ const Journal = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [moodFilter, setMoodFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [fetchingPrompt, setFetchingPrompt] = useState(false);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+  const [statsData, setStatsData] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
   const [error, setError] = useState('');
   const [currentEntry, setCurrentEntry] = useState({
-    id: null, title: '', content: '', mood: 'neutral', createdAt: new Date().toISOString()
+    id: null, title: '', content: '', mood: 'neutral', createdAt: new Date().toISOString(), aiResponse: ''
   });
 
   // --- LOGIC DỮ LIỆU ---
@@ -71,6 +75,31 @@ const Journal = () => {
     } catch (e) {
       console.error('Error saving journal:', e);
       setError(e?.data?.message || 'Không thể lưu nhật ký. Vui lòng thử lại.');
+    }
+  };
+
+  const handleSuggestPrompt = async () => {
+    setFetchingPrompt(true);
+    try {
+      const prompt = await journalService.getAiPrompt();
+      setCurrentEntry({ ...currentEntry, title: prompt });
+    } catch (e) {
+      console.error('Error fetching AI prompt:', e);
+    } finally {
+      setFetchingPrompt(false);
+    }
+  };
+
+  const handleOpenStats = async () => {
+    setIsStatsModalOpen(true);
+    setLoadingStats(true);
+    try {
+      const data = await journalService.getStats();
+      setStatsData(data);
+    } catch (e) {
+      console.error('Error fetching stats:', e);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
@@ -134,6 +163,22 @@ const Journal = () => {
                     {m === 'all' ? 'Tất cả' : m === 'happy' ? <Smile size={18} /> : m === 'neutral' ? <Meh size={18} /> : <Frown size={18} />}
                   </button>
                 ))}
+
+                <button
+                  onClick={handleOpenStats}
+                  style={{
+                    ...filterBtn,
+                    backgroundColor: '#fff',
+                    color: brandGreen,
+                    borderColor: '#e0e0e0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  className="stats-btn"
+                >
+                  <BarChart3 size={18} /> Thống kê
+                </button>
               </div>
             </div>
           </div>
@@ -175,7 +220,8 @@ const Journal = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     whileHover={{ y: -5 }}
-                    style={entryCard}
+                    onClick={() => { setCurrentEntry(entry); setIsModalOpen(true); }}
+                    style={{ ...entryCard, cursor: 'pointer' }}
                   >
                     <div style={cardHeader}>
                       <div style={cardMood}>
@@ -183,12 +229,17 @@ const Journal = () => {
                         <span style={cardDate}>{new Date(entry.createdAt).toLocaleDateString('vi-VN')}</span>
                       </div>
                       <div style={cardActions}>
-                        <button onClick={() => { setCurrentEntry(entry); setIsModalOpen(true); }} style={iconBtn}><Edit2 size={14} /></button>
-                        <button onClick={() => handleDeleteEntry(entry.id)} style={{ ...iconBtn, color: '#ef4444' }}><Trash2 size={14} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); setCurrentEntry(entry); setIsModalOpen(true); }} style={iconBtn}><Edit2 size={14} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteEntry(entry.id); }} style={{ ...iconBtn, color: '#ef4444' }}><Trash2 size={14} /></button>
                       </div>
                     </div>
                     <h3 style={cardTitle}>{entry.title}</h3>
                     <p style={cardExcerpt}>{entry.content}</p>
+                    {entry.aiResponse && (
+                      <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px', color: lightGreen, fontSize: '12px', fontWeight: '600' }}>
+                        <Sparkles size={14} /> <span>Đã có AI phản hồi</span>
+                      </div>
+                    )}
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -221,16 +272,34 @@ const Journal = () => {
               style={modalContent}
             >
               <div style={modalHeader}>
-                <h3 style={{ margin: 0, color: brandGreen }}>{currentEntry.id ? 'Cập nhật tâm tư' : 'Viết bài mới'}</h3>
+                <h3 style={{ margin: 0, color: brandGreen }}>{currentEntry.id ? 'Xem chi tiết & Chỉnh sửa' : 'Viết bài mới'}</h3>
                 <X onClick={() => setIsModalOpen(false)} style={{ cursor: 'pointer', color: '#999' }} />
               </div>
               <div style={{ padding: '24px' }}>
-                <input
+                <textarea
                   style={modalInput}
                   placeholder="Tiêu đề hôm nay..."
                   value={currentEntry.title}
                   onChange={e => setCurrentEntry({ ...currentEntry, title: e.target.value })}
                 />
+                <button
+                  onClick={handleSuggestPrompt}
+                  disabled={fetchingPrompt}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: lightGreen,
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    marginTop: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Sparkles size={14} /> {fetchingPrompt ? 'Đang suy nghĩ...' : 'Gợi ý chủ đề cho tôi'}
+                </button>
                 <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }}>
                   {['happy', 'neutral', 'sad'].map(m => (
                     <button
@@ -253,8 +322,114 @@ const Journal = () => {
                   value={currentEntry.content}
                   onChange={e => setCurrentEntry({ ...currentEntry, content: e.target.value })}
                 />
+
+                {currentEntry.aiResponse && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    style={{
+                      marginTop: '20px',
+                      padding: '16px',
+                      backgroundColor: `${lightGreen}15`,
+                      borderRadius: '14px',
+                      borderLeft: `4px solid ${lightGreen}`
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: lightGreen, fontWeight: '700', fontSize: '14px' }}>
+                      <Sparkles size={16} /> Lời khuyên từ Calmistry AI
+                    </div>
+                    <p style={{ margin: 0, fontSize: '14px', color: brandGreen, fontStyle: 'italic', lineHeight: '1.6' }}>
+                      "{currentEntry.aiResponse}"
+                    </p>
+                  </motion.div>
+                )}
                 <button onClick={handleSaveEntry} style={{ ...saveBtn, backgroundColor: brandGreen }}>
                   <Save size={18} style={{ marginRight: '8px' }} /> Lưu vào nhật ký
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- STATISTICS MODAL --- */}
+      <AnimatePresence>
+        {isStatsModalOpen && (
+          <div style={modalOverlay}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              style={{ ...modalContent, maxWidth: '600px' }}
+            >
+              <div style={modalHeader}>
+                <h3 style={{ margin: 0, color: brandGreen, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <BarChart3 size={24} /> Thống kê tâm trạng
+                </h3>
+                <X onClick={() => setIsStatsModalOpen(false)} style={{ cursor: 'pointer', color: '#999' }} />
+              </div>
+
+              <div style={{ padding: '30px' }}>
+                {loadingStats ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <div className="spinner-border text-success" role="status"></div>
+                    <p style={{ marginTop: '15px', color: '#666' }}>Đang phân tích tâm hồn bạn...</p>
+                  </div>
+                ) : statsData ? (
+                  <>
+                    {/* Visual Chart */}
+                    <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', height: '200px', marginBottom: '40px', paddingBottom: '20px', borderBottom: '2px solid #f0f0f0' }}>
+                      {[
+                        { label: 'Vui vẻ', count: statsData.happyCount, color: lightGreen, icon: <Smile /> },
+                        { label: 'Ổn', count: statsData.neutralCount, color: '#6b7280', icon: <Meh /> },
+                        { label: 'Buồn', count: statsData.sadCount, color: '#3b82f6', icon: <Frown /> }
+                      ].map((item, idx) => {
+                        const maxCount = Math.max(statsData.happyCount, statsData.neutralCount, statsData.sadCount, 1);
+                        const heightPercent = (item.count / maxCount) * 100;
+
+                        return (
+                          <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, gap: '10px' }}>
+                            <div style={{ fontWeight: '800', fontSize: '18px', color: item.color }}>{item.count}</div>
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{ height: `${heightPercent}%` }}
+                              style={{
+                                width: '40px',
+                                backgroundColor: item.color,
+                                borderRadius: '8px 8px 2px 2px',
+                                minHeight: item.count > 0 ? '5px' : '0'
+                              }}
+                            />
+                            <div style={{ color: '#666', fontSize: '12px', fontWeight: '700' }}>{item.label}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div style={{ marginBottom: '25px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '14px', color: '#888' }}>Tổng số bài nhật ký: </span>
+                      <span style={{ fontSize: '18px', fontWeight: '800', color: brandGreen }}>{statsData.totalEntries}</span>
+                    </div>
+
+                    {/* AI Analysis */}
+                    <div style={{ backgroundColor: `${lightGreen}10`, padding: '20px', borderRadius: '20px', border: `1px dashed ${lightGreen}40` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: lightGreen, fontWeight: '800' }}>
+                        <Sparkles size={18} /> Nhận xét từ Calmistry AI
+                      </div>
+                      <p style={{ margin: 0, fontSize: '15px', color: brandGreen, fontStyle: 'italic', lineHeight: '1.7' }}>
+                        "{statsData.aiAnalysis}"
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#ff4444' }}>Không thể tải dữ liệu thống kê.</div>
+                )}
+
+                <button
+                  onClick={() => setIsStatsModalOpen(false)}
+                  style={{ ...saveBtn, backgroundColor: brandGreen, marginTop: '30px' }}
+                >
+                  Đóng
                 </button>
               </div>
             </motion.div>
@@ -303,7 +478,7 @@ const modalOverlay = {
 
 const modalContent = { backgroundColor: '#fff', width: '100%', maxWidth: '550px', borderRadius: '28px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' };
 const modalHeader = { padding: '20px 24px', backgroundColor: '#fbfcfb', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
-const modalInput = { width: '100%', padding: '16px', borderRadius: '14px', border: '1px solid #eee', outline: 'none', fontSize: '16px', backgroundColor: '#f9f9f9', color: '#324d3e' };
+const modalInput = { width: '100%', minHeight: '60px', padding: '16px', borderRadius: '14px', border: '1px solid #eee', outline: 'none', fontSize: '16px', backgroundColor: '#f9f9f9', color: '#324d3e', resize: 'none', lineHeight: '1.4' };
 const moodSelectBtn = { flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid', cursor: 'pointer', fontSize: '14px', fontWeight: '700' };
 const modalTextarea = { width: '100%', height: '220px', padding: '16px', borderRadius: '14px', border: '1px solid #eee', outline: 'none', resize: 'none', fontSize: '15px', backgroundColor: '#f9f9f9', color: '#324d3e', lineHeight: '1.6' };
 const saveBtn = { width: '100%', padding: '16px', color: '#fff', border: 'none', borderRadius: '16px', marginTop: '15px', fontWeight: '800', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' };

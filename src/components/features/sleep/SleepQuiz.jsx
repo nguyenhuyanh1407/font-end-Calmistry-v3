@@ -103,7 +103,7 @@ const QUESTIONS = [
   }
 ];
 
-export default function SleepQuiz({ answers, onAnswer, onSubmit, onBack }) {
+export default function SleepQuiz({ answers, onAnswer, onSubmit, onBack, loading }) {
   const [currentStep, setCurrentStep] = useState(0);
   const brandGreen = "#3a5a40";
   const lightGreen = "#8ec339";
@@ -119,12 +119,19 @@ export default function SleepQuiz({ answers, onAnswer, onSubmit, onBack }) {
   };
 
   const progress = ((currentStep + 1) / QUESTIONS.length) * 100;
+  const isLastStep = currentStep === QUESTIONS.length - 1;
+  const isCurrentAnswered = !!answers[QUESTIONS[currentStep].id];
+  const allAnswered = QUESTIONS.every(q => !!answers[q.id]);
 
   return (
     <div style={quizWrapper}>
       {/* Header & Progress */}
       <div style={quizHeader}>
-        <button onClick={currentStep === 0 ? onBack : () => setCurrentStep(currentStep - 1)} style={backBtnStyle}>
+        <button
+          onClick={currentStep === 0 ? onBack : () => setCurrentStep(currentStep - 1)}
+          style={backBtnStyle}
+          disabled={loading}
+        >
           <i className={`bi ${currentStep === 0 ? "bi-x-lg" : "bi-chevron-left"}`}></i>
         </button>
         <div style={progressContainer}>
@@ -157,11 +164,15 @@ export default function SleepQuiz({ answers, onAnswer, onSubmit, onBack }) {
                   <button
                     key={opt.label}
                     onClick={() => handleOptionClick(QUESTIONS[currentStep].id, opt.point)}
+                    disabled={loading}
+                    className="option-btn"
                     style={{
                       ...optionBtnStyle,
                       border: isSelected ? `2px solid ${lightGreen}` : "1.5px solid #f0f3f0",
                       backgroundColor: isSelected ? "#f9fcf9" : "#fff",
                       color: isSelected ? brandGreen : "#4a5568",
+                      opacity: loading ? 0.7 : 1,
+                      cursor: loading ? 'not-allowed' : 'pointer'
                     }}
                   >
                     <span style={{ fontSize: "15px", fontWeight: isSelected ? "700" : "500" }}>{opt.label}</span>
@@ -175,17 +186,40 @@ export default function SleepQuiz({ answers, onAnswer, onSubmit, onBack }) {
       </div>
 
       {/* Nút Hoàn thành - Chỉ hiện ở câu cuối */}
-      {currentStep === QUESTIONS.length - 1 && (
+      {isLastStep && (
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={submitBtnStyle}
-          disabled={!answers[QUESTIONS[currentStep].id]}
+          style={{
+            ...submitBtnStyle,
+            opacity: (!isCurrentAnswered || loading) ? 0.6 : 1,
+            cursor: (!isCurrentAnswered || loading) ? 'not-allowed' : 'pointer',
+            backgroundColor: allAnswered ? brandGreen : '#a0aec0'
+          }}
+          disabled={!isCurrentAnswered || loading}
           onClick={onSubmit}
         >
-          Hoàn thành & Xem kết quả
+          {loading ? (
+            <span className="d-flex align-items-center justify-content-center gap-2">
+              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Đang tính toán...
+            </span>
+          ) : (
+            allAnswered ? "Hoàn thành & Xem kết quả" : "Vui lòng trả lời hết các câu"
+          )}
         </motion.button>
       )}
+
+      <style>{`
+        .option-btn:hover:not(:disabled) {
+          background-color: #f9fcf9 !important;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .option-btn:active:not(:disabled) {
+          transform: translateY(0);
+        }
+      `}</style>
     </div>
   );
 }

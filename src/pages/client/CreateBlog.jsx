@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Save, ArrowLeft, X, Upload } from 'lucide-react';
@@ -12,18 +12,30 @@ const CreateBlog = () => {
 
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        categoryId: 1,
+        categoryId: '',
         imageUrls: []
     });
 
-    const categories = [
-        { id: 1, name: 'Sức khỏe tâm lý' },
-        { id: 2, name: 'Thiền định' },
-        { id: 3, name: 'Lối sống' }
-    ];
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const cats = await blogService.getCategories();
+                setCategories(cats);
+                if (cats.length > 0) {
+                    setFormData(prev => ({ ...prev, categoryId: cats[0].id }));
+                }
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+                toast.error("Không thể tải danh mục bài viết.");
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;

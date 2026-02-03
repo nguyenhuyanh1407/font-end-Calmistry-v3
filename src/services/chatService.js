@@ -65,6 +65,22 @@ class ChatService {
     async getRooms() {
         return api.get('/chat/rooms');
     }
+
+    async getRoomHistory(roomId) {
+        return api.get(`/chat/rooms/${roomId}/messages`);
+    }
+
+    async createRoom(roomData) {
+        return api.post('/chat/rooms', roomData);
+    }
+
+    async addMember(roomId, userId) {
+        return api.post(`/chat/rooms/${roomId}/members/${userId}`);
+    }
+
+    async removeMember(roomId, userId) {
+        return api.delete(`/chat/rooms/${roomId}/members/${userId}`);
+    }
 }
 
 export default new ChatService();

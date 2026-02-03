@@ -23,6 +23,8 @@ import FadeInUp from "../../components/ui/FadeInUp";
 import TherapyCard from "../../components/common/TherapyCard";
 import WaveDivider from "../../components/common/WaveDivider";
 import StatsSection from "../../components/common/StatsSection";
+import userService from "../../services/userService";
+import api from "../../services/api";
 import "../../styles/Home.css";
 
 const Home = () => {
@@ -52,15 +54,36 @@ const Home = () => {
 
   // 🔥 SỬA LỖI: Tự động chạy khi Component Mount
   useEffect(() => {
-    const hasSeen = localStorage.getItem('HAS_SEEN_HOME_ONBOARDING');
-    if (!hasSeen) {
-      // Delay một chút để đảm bảo DOM đã render xong các class target
-      const timer = setTimeout(() => {
-        setRunOnboarding(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    const checkOnboarding = async () => {
+      const token = api.getToken();
+      console.log('🔍 [Home] Checking onboarding status, token found:', !!token);
+
+      if (token) {
+        try {
+          const user = await userService.getMyInfo();
+          console.log('👤 [Home] User data:', { username: user?.username, isOnboarded: user?.isOnboarded });
+
+          if (user && user.isOnboarded === false) {
+            console.log('🚀 [Home] Redirecting to onboarding...');
+            navigate('/onboarding');
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to fetch user info for onboarding check:", error);
+        }
+      }
+
+      const hasSeen = localStorage.getItem('HAS_SEEN_HOME_ONBOARDING');
+      if (!hasSeen) {
+        const timer = setTimeout(() => {
+          setRunOnboarding(true);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkOnboarding();
+  }, [navigate]);
 
   const handleJoyrideCallback = (data) => {
     const { status } = data;

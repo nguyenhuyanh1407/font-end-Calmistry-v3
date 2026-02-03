@@ -66,9 +66,17 @@ const AuthPages = () => {
         );
 
         if (result && result.authenticated) {
+          console.log('🔑 [Login] Success! Result:', result);
           // 🔥 QUAN TRỌNG: refresh user cache
           await queryClient.invalidateQueries(['me']);
-          navigate('/', { replace: true });
+
+          if (result.isOnboarded === false || result.isOnboarded === null || result.isOnboarded === undefined) {
+            console.log('🚀 [Login] User not onboarded, redirecting to /onboarding');
+            navigate('/onboarding', { replace: true });
+          } else {
+            console.log('🏠 [Login] User already onboarded, redirecting to Home');
+            navigate('/', { replace: true });
+          }
         } else {
           setError('Đăng nhập thất bại. Vui lòng thử lại.');
         }

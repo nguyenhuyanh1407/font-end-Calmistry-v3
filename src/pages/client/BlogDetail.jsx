@@ -372,11 +372,12 @@ const BlogDetail = () => {
                     <img
                       src={article.imageUrls[0]}
                       alt={article.title}
-                      className="w-100 rounded-3 shadow-sm"
+                      className="rounded-3 shadow-sm mx-auto d-block"
                       style={{
-                        height: '500px',
-                        objectFit: 'contain',
-                        backgroundColor: '#f8f9fa'
+                        maxHeight: '600px',
+                        maxWidth: '100%',
+                        height: 'auto',
+                        objectFit: 'contain'
                       }}
                     />
                   ) : (
@@ -395,17 +396,18 @@ const BlogDetail = () => {
                           ></button>
                         ))}
                       </div>
-                      <div className="carousel-inner rounded-3 shadow-sm" style={{ backgroundColor: '#f8f9fa' }}>
+                      <div className="carousel-inner rounded-3 shadow-sm">
                         {article.imageUrls.map((url, index) => (
                           <div key={index} className={`carousel-item ${index === 0 ? 'active' : ''}`}>
                             <img
                               src={url}
-                              className="d-block w-100"
+                              className="d-block mx-auto"
                               alt={`${article.title} - Ảnh ${index + 1}`}
                               style={{
-                                height: '500px',
-                                objectFit: 'contain',
-                                backgroundColor: '#f8f9fa'
+                                maxHeight: '600px',
+                                maxWidth: '100%',
+                                height: 'auto',
+                                objectFit: 'contain'
                               }}
                             />
                           </div>

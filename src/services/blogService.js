@@ -14,6 +14,17 @@ export const blogService = {
         }
     },
 
+    // Public - Get Featured Blogs
+    getFeaturedBlogs: async () => {
+        try {
+            const response = await axios.get(`${API_URL}/blogs/featured`);
+            return response.data.result;
+        } catch (error) {
+            console.error("Error fetching featured blogs:", error);
+            throw error;
+        }
+    },
+
     // Public - Get Blog Detail
     getBlogById: async (id) => {
         try {

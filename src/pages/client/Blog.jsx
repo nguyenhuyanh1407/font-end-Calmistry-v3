@@ -1,70 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Calendar, Clock, User, Tag, TrendingUp, Heart, MessageCircle, Share2, ChevronRight, Edit, Trash2 } from 'lucide-react';
+import { Search, Calendar, Clock, User, Tag, TrendingUp, Heart, MessageCircle, Share2, ChevronRight, Edit, Trash2, Flame, Star, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import BlogCard from '../../components/blog/BlogCard';
-import SearchBar from '../../components/blog/SearchBar';
-
 import '../../styles/Blog.css';
-
 import api from '../../services/api';
 import authService from '../../services/authService';
+import { blogService } from '../../services/blogService';
 
 const Blog = () => {
   const navigate = useNavigate();
   const brandGreen = '#324d3e';
-  const lightGreen = '#74c655';
+  const lightGreen = '#8ec339';
+  const softBg = '#f8fafc';
 
   const [blogs, setBlogs] = useState([]);
+  const [featuredBlogs, setFeaturedBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState(null);
+  const [categories, setCategories] = useState([
+    { id: 'all', name: 'Tất cả', icon: TrendingUp }
+  ]);
 
-  React.useEffect(() => {
-    // Fetch user info to check role
+  useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Try to get from cache first or api
-        // Simple way: check api.getToken() and call /auth/me if needed
-        // OR use cached user from AuthContext if available. Since we don't have global context accessible here easily without hooking properly, let's just fetch 'me' if token exists
         if (api.getToken()) {
           const userData = await authService.getCurrentUser();
-          console.log("Current User Data:", userData); // Debugging
-          // API returns { code, result: { ...user } }
           if (userData && userData.result) {
-            console.log("User Roles:", userData.result.roles); // Debugging
             setUser(userData.result);
           }
         }
       } catch (e) {
-        console.error("Failed to fetch user role", e);
+        console.error("Failed to fetch user info", e);
       }
     };
     fetchUser();
   }, []);
 
-  // State for categories
-  const [categories, setCategories] = useState([
-    { id: 'all', name: 'Tất cả', icon: TrendingUp }
-  ]);
-
-  React.useEffect(() => {
-    // Icons mapping based on index or name
-    const icons = [Heart, User, Tag, Calendar, Share2];
-
+  useEffect(() => {
+    const icons = [Heart, User, Tag, Calendar, Share2, Zap, Star];
     const fetchCategories = async () => {
       try {
-        const service = await import('../../services/blogService').then(m => m.blogService);
-        const data = await service.getCategories();
-
-        // Map backend categories to frontend structure
+        const data = await blogService.getCategories();
         const mappedCategories = data.map((cat, index) => ({
           id: cat.id,
           name: cat.name,
-          icon: icons[index % icons.length] // Cycle through icons
+          icon: icons[index % icons.length]
         }));
-
         setCategories([
           { id: 'all', name: 'Tất cả', icon: TrendingUp },
           ...mappedCategories
@@ -76,24 +61,34 @@ const Blog = () => {
     fetchCategories();
   }, []);
 
-  // Fetch blogs
-  React.useEffect(() => {
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      setFeaturedLoading(true);
+      try {
+        const data = await blogService.getFeaturedBlogs();
+        setFeaturedBlogs(data || []);
+      } catch (error) {
+        console.error("Failed to fetch featured blogs", error);
+      } finally {
+        setFeaturedLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  useEffect(() => {
     const fetchBlogs = async () => {
       setLoading(true);
       try {
         let data = [];
-        const service = await import('../../services/blogService').then(m => m.blogService);
-
         if (selectedCategory === 'all' && !searchQuery) {
-          data = await service.getPublishedBlogs();
+          data = await blogService.getPublishedBlogs();
         } else {
-          // Use Search API
           const params = {};
           if (searchQuery) params.title = searchQuery;
           if (selectedCategory !== 'all') params.categoryId = selectedCategory;
-          params.status = 'PUBLISHED'; // Only show published blogs to users
-
-          data = await service.searchBlogs(params);
+          params.status = 'PUBLISHED';
+          data = await blogService.searchBlogs(params);
         }
         setBlogs(data || []);
       } catch (error) {
@@ -103,30 +98,17 @@ const Blog = () => {
       }
     };
 
-    const timeoutId = setTimeout(() => {
-      fetchBlogs();
-    }, 500); // Debounce search
-
+    const timeoutId = setTimeout(fetchBlogs, 500);
     return () => clearTimeout(timeoutId);
   }, [selectedCategory, searchQuery]);
 
-  // Data is now already filtered by API
-  const featuredPosts = (blogs.length > 0 && selectedCategory === 'all' && !searchQuery) ? blogs.slice(0, 1) : [];
-  const regularPosts = (blogs.length > 0 && selectedCategory === 'all' && !searchQuery) ? blogs.slice(1) : blogs;
-
-  // Hàm xử lý click vào bài viết
-  const handlePostClick = (postId) => {
-    navigate(`/blog/${postId}`);
-  };
+  const handlePostClick = (postId) => navigate(`/blog/${postId}`);
 
   const canManagePost = (post) => {
     if (!user) return false;
     const roles = user.roles.map(r => typeof r === 'string' ? r : (r.name || r.authority || ''));
     const isAdmin = roles.includes('ADMIN');
-
-    // Check ownership: author OR tagged expert
     const isOwner = post.authorId === user.id || post.expertUserId === user.id;
-
     return isAdmin || (roles.includes('EXPERT') && isOwner);
   };
 
@@ -134,383 +116,266 @@ const Blog = () => {
     e.stopPropagation();
     if (window.confirm(`Bạn có chắc muốn xóa bài viết "${post.title}"?`)) {
       try {
-        const service = await import('../../services/blogService').then(m => m.blogService);
-        await service.deleteBlog(post.id, api.getToken());
+        await blogService.deleteBlog(post.id, api.getToken());
         setBlogs(prev => prev.filter(b => b.id !== post.id));
-        alert("Đã xóa bài viết.");
       } catch (error) {
         console.error(error);
-        alert("Xóa thất bại.");
       }
     }
   };
 
-  return (
+  const renderHeroCard = (post) => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="hero-blog-card mb-5 overflow-hidden position-relative rounded-5 shadow-lg"
+      onClick={() => handlePostClick(post.id)}
+      style={{ height: '500px', cursor: 'pointer' }}
     >
-      <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-
-        {/* Hero Section */}
-        <section style={{
-          background: `linear-gradient(135deg, ${brandGreen} 0%, #2d4435 100%)`,
-          color: '#ffffff',
-          padding: '80px 0 60px'
-        }}>
-          <div className="container">
-            <div className="row align-items-center">
-              <div className="col-lg-8 mx-auto text-center">
-                <h1 className="display-4 fw-bold mb-4">Blog Calmistry</h1>
-                <p className="lead mb-5" style={{ opacity: 0.9 }}>
-                  Khám phá những bài viết chất lượng về sức khỏe tâm lý, phát triển bản thân và cuộc sống hạnh phúc
-                </p>
-
-                {/* Search Bar */}
-                <div className="position-relative mx-auto mb-4" style={{ maxWidth: '600px' }}>
-                  <Search
-                    size={20}
-                    style={{
-                      position: 'absolute',
-                      left: '20px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: '#6c757d'
-                    }}
-                  />
-                  <input
-                    type="text"
-                    className="form-control form-control-lg shadow-sm"
-                    placeholder="Tìm kiếm bài viết..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                      paddingLeft: '50px',
-                      borderRadius: '50px',
-                      border: 'none',
-                      fontSize: '16px'
-                    }}
-                  />
-                </div>
-
-                {/* Write Blog Button */}
-                <button
-                  onClick={() => navigate('/blog/create')}
-                  className="btn btn-light rounded-pill px-4 py-2 fw-bold shadow-sm"
-                  style={{ color: brandGreen }}
-                >
-                  + Đăng bài
-                </button>
-
-                {/* Approve Button (Only for ADMIN/EXPERT) */}
-                {user && user.roles && (() => {
-                  const roles = user.roles.map(r => typeof r === 'string' ? r : (r.name || r.authority || ''));
-                  const canApprove = roles.includes('ADMIN') || roles.includes('EXPERT');
-                  return canApprove && (
-                    <button
-                      onClick={() => navigate('/blog/approval')}
-                      className="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm ms-2"
-                    >
-                      Duyệt bài viết
-                    </button>
-                  );
-                })()}
+      <img
+        src={(post.imageUrls && post.imageUrls[0]) || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=2070'}
+        alt={post.title}
+        className="w-100 h-100 object-fit-cover transition-transform"
+      />
+      <div className="hero-overlay position-absolute bottom-0 start-0 w-100 p-5">
+        <div className="d-flex align-items-center gap-2 mb-3">
+          <span className="badge rounded-pill bg-danger px-3 py-2 d-flex align-items-center gap-1 shadow-sm">
+            <Flame size={14} /> TRENDING
+          </span>
+          <span className="badge rounded-pill bg-white text-dark px-3 py-2 shadow-sm fw-bold">
+            {post.categoryName}
+          </span>
+        </div>
+        <h1 className="display-4 fw-bold text-white mb-4 hero-title">{post.title}</h1>
+        <div className="d-flex align-items-center justify-content-between">
+          <div className="d-flex align-items-center gap-3 text-white">
+            <div className="d-flex align-items-center gap-2">
+              <div className="rounded-circle overflow-hidden bg-white p-1" style={{ width: 40, height: 40 }}>
+                <img src={post.authorAvatar} alt={post.authorName} className="w-100 h-100 rounded-circle" />
               </div>
+              <span className="fw-medium">{post.authorName}</span>
+            </div>
+            <div className="d-flex align-items-center gap-1 opacity-75 small">
+              <Clock size={16} /> 5 phút đọc
             </div>
           </div>
-        </section>
-
-        {/* Categories */}
-        <section className="py-4" style={{ backgroundColor: '#ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <div className="container">
-            <div className="d-flex flex-wrap gap-2 justify-content-center">
-              {categories.map(cat => {
-                const Icon = cat.icon;
-                const isActive = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className="btn rounded-pill d-flex align-items-center gap-2"
-                    style={{
-                      backgroundColor: isActive ? brandGreen : '#f8f9fa',
-                      color: isActive ? '#ffffff' : brandGreen,
-                      border: `1px solid ${isActive ? brandGreen : '#dee2e6'}`,
-                      fontWeight: isActive ? '600' : '500',
-                      transition: 'all 0.3s',
-                      padding: '8px 20px'
-                    }}
-                  >
-                    <Icon size={18} />
-                    {cat.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Main Content */}
-        <section className="py-5">
-          <div className="container">
-
-            {/* Featured Posts */}
-            {featuredPosts.length > 0 && (
-              <div className="mb-5">
-                <div className="d-flex align-items-center mb-4">
-                  <TrendingUp size={24} color={brandGreen} className="me-2" />
-                  <h2 className="mb-0" style={{ color: brandGreen, fontWeight: '700' }}>Bài viết nổi bật</h2>
-                </div>
-
-                <div className="row g-4">
-                  {featuredPosts.map(post => (
-                    <div key={post.id} className="col-lg-6">
-                      <div
-                        className="card border-0 shadow-sm h-100"
-                        style={{
-                          borderRadius: '16px',
-                          overflow: 'hidden',
-                          transition: 'transform 0.3s, box-shadow 0.3s',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handlePostClick(post.id)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-8px)';
-                          e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.15)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                        }}
-                      >
-                        <div style={{
-                          height: '280px',
-                          overflow: 'hidden',
-                          position: 'relative'
-                        }}>
-                          <img
-                            src={post.image}
-                            alt={post.title}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
-                          />
-                          <div style={{
-                            position: 'absolute',
-                            top: '16px',
-                            left: '16px',
-                            backgroundColor: lightGreen,
-                            color: '#ffffff',
-                            padding: '6px 16px',
-                            borderRadius: '20px',
-                            fontSize: '13px',
-                            fontWeight: '600'
-                          }}>
-                            Nổi bật
-                          </div>
-                        </div>
-                        <div className="card-body p-4">
-                          <div className="d-flex align-items-center gap-3 mb-3 text-muted small">
-                            <div className="d-flex align-items-center gap-1">
-                              <User size={16} />
-                              <span>{post.author}</span>
-                            </div>
-                            <div className="d-flex align-items-center gap-1">
-                              <Calendar size={16} />
-                              <span>{post.date}</span>
-                            </div>
-                            <div className="d-flex align-items-center gap-1">
-                              <Clock size={16} />
-                              <span>{post.readTime}</span>
-                            </div>
-                          </div>
-                          <h3 className="h5 fw-bold mb-3" style={{ color: brandGreen }}>
-                            {post.title}
-                          </h3>
-                          <p className="text-muted mb-4">{post.excerpt}</p>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div className="d-flex gap-3 text-muted small">
-                              <span className="d-flex align-items-center gap-1">
-                                <Heart size={16} />
-                                {post.likes}
-                              </span>
-                              <span className="d-flex align-items-center gap-1">
-                                <MessageCircle size={16} />
-                                {post.comments}
-                              </span>
-                            </div>
-                            <button
-                              className="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-1"
-                              style={{ color: brandGreen, fontWeight: '600' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePostClick(post.id);
-                              }}
-                            >
-                              Đọc thêm
-                              <ChevronRight size={18} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* All Posts */}
-            <div>
-              <h2 className="mb-4" style={{ color: brandGreen, fontWeight: '700' }}>
-                {selectedCategory === 'all' ? 'Tất cả bài viết' : `Bài viết về ${categories.find(c => c.id === selectedCategory)?.name}`}
-              </h2>
-
-              {blogs.length === 0 ? (
-                <div className="text-center py-5">
-                  <p className="text-muted">Không tìm thấy bài viết nào phù hợp.</p>
-                </div>
-              ) : (
-                <div className="row g-4">
-                  {regularPosts.map(post => (
-                    <div key={post.id} className="col-lg-4 col-md-6">
-                      <div
-                        className="card border-0 shadow-sm h-100"
-                        style={{
-                          borderRadius: '16px',
-                          overflow: 'hidden',
-                          transition: 'transform 0.3s, box-shadow 0.3s',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handlePostClick(post.id)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-5px)';
-                          e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.12)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                        }}
-                      >
-                        <div style={{
-                          height: '200px',
-                          overflow: 'hidden',
-                          backgroundColor: '#f8f9fa',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <img
-                            src={(post.imageUrls && post.imageUrls[0]) || 'https://via.placeholder.com/800x500'} // Use first image
-                            alt={post.title}
-                            style={{
-                              maxWidth: '100%',
-                              maxHeight: '100%',
-                              objectFit: 'contain'
-                            }}
-                          />
-                        </div>
-                        <div className="card-body p-4">
-                          <div className="d-flex align-items-center gap-2 mb-2 text-muted small">
-                            <Calendar size={14} />
-                            <span>{new Date(post.createdAt).toLocaleDateString()}</span> {/* Map date */}
-                            <span>•</span>
-                            <Clock size={14} />
-                            <span>5 phút đọc</span> {/* Mock readTime */}
-                          </div>
-                          <h4 className="h6 fw-bold mb-2" style={{ color: brandGreen }}>
-                            {post.title}
-                          </h4>
-                          <p className="text-muted small mb-3" style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          }}>
-                            {post.content ? post.content.replace(/<[^>]+>/g, '').substring(0, 100) : ''}... {/* Strip HTML for excerpt */}
-                          </p>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <span className="small text-muted d-flex align-items-center gap-1">
-                              <User size={14} />
-                              {post.authorName || 'Admin'} {/* Map author */}
-                            </span>
-                            <div className="d-flex gap-2 small text-muted">
-                              <span className="d-flex align-items-center gap-1">
-                                <Heart size={14} />
-                                {post.likeCount || 0} {/* Map likes */}
-                              </span>
-                              <span className="d-flex align-items-center gap-1">
-                                {post.commentCount || 0} {/* Map comments */}
-                              </span>
-                            </div>
-
-                            {/* Management Quick Actions */}
-                            {canManagePost(post) && (
-                              <div className="d-flex gap-2">
-                                <button
-                                  className="btn btn-sm btn-outline-secondary p-1 rounded-circle"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/blog/edit/${post.id}`);
-                                  }}
-                                  title="Sửa"
-                                >
-                                  <Edit size={14} /> {/* Updated icon */}
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-outline-danger p-1 rounded-circle"
-                                  onClick={(e) => handleQuickDelete(e, post)}
-                                  title="Xóa"
-                                >
-                                  <Trash2 size={14} className="text-danger" /> {/* Updated icon */}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Load More Button */}
-            {blogs.length > 0 && (
-              <div className="text-center mt-5">
-                <button
-                  className="btn rounded-pill px-5 py-3"
-                  style={{
-                    backgroundColor: brandGreen,
-                    color: '#ffffff',
-                    border: 'none',
-                    fontWeight: '600',
-                    transition: 'all 0.3s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2d4435';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = brandGreen;
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  Xem thêm bài viết
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-
-
-
+          <motion.button
+            whileHover={{ x: 5 }}
+            className="btn btn-light rounded-pill px-4 py-2 fw-bold d-none d-md-flex align-items-center gap-2"
+            style={{ color: brandGreen }}
+          >
+            Đọc ngay <ChevronRight size={18} />
+          </motion.button>
+        </div>
       </div>
     </motion.div>
+  );
 
+  return (
+    <div style={{ backgroundColor: softBg, minHeight: '100vh', paddingBottom: '100px' }}>
+      {/* Header Section */}
+      <section className="blog-hero pt-5 pb-5 mt-5">
+        <div className="container mt-5">
+          <div className="row justify-content-between align-items-end mb-4">
+            <div className="col-lg-6">
+              <motion.h1
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="display-5 fw-bold mb-3"
+                style={{ color: brandGreen }}
+              >
+                Calmistry Magazine <span className="text-muted fs-4 fw-normal">/ Blog</span>
+              </motion.h1>
+              <p className="lead text-muted">Những góc nhìn mới về tâm lý và cuộc sống cân bằng.</p>
+            </div>
+            <div className="col-lg-5">
+              <div className="d-flex gap-2 justify-content-lg-end">
+                <div className="position-relative flex-grow-1" style={{ maxWidth: '300px' }}>
+                  <Search size={18} className="position-absolute translate-middle-y top-50 start-0 ms-3 text-muted" />
+                  <input
+                    type="text"
+                    className="form-control rounded-pill border-0 shadow-sm ps-5"
+                    placeholder="Tìm từ khóa..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{ height: '48px' }}
+                  />
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate('/blog/create')}
+                  className="btn btn-dark rounded-pill px-4 fw-bold shadow-lg"
+                  style={{ backgroundColor: brandGreen, border: 'none' }}
+                >
+                  + Post
+                </motion.button>
+              </div>
+            </div>
+          </div>
+
+          {/* Categories Strip */}
+          <div className="d-flex flex-wrap gap-2 pb-3">
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`btn rounded-pill px-4 py-2 text-nowrap d-flex align-items-center gap-2 transition-all ${selectedCategory === cat.id ? 'active-cat' : 'inactive-cat'}`}
+                style={{
+                  backgroundColor: selectedCategory === cat.id ? brandGreen : 'white',
+                  color: selectedCategory === cat.id ? 'white' : brandGreen,
+                  border: 'none',
+                  boxShadow: selectedCategory === cat.id ? '0 10px 25px rgba(50,77,62,0.3)' : '0 2px 5px rgba(0,0,0,0.05)'
+                }}
+              >
+                {<cat.icon size={16} />} {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <main className="container">
+        {/* Featured Section */}
+        {!searchQuery && selectedCategory === 'all' && (
+          <section className="mb-5 mt-4">
+            {featuredLoading ? (
+              <div className="hero-skeleton rounded-5 bg-white bg-opacity-50" style={{ height: '500px' }}></div>
+            ) : (
+              featuredBlogs.length > 0 && (
+                <>
+                  {renderHeroCard(featuredBlogs[0])}
+
+                  {featuredBlogs.length > 1 && (
+                    <div className="row g-4">
+                      {featuredBlogs.slice(1, 4).map((post, idx) => (
+                        <div key={post.id} className="col-md-4">
+                          <motion.div
+                            whileHover={{ y: -10 }}
+                            className="featured-side-card h-100 rounded-5 bg-white shadow-sm overflow-hidden p-3"
+                            onClick={() => handlePostClick(post.id)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <div className="rounded-4 overflow-hidden mb-3" style={{ height: '180px' }}>
+                              <img
+                                src={(post.imageUrls && post.imageUrls[0]) || 'https://via.placeholder.com/400x300'}
+                                alt={post.title}
+                                className="w-100 h-100 object-fit-cover"
+                              />
+                            </div>
+                            <div className="px-2">
+                              <div className="d-flex align-items-center gap-2 mb-2">
+                                <span className="badge rounded-pill bg-light text-success small px-2 py-1">{post.categoryName}</span>
+                                <small className="text-muted d-flex align-items-center gap-1"><Zap size={12} className="text-warning fill-warning" /> HOT</small>
+                              </div>
+                              <h5 className="fw-bold fs-6 mb-3 text-clamp-2" style={{ color: brandGreen }}>{post.title}</h5>
+                              <div className="d-flex align-items-center gap-2 mt-auto">
+                                <img src={post.authorAvatar} alt="" className="rounded-circle" style={{ width: 24, height: 24 }} />
+                                <span className="small text-muted fw-medium">{post.authorName}</span>
+                              </div>
+                            </div>
+                          </motion.div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )
+            )}
+          </section>
+        )}
+
+        {/* Regular Feed */}
+        <section className="mt-5">
+          <div className="d-flex align-items-center justify-content-between mb-4 mt-5">
+            <h3 className="fw-bold mb-0" style={{ color: brandGreen }}>
+              {searchQuery ? `Kết quả tìm kiếm: "${searchQuery}"` : selectedCategory === 'all' ? 'Dành cho bạn' : `Tất cả về ${categories.find(c => c.id === selectedCategory)?.name}`}
+            </h3>
+            {user && (user.roles?.some(r => r === 'ADMIN' || r === 'EXPERT')) && (
+              <button onClick={() => navigate('/blog/approval')} className="btn btn-warning rounded-pill px-4 fw-bold shadow-sm">Duyệt bài</button>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="row g-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="col-lg-4 col-md-6"><div className="skeleton-card rounded-5 bg-white bg-opacity-50" style={{ height: '350px' }}></div></div>
+              ))}
+            </div>
+          ) : blogs.length === 0 ? (
+            <div className="text-center py-5 glass-morphism rounded-5">
+              <div className="display-1 mb-3">🍃</div>
+              <h4 className="text-muted">Hết bài rồi, bạn hãy là người đầu tiên <span className="text-success cursor-pointer" onClick={() => navigate('/blog/create')}>đăng bài</span> mới nhé!</h4>
+            </div>
+          ) : (
+            <div className="row g-4">
+              {blogs
+                .filter(b => !featuredBlogs.some(fb => fb.id === b.id) || searchQuery || selectedCategory !== 'all')
+                .map((post, idx) => (
+                  <div key={post.id} className="col-lg-4 col-md-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="blog-grid-card h-100 rounded-5 bg-white shadow-sm overflow-hidden p-3"
+                      onClick={() => handlePostClick(post.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="rounded-4 overflow-hidden mb-3 position-relative" style={{ height: '220px' }}>
+                        <img src={(post.imageUrls && post.imageUrls[0]) || 'https://via.placeholder.com/400x300'} alt={post.title} className="w-100 h-100 object-fit-cover" />
+                        <div className="position-absolute bottom-0 start-0 m-3 px-3 py-1 bg-white bg-opacity-75 rounded-pill small fw-bold text-dark backdrop-blur">
+                          {new Date(post.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="px-2">
+                        <h4 className="fw-bold h5 mb-3 text-clamp-2" style={{ color: brandGreen }}>{post.title}</h4>
+                        <p className="text-muted small text-clamp-3 mb-4">{post.content?.replace(/<[^>]+>/g, '')}</p>
+                        <div className="d-flex align-items-center justify-content-between border-top pt-3">
+                          <div className="d-flex align-items-center gap-2">
+                            <img src={post.authorAvatar} alt="" className="rounded-circle" style={{ width: 30, height: 30 }} />
+                            <span className="small text-muted fw-bold">{post.authorName}</span>
+                          </div>
+                          <div className="d-flex gap-3 text-muted small">
+                            <span className="d-flex align-items-center gap-1"><Heart size={14} /> {post.likeCount}</span>
+                            <span className="d-flex align-items-center gap-1"><MessageCircle size={14} /> {post.commentCount}</span>
+                          </div>
+                        </div>
+
+                        {canManagePost(post) && (
+                          <div className="mt-3 d-flex justify-content-end gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); navigate(`/blog/edit/${post.id}`); }} className="btn btn-sm btn-light rounded-circle shadow-sm"><Edit size={14} /></button>
+                            <button onClick={(e) => handleQuickDelete(e, post)} className="btn btn-sm btn-outline-danger rounded-circle shadow-sm"><Trash2 size={14} /></button>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </section>
+      </main>
+
+      <style>{`
+                .hero-overlay {
+                    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+                    transition: all 0.5s ease;
+                }
+                .hero-blog-card:hover .object-fit-cover { transform: scale(1.05); }
+                .hero-blog-card:hover .hero-overlay { padding-bottom: 6rem !important; }
+                .text-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+                .text-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+                .backdrop-blur { backdrop-filter: blur(8px); }
+                .blog-grid-card { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(0,0,0,0.03); }
+                .blog-grid-card:hover { transform: translateY(-12px); box-shadow: 0 30px 60px rgba(0,0,0,0.08) !important; border-color: ${lightGreen}; }
+                .active-cat { transform: scale(1.05); box-shadow: 0 10px 25px rgba(50,77,62,0.3) !important; }
+                .custom-scrollbar::-webkit-scrollbar { height: 0; }
+                .skeleton-card, .hero-skeleton { animation: pulse 2s infinite ease-in-out; }
+                @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }
+                .fill-warning { fill: #ffc107; }
+                .blog-hero { position: sticky; top: 0; z-index: 100; background: rgba(248, 250, 252, 0.8); backdrop-filter: blur(15px); }
+            `}</style>
+    </div>
   );
 };
 

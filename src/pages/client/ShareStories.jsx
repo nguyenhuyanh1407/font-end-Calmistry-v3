@@ -3,11 +3,52 @@ import '../../styles/ShareStories.css';
 import userService from '../../services/userService';
 import storyService from '../../services/storyService';
 import { toast } from 'react-toastify';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, Heart, MessageCircle, Shield, Zap, User, Circle, Star, Info, Ghost } from 'lucide-react';
+
+const BackgroundBlobs = () => (
+  <div className="position-fixed top-0 start-0 w-100 h-100 overflow-hidden" style={{ zIndex: -1, opacity: 0.5 }}>
+    <motion.div
+      animate={{
+        scale: [1, 1.2, 1],
+        x: [0, 80, 0],
+        y: [0, 40, 0],
+      }}
+      transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+      style={{
+        position: 'absolute',
+        top: '5%',
+        right: '5%',
+        width: '35vw',
+        height: '35vw',
+        background: 'radial-gradient(circle, rgba(142, 195, 57, 0.15) 0%, rgba(142, 195, 57, 0) 70%)',
+        borderRadius: '50%',
+      }}
+    />
+    <motion.div
+      animate={{
+        scale: [1.2, 1, 1.2],
+        x: [0, -80, 0],
+        y: [0, -40, 0],
+      }}
+      transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+      style={{
+        position: 'absolute',
+        bottom: '10%',
+        left: '5%',
+        width: '40vw',
+        height: '40vw',
+        background: 'radial-gradient(circle, rgba(50, 77, 62, 0.1) 0%, rgba(50, 77, 62, 0) 70%)',
+        borderRadius: '50%',
+      }}
+    />
+  </div>
+);
 
 const ShareStories = () => {
   const brandGreen = '#324d3e';
-  const lightGreen = '#74c655';
-  const softBg = '#fcfdfd';
+  const lightGreen = '#8ec339';
+  const softBg = '#f8fafc';
 
   const [currentUser, setCurrentUser] = useState({
     name: "...",
@@ -53,7 +94,6 @@ const ShareStories = () => {
       const newStory = await storyService.createStory(newStoryContent, isAnonPost);
       setStories([newStory, ...stories]);
       setNewStoryContent("");
-      // Update score locally or refetch
       setCurrentUser(prev => ({
         ...prev,
         fuedScore: prev.fuedScore + 10
@@ -67,7 +107,6 @@ const ShareStories = () => {
 
   const handleLikeStory = async (storyId) => {
     try {
-      // Optimistic update
       setStories(stories.map(story => {
         if (story.id === storyId) {
           const newIsLiked = !story.isLiked;
@@ -83,9 +122,20 @@ const ShareStories = () => {
       await storyService.likeStory(storyId);
     } catch (error) {
       console.error("Failed to like story", error);
-      // Revert if failed
       fetchData();
     }
+  };
+
+  const renderAvatar = (avatar) => {
+    if (!avatar) return '🌱';
+    // Handle legacy bootstrap classes from database
+    if (typeof avatar === 'string' && avatar.includes('bi-')) {
+      if (avatar.includes('person')) return <User size={24} className="text-success" />;
+      if (avatar.includes('incognito')) return <Ghost size={24} className="text-secondary" />;
+      if (avatar.includes('lightning')) return <Zap size={24} className="text-warning" />;
+      return <Circle size={24} className="text-muted" />;
+    }
+    return <span className="fs-3">{avatar}</span>;
   };
 
   if (loading) {
@@ -99,30 +149,38 @@ const ShareStories = () => {
   }
 
   return (
-    <div style={{ backgroundColor: softBg, minHeight: '100vh', paddingTop: '120px', paddingBottom: '100px' }}>
-      <div className="container">
+    <div style={{ backgroundColor: softBg, minHeight: '100vh', paddingTop: '100px', paddingBottom: '100px', position: 'relative' }}>
+      <BackgroundBlobs />
+      <div className="container position-relative">
         <div className="row justify-content-center">
 
           {/* --- CỘT TRÁI: FEED CÂU CHUYỆN --- */}
           <div className="col-lg-7">
-
             {/* Box Đăng bài */}
-            <div className="p-4 rounded-5 bg-white shadow-sm border-0 mb-5">
-              <div className="d-flex align-items-center mb-3">
-                <i className={`bi ${isAnonPost ? 'bi-incognito' : 'bi-person-circle'} fs-3 me-2 text-muted`}></i>
-                <span className="fw-bold">{isAnonPost ? 'Đăng bài ẩn danh' : currentUser.name}</span>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-5 glass-card mb-5 shadow-sm"
+            >
+              <div className="d-flex align-items-center mb-4 gap-2">
+                <div className="p-2 rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center" style={{ width: 44, height: 44, color: brandGreen }}>
+                  {isAnonPost ? <Ghost size={22} /> : <User size={22} />}
+                </div>
+                <span className="fw-bold fs-5" style={{ color: brandGreen }}>
+                  {isAnonPost ? 'Đăng bài ẩn danh' : currentUser.name}
+                </span>
               </div>
               <textarea
-                className="form-control border-0 bg-light rounded-4 p-3 mb-3"
+                className="form-control border-0 bg-white bg-opacity-50 rounded-4 p-4 mb-4 shadow-inner"
                 rows="3"
                 placeholder="Chia sẻ câu chuyện hoặc cảm xúc của bạn..."
-                style={{ resize: 'none', color: '#324d3e' }}
+                style={{ resize: 'none', color: brandGreen, fontSize: '16px' }}
                 value={newStoryContent}
                 onChange={(e) => setNewStoryContent(e.target.value)}
               ></textarea>
 
               <div className="d-flex justify-content-between align-items-center">
-                <div className="form-check form-switch">
+                <div className="form-check form-switch custom-switch">
                   <input
                     className="form-check-input"
                     type="checkbox"
@@ -130,117 +188,207 @@ const ShareStories = () => {
                     checked={isAnonPost}
                     onChange={() => setIsAnonPost(!isAnonPost)}
                   />
-                  <label className="form-check-label small text-muted" htmlFor="anonSwitch">Chế độ ẩn danh</label>
+                  <label className="form-check-label small fw-medium text-muted ms-2" htmlFor="anonSwitch">🛡️ Chế độ ẩn danh</label>
                 </div>
-                <button
-                  className="btn btn-dark rounded-pill px-4 fw-bold"
-                  style={{ backgroundColor: brandGreen }}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn btn-dark rounded-pill px-5 py-2 fw-bold shadow-lg d-flex align-items-center gap-2"
+                  style={{ backgroundColor: brandGreen, border: 'none' }}
                   onClick={handlePostStory}
                   disabled={!newStoryContent.trim()}
                 >
-                  Chia sẻ <i className="bi bi-send-fill ms-1"></i>
-                </button>
+                  Chia sẻ <Send size={18} />
+                </motion.button>
+              </div>
+            </motion.div>
+
+            {/* Danh sách Story */}
+            <div className="d-flex align-items-center justify-content-between mb-4 mt-2">
+              <h5 className="fw-bold mb-0 d-flex align-items-center gap-2" style={{ color: brandGreen }}>
+                <Heart size={22} className="text-danger fill-danger" />
+                Câu chuyện từ cộng đồng
+              </h5>
+              <div className="badge rounded-pill bg-white text-muted border py-2 px-3 shadow-xs fw-medium">
+                Mới nhất
               </div>
             </div>
 
-            {/* Danh sách Story */}
-            <h5 className="fw-bold mb-4 d-flex align-items-center">
-              <i className="bi bi-chat-heart-fill me-2 text-danger"></i> Câu chuyện từ cộng đồng
-            </h5>
-
-            {stories.map(story => (
-              <div key={story.id} className="p-4 rounded-5 bg-white shadow-sm border-0 mb-4 card-story">
-                <div className="d-flex justify-content-between mb-3">
-                  <div className="d-flex align-items-center">
-                    <div className="p-2 rounded-circle bg-light me-2 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                      <i className={`bi ${story.avatar} fs-5`}></i>
+            <AnimatePresence>
+              {stories.map((story, idx) => (
+                <motion.div
+                  key={story.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="p-4 rounded-5 glass-card mb-4 card-story hover-lift shadow-sm"
+                >
+                  <div className="d-flex justify-content-between mb-4">
+                    <div className="d-flex align-items-center">
+                      <div className="p-1 rounded-circle border border-2 border-white bg-light me-3 shadow-sm d-flex align-items-center justify-content-center" style={{ width: '56px', height: '56px' }}>
+                        {renderAvatar(story.avatar)}
+                      </div>
+                      <div>
+                        <div className="fw-bold text-dark">{story.author}</div>
+                        <div className="text-muted small d-flex align-items-center gap-1">
+                          <Circle size={4} className="fill-muted" /> {story.time}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="fw-bold small">{story.author}</div>
-                      <div className="text-muted" style={{ fontSize: '11px' }}>{story.time}</div>
+                  </div>
+
+                  <p className="mb-4 px-1" style={{ lineHeight: '1.8', color: '#2d3748', whiteSpace: 'pre-wrap', fontSize: '16px' }}>
+                    {story.content}
+                  </p>
+
+                  <div className="d-flex align-items-center gap-4 border-top pt-4 mt-4">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="d-flex align-items-center cursor-pointer interaction-item gap-2 px-3 py-2 rounded-pill hover-bg-light"
+                      onClick={() => handleLikeStory(story.id)}
+                    >
+                      <Heart className={`${story.isLiked ? 'text-danger fill-danger' : 'text-muted'}`} size={20} />
+                      <span className={`fw-bold ${story.isLiked ? 'text-danger' : 'text-muted'}`}>{story.hearts}</span>
+                    </motion.div>
+
+                    <div className={`d-flex align-items-center gap-2 px-3 py-2 rounded-pill ${currentUser.fuedScore < currentUser.requiredFUED ? 'opacity-50' : 'cursor-pointer interaction-item hover-bg-light'}`}>
+                      <MessageCircle className="text-muted" size={20} />
+                      <span className="fw-bold text-muted">Bình luận</span>
                     </div>
                   </div>
-                  {/* <i className="bi bi-three-dots"></i> */}
-                </div>
 
-                <p className="mb-4" style={{ lineHeight: '1.6', color: '#444', whiteSpace: 'pre-wrap' }}>{story.content}</p>
-
-                <div className="d-flex align-items-center gap-4 border-top pt-3">
-                  {/* Nút Thả tim */}
-                  <div
-                    className="d-flex align-items-center cursor-pointer interaction-item"
-                    onClick={() => handleLikeStory(story.id)}
-                  >
-                    <i className={`bi ${story.isLiked ? 'bi-heart-fill text-danger' : 'bi-heart'} fs-5 me-2`}></i>
-                    <span className="small fw-bold">{story.hearts}</span>
-                  </div>
-
-                  {/* Nút Bình luận (Kiểm tra FUED) */}
-                  <div className={`d-flex align-items-center ${currentUser.fuedScore < currentUser.requiredFUED ? 'opacity-50' : 'cursor-pointer interaction-item'}`}>
-                    <i className={`bi ${currentUser.fuedScore < currentUser.requiredFUED ? 'bi-lock-fill' : 'bi-chat-left-text'} fs-5 me-2`}></i>
-                    <span className="small fw-bold">Bình luận</span>
-                  </div>
-                </div>
-
-                {/* Cảnh báo FUED nếu thấp */}
-                {currentUser.fuedScore < currentUser.requiredFUED && (
-                  <div className="mt-3 p-2 rounded-4 bg-light text-center" style={{ fontSize: '11px', border: '1px dashed #ddd' }}>
-                    <i className="bi bi-exclamation-triangle-fill me-1 text-warning"></i>
-                    Bạn cần đạt <strong>{currentUser.requiredFUED} FUED</strong> để tham gia thảo luận.
-                    (Hiện có: {currentUser.fuedScore})
-                  </div>
-                )}
-              </div>
-            ))}
+                  {currentUser.fuedScore < currentUser.requiredFUED && (
+                    <motion.div
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      className="mt-3 p-3 rounded-4 bg-white bg-opacity-40 text-center border-dashed"
+                    >
+                      <small className="text-muted d-flex align-items-center justify-content-center gap-2">
+                        <Info size={14} className="text-warning" />
+                        Cần <strong>{currentUser.requiredFUED} FUED</strong> để thảo luận. (Có: {currentUser.fuedScore})
+                      </small>
+                    </motion.div>
+                  )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
 
             {stories.length === 0 && (
-              <div className="text-center text-muted py-5">
+              <div className="text-center text-muted py-5 glass-card rounded-5 mt-4">
+                <div className="mb-3 fs-1">✨</div>
                 Chưa có câu chuyện nào. Hãy là người đầu tiên chia sẻ!
               </div>
             )}
           </div>
 
           {/* --- CỘT PHẢI: THÔNG TIN CÁ NHÂN & QUY TẮC --- */}
-          <div className="col-lg-3 mt-5 mt-lg-0">
-            <div className="p-4 rounded-5 bg-white shadow-sm border-0 sticky-top" style={{ top: '120px' }}>
-              <div className="text-center mb-4">
-                <div className="p-3 d-inline-block rounded-circle mb-3" style={{ backgroundColor: 'rgba(116, 198, 85, 0.1)' }}>
-                  <i className="bi bi-lightning-charge-fill fs-2" style={{ color: lightGreen }}></i>
+          <div className="col-lg-4 mt-5 mt-lg-0 ps-lg-4">
+            <div className="sticky-top" style={{ top: '120px' }}>
+              {/* Score Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="p-4 rounded-5 glass-card mb-4 shadow-sm text-center border-0 overflow-hidden position-relative"
+              >
+                <div className="p-4 d-inline-block rounded-circle mb-4 shadow-lg bg-white" style={{ position: 'relative', zIndex: 2 }}>
+                  <Zap size={32} color={lightGreen} className="fill-success" style={{ fill: lightGreen }} />
                 </div>
-                <h6 className="fw-bold mb-1">Chỉ số FUED của bạn</h6>
-                <div className="display-6 fw-bold" style={{ color: brandGreen }}>{currentUser.fuedScore}</div>
-                <div className="progress mt-3" style={{ height: '6px', backgroundColor: '#eee' }}>
-                  <div className="progress-bar" style={{ width: `${Math.min((currentUser.fuedScore / currentUser.requiredFUED) * 100, 100)}%`, backgroundColor: lightGreen }}></div>
+                <h6 className="fw-bold text-muted mb-1 text-uppercase tracking-wider">My Power Level</h6>
+                <div className="display-4 fw-bold mb-3" style={{ color: brandGreen }}>{currentUser.fuedScore} <small className="fs-5 text-muted">FUED</small></div>
+
+                <div className="px-3">
+                  <div className="progress rounded-pill bg-white bg-opacity-50 shadow-inner mb-2" style={{ height: '12px' }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min((currentUser.fuedScore / currentUser.requiredFUED) * 100, 100)}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className="progress-bar rounded-pill"
+                      style={{ backgroundColor: lightGreen }}
+                    ></motion.div>
+                  </div>
+                  <p className="small text-muted fw-medium">
+                    + <span className="text-success fw-bold">{Math.max(0, currentUser.requiredFUED - currentUser.fuedScore)}</span> điểm để mở khóa chat
+                  </p>
                 </div>
-                <p className="small text-muted mt-2">Cần thêm {Math.max(0, currentUser.requiredFUED - currentUser.fuedScore)} điểm để mở khóa bình luận.</p>
-              </div>
 
-              <hr className="opacity-25" />
+                <div className="mt-4 pt-4 border-top text-start px-2">
+                  <h6 className="fw-bold small mb-3 text-muted d-flex align-items-center gap-2">
+                    <Star size={14} className="text-warning fill-warning" /> Skill Up System
+                  </h6>
+                  <ul className="list-unstyled mb-0 d-flex flex-column gap-3">
+                    <li className="d-flex align-items-center justify-content-between p-2 rounded-4 bg-white bg-opacity-40 shadow-xs border">
+                      <span className="small text-dark fw-medium">📝 Chia sẻ câu chuyện</span>
+                      <span className="badge rounded-pill bg-success px-2 py-1">+10</span>
+                    </li>
+                    <li className="d-flex align-items-center justify-content-between p-2 rounded-4 bg-white bg-opacity-40 shadow-xs border">
+                      <span className="small text-dark fw-medium">❤️ Nhận Tim (tym)</span>
+                      <span className="badge rounded-pill bg-danger px-2 py-1">+2</span>
+                    </li>
+                  </ul>
+                </div>
+              </motion.div>
 
-              <div className="mb-4">
-                <h6 className="fw-bold small mb-3">Làm sao để tăng FUED?</h6>
-                <ul className="list-unstyled mb-0" style={{ fontSize: '12px' }}>
-                  <li className="mb-2"><i className="bi bi-check2-circle text-success me-2"></i>Chia sẻ câu chuyện thật <span className="fw-bold text-success">(+10)</span></li>
-                  <li className="mb-2"><i className="bi bi-check2-circle text-success me-2"></i>Nhận được sự ủng hộ (tym) <span className="fw-bold text-success">(+2)</span></li>
-                  {/* <li className="mb-2"><i className="bi bi-check2-circle text-success me-2"></i>Hoàn thành bài tập tâm lý</li> */}
-                </ul>
-              </div>
-
-              <div className="p-3 rounded-4" style={{ backgroundColor: '#fff8f8' }}>
-                <h6 className="fw-bold small text-danger"><i className="bi bi-shield-lock me-2"></i>Không Gian An Toàn</h6>
-                <p className="mb-0" style={{ fontSize: '11px', color: '#888' }}>
-                  Chúng tôi không sử dụng nút Dislike để tránh gây tổn thương. Mọi hành vi tiêu cực sẽ bị trừ điểm FUED.
+              {/* Safe Space Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="p-4 rounded-5 glass-card shadow-sm border-0"
+                style={{ background: `linear-gradient(135deg, #fff, #fff0f0)` }}
+              >
+                <h6 className="fw-bold fs-6 text-danger d-flex align-items-center mb-3">
+                  <Shield size={20} className="me-2" /> Vibe Check
+                </h6>
+                <p className="mb-0 lh-lg" style={{ fontSize: '13px', color: '#718096' }}>
+                  Đây là khoảng trời riêng để bạn trút bỏ muộn phiền. Calmistry <strong>nói không với sự phán xét</strong>. Mọi hành vi làm tổn thương cộng đồng sẽ bị trừ điểm FUED ngay lập tức.
                 </p>
-              </div>
+              </motion.div>
             </div>
           </div>
 
         </div>
       </div>
 
+      <style>{`
+                .glass-card { 
+                    background: rgba(255, 255, 255, 0.7); 
+                    backdrop-filter: blur(14px); 
+                    border: 1px solid rgba(255, 255, 255, 0.4);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+                .hover-lift:hover {
+                    transform: translateY(-6px);
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06) !important;
+                    background: rgba(255, 255, 255, 0.9);
+                    border-color: #8ec339;
+                }
+                .hover-bg-light:hover {
+                    background-color: rgba(0,0,0,0.05);
+                }
+                .shadow-inner {
+                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+                }
+                .border-dashed {
+                    border: 1px dashed rgba(0,0,0,0.15);
+                }
+                .custom-switch .form-check-input {
+                    width: 3em;
+                    height: 1.5em;
+                }
+                .custom-switch .form-check-input:checked {
+                    background-color: ${brandGreen};
+                    border-color: ${brandGreen};
+                }
+                .shadow-xs { box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+                .tracking-wider { letter-spacing: 0.08em; }
+                .cursor-pointer { cursor: pointer; }
+                .fill-danger { fill: #dc3545; }
+                .fill-muted { fill: #6c757d; }
+                .fill-warning { fill: #ffc107; }
+                .fill-success { fill: #8ec339; }
+            `}</style>
     </div>
   );
 };
 
 export default ShareStories;
-

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckInCard from "../../components/features/sleep/CheckInCard";
 import SleepQuiz from "../../components/features/sleep/SleepQuiz";
@@ -27,20 +27,28 @@ export default function SleepManagement() {
     9: "Q9_MORNING"
   };
 
+  // Tự động cuộn lên đầu khi chuyển bước
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
+
   const handleAnswer = (qId, point) => {
-    setAnswers({ ...answers, [qId]: point });
+    setAnswers(prev => ({ ...prev, [qId]: point }));
   };
 
   const calculateScore = async () => {
+    if (loading) return;
     setLoading(true);
     setError("");
 
     try {
       // Map answers to backend format
-      const answersList = Object.entries(answers).map(([qId, point]) => ({
-        questionCode: QUESTION_CODE_MAP[qId],
-        answerValue: String(point)
-      }));
+      const answersList = Object.entries(answers)
+        .filter(([qId]) => QUESTION_CODE_MAP[qId]) // Chỉ gửi những câu có mapping
+        .map(([qId, point]) => ({
+          questionCode: QUESTION_CODE_MAP[qId],
+          answerValue: String(point)
+        }));
 
       // Submit to backend
       const result = await sleepService.submitSleepQuiz({
@@ -50,7 +58,7 @@ export default function SleepManagement() {
 
       // Update state with backend response
       setSessionData(result);
-      setScore(result.finalScore100);
+      setScore(result?.finalScore100 || 0);
       setStep("result");
     } catch (e) {
       console.error("Error submitting sleep quiz:", e);
@@ -59,7 +67,8 @@ export default function SleepManagement() {
 
       // Still show result with local calculation if backend fails
       const total = Object.values(answers).reduce((a, b) => a + b, 0);
-      setScore(Math.min(100, total));
+      const calculatedScore = Math.round((total / (Object.keys(QUESTION_CODE_MAP).length * 10)) * 100);
+      setScore(Math.min(100, calculatedScore));
       setStep("result");
     } finally {
       setLoading(false);
@@ -72,51 +81,61 @@ export default function SleepManagement() {
       <div style={circleLeft}></div>
       <div style={circleRight}></div>
 
-      <div className="container" style={{ maxWidth: 480, position: 'relative', zIndex: 1 }}>
+      <div className="container-fluid" style={{ maxWidth: 1200, position: 'relative', zIndex: 1 }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.4 }}
           >
             {step === "checkin" && (
-              <CheckInCard onStart={() => setStep("quiz")} />
+              <div className="d-flex justify-content-center">
+                <div style={{ maxWidth: 480, width: '100%' }}>
+                  <CheckInCard onStart={() => setStep("quiz")} />
+                </div>
+              </div>
             )}
 
             {step === "quiz" && (
-              <SleepQuiz
-                answers={answers}
-                onAnswer={handleAnswer}
-                onSubmit={calculateScore}
-                onBack={() => setStep("checkin")}
-                loading={loading}
-              />
+              <div className="d-flex justify-content-center">
+                <div style={{ maxWidth: 600, width: '100%' }}>
+                  <SleepQuiz
+                    answers={answers}
+                    onAnswer={handleAnswer}
+                    onSubmit={calculateScore}
+                    onBack={() => setStep("checkin")}
+                    loading={loading}
+                  />
+                </div>
+              </div>
             )}
 
             {step === "result" && (
-              <>
-                {error && (
-                  <div style={{
-                    padding: '12px 16px',
-                    backgroundColor: '#fff3cd',
-                    border: '1px solid #ffc107',
-                    borderRadius: '12px',
-                    color: '#856404',
-                    fontSize: '14px',
-                    marginBottom: '16px',
-                    fontWeight: '500'
-                  }}>
-                    ⚠️ {error}
-                  </div>
-                )}
-                <SleepResult
-                  score={score}
-                  sessionData={sessionData}
-                  onDashboard={() => setStep("dashboard")}
-                />
-              </>
+              <div className="d-flex justify-content-center">
+                <div style={{ maxWidth: 480, width: '100%' }}>
+                  {error && (
+                    <div style={{
+                      padding: '12px 16px',
+                      backgroundColor: '#fff3cd',
+                      border: '1px solid #ffc107',
+                      borderRadius: '12px',
+                      color: '#856404',
+                      fontSize: '14px',
+                      marginBottom: '16px',
+                      fontWeight: '500'
+                    }}>
+                      ⚠️ {error}
+                    </div>
+                  )}
+                  <SleepResult
+                    score={score}
+                    sessionData={sessionData}
+                    onDashboard={() => setStep("dashboard")}
+                  />
+                </div>
+              </div>
             )}
 
             {step === "dashboard" && <SleepDashboard />}
@@ -127,22 +146,22 @@ export default function SleepManagement() {
   );
 }
 
-// Styles cho Main Container
+// Styles cho Main Container (Nâng cấp giao diện rộng & Aesthetic)
 const containerStyle = {
   minHeight: '100vh',
-  backgroundColor: '#f4f7f5',
-  padding: '140px 20px 80px', // Tránh Header
+  backgroundColor: '#f8faf9',
+  padding: '120px 20px 80px', // Tránh Header
   position: 'relative',
   overflow: 'hidden',
   fontFamily: "'Be Vietnam Pro', sans-serif"
 };
 
 const circleLeft = {
-  position: 'absolute', top: '10%', left: '-50px', width: '200px', height: '200px',
-  borderRadius: '50%', background: 'rgba(142, 195, 57, 0.1)', filter: 'blur(50px)'
+  position: 'absolute', top: '5%', left: '-100px', width: '400px', height: '400px',
+  borderRadius: '50%', background: 'radial-gradient(circle, rgba(142, 195, 57, 0.15) 0%, rgba(255,255,255,0) 70%)', filter: 'blur(60px)', zIndex: 0
 };
 
 const circleRight = {
-  position: 'absolute', bottom: '10%', right: '-50px', width: '250px', height: '250px',
-  borderRadius: '50%', background: 'rgba(58, 90, 64, 0.08)', filter: 'blur(60px)'
+  position: 'absolute', bottom: '10%', right: '-100px', width: '500px', height: '500px',
+  borderRadius: '50%', background: 'radial-gradient(circle, rgba(58, 90, 64, 0.1) 0%, rgba(255,255,255,0) 70%)', filter: 'blur(80px)', zIndex: 0
 };

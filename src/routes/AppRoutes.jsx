@@ -40,6 +40,7 @@ import WorkshopManagement from "../pages/admin/WorkshopManagement";
 
 // Common pages
 import NotFound from "../pages/common/NotFound";
+import Onboarding from "../pages/client/Onboarding";
 
 import AIChatButton from "../components/features/chat/AIChatButton";
 
@@ -120,6 +121,13 @@ function AppRoutes() {
             <Route path="/ai-chat" element={
               <PrivateRoute>
                 <AiPersonalizedChat />
+              </PrivateRoute>
+            } />
+
+            {/* Onboarding */}
+            <Route path="/onboarding" element={
+              <PrivateRoute>
+                <Onboarding />
               </PrivateRoute>
             } />
 

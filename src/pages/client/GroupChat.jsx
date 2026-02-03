@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Send, Users, MessageCircle, Sparkles,
     Ghost, Cloud, Moon, Star, Sun, Info, Heart,
-    LogOut, ChevronRight, Hash, Compass, Flower2
+    LogOut, ChevronRight, Hash, Compass, Flower2,
+    Image as ImageIcon, Link as LinkIcon, Plus, X, Camera
 } from "lucide-react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -44,9 +45,18 @@ const GroupChat = () => {
     const [isAnonymous, setIsAnonymous] = useState(false);
     const [particles, setParticles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [showCreateRoom, setShowCreateRoom] = useState(false);
+    const [newRoomData, setNewRoomData] = useState({ name: "", description: "", type: "GROUP" });
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [showMembersModal, setShowMembersModal] = useState(false);
+    const [allUsers, setAllUsers] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const fileInputRef = useRef(null);
 
     const subscriptionRef = useRef(null);
-    const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
     const brandGreen = '#324d3e';
     const softGreen = '#f0fdf4';
 
@@ -70,6 +80,14 @@ const GroupChat = () => {
                 ]);
 
                 setCurrentUser(user);
+
+                // Robust Admin check: handles string array (backend default) and case-insensitivity
+                const userRoles = user.roles || [];
+                const hasAdminPrivileges = userRoles.some(role => {
+                    const roleName = (typeof role === 'string' ? role : role.name || '').toUpperCase();
+                    return roleName.includes('ADMIN');
+                });
+                setIsAdmin(hasAdminPrivileges);
 
                 if (roomsRes && roomsRes.code === 1000) {
                     const fetchedRooms = roomsRes.result;
@@ -101,29 +119,53 @@ const GroupChat = () => {
 
     useEffect(() => {
         if (isConnected && selectedRoom) {
-            if (subscriptionRef.current) {
-                subscriptionRef.current.unsubscribe();
-            }
-            setMessages([]);
-            subscriptionRef.current = chatService.subscribeToRoom(selectedRoom.id, (payload) => {
-                const message = JSON.parse(payload.body);
-                if (message.messageType === 'SYSTEM' && message.messageText === 'HEALING_VIBES') {
-                    triggerParticles();
-                } else {
-                    setMessages(prev => [...prev, message]);
-                    scrollToBottom();
+            const loadHistoryAndSubscribe = async () => {
+                try {
+                    if (subscriptionRef.current) {
+                        subscriptionRef.current.unsubscribe();
+                    }
+
+                    // Fetch history first
+                    const historyRes = await chatService.getRoomHistory(selectedRoom.id);
+                    if (historyRes && historyRes.code === 1000) {
+                        setMessages(historyRes.result);
+                        scrollToBottom();
+                    } else {
+                        setMessages([]);
+                    }
+
+                    // Then subscribe for new ones
+                    subscriptionRef.current = chatService.subscribeToRoom(selectedRoom.id, (payload) => {
+                        const message = JSON.parse(payload.body);
+                        if (message.messageType === 'SYSTEM' && message.messageText === 'HEALING_VIBES') {
+                            triggerParticles();
+                        } else {
+                            setMessages(prev => [...prev, message]);
+                            scrollToBottom();
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error loading history/subscribing:", error);
+                    toast.error("Không thể tải lịch sử trò chuyện.");
+                    setMessages([]);
                 }
-            });
+            };
+
+            loadHistoryAndSubscribe();
         }
     }, [isConnected, selectedRoom]);
 
     const scrollToBottom = () => {
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+        setTimeout(() => {
+            if (messagesContainerRef.current) {
+                messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+            }
+        }, 100);
     };
 
     const handleSendMessage = (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !currentUser || !selectedRoom) return;
+        if ((!newMessage.trim() && !selectedImage) || !currentUser || !selectedRoom) return;
 
         const messagePayload = {
             sender: {
@@ -131,13 +173,98 @@ const GroupChat = () => {
                 username: isAnonymous ? `Bạn ${anonIcons[currentUser.id % anonIcons.length]}` : (currentUser.fullName || currentUser.username)
             },
             messageText: newMessage,
-            messageType: 'TEXT',
+            mediaUrl: selectedImage,
+            messageType: selectedImage ? 'IMAGE' : 'TEXT',
             isAnonymous: isAnonymous,
             room: { id: selectedRoom.id }
         };
 
         chatService.sendMessage(messagePayload);
         setNewMessage("");
+        setSelectedImage(null);
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // In a real app, upload to S3/Cloudinary here.
+        // For now, we simulate with a local preview or placeholder
+        setIsUploading(true);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setSelectedImage(reader.result);
+            setIsUploading(false);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleCreateRoom = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await chatService.createRoom(newRoomData);
+            if (res.code === 1000) {
+                toast.success("Tạo Sanctuary mới thành công!");
+                setRooms(prev => [...prev, res.result]);
+                setShowCreateRoom(false);
+                setNewRoomData({ name: "", description: "", type: "GROUP" });
+            }
+        } catch (error) {
+            toast.error("Không thể tạo phòng mới.");
+        }
+    };
+
+    const loadUsers = async () => {
+        try {
+            const users = await userService.getAllUsers();
+            setAllUsers(users);
+        } catch (error) {
+            console.error("Error loading users:", error);
+        }
+    };
+
+    const handleAddMember = async (userId) => {
+        try {
+            const res = await chatService.addMember(selectedRoom.id, userId);
+            if (res.code === 1000) {
+                toast.success("Đã thêm thành viên vào Vùng Yên!");
+                setSelectedRoom(res.result);
+                // Update rooms list as well
+                setRooms(prev => prev.map(r => r.id === res.result.id ? res.result : r));
+            }
+        } catch (error) {
+            toast.error("Không thể thêm thành viên.");
+        }
+    };
+
+    const handleRemoveMember = async (userId) => {
+        try {
+            const res = await chatService.removeMember(selectedRoom.id, userId);
+            if (res.code === 1000) {
+                toast.warning("Đã xóa thành viên khỏi Vùng Yên.");
+                setSelectedRoom(res.result);
+                setRooms(prev => prev.map(r => r.id === res.result.id ? res.result : r));
+            }
+        } catch (error) {
+            toast.error("Không thể xóa thành viên.");
+        }
+    };
+
+    const filteredUsers = allUsers.filter(u =>
+        u.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.username?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const renderMessageText = (text) => {
+        if (!text) return null;
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        const parts = text.split(urlRegex);
+        return parts.map((part, i) => {
+            if (part.match(urlRegex)) {
+                return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-info text-decoration-underline">{part}</a>;
+            }
+            return part;
+        });
     };
 
     const sendHealingVibes = () => {
@@ -166,12 +293,13 @@ const GroupChat = () => {
     };
 
     return (
-        <div className="min-vh-100 py-4 py-md-5" style={{
+        <div style={{
             background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)',
-            marginTop: '60px'
+            paddingTop: '80px', // Standard padding for fixed navbar
+            paddingBottom: '40px'
         }}>
-            <div className="container-xl pt-3">
-                <div className="row g-4" style={{ height: 'calc(100vh - 160px)' }}>
+            <div className="container-xl">
+                <div className="row g-4" style={{ height: '750px', maxHeight: 'calc(100vh - 180px)' }}>
 
                     {/* Left Sidebar: Rooms */}
                     <div className="col-lg-3 d-none d-lg-block">
@@ -181,6 +309,16 @@ const GroupChat = () => {
                                     <Compass size={22} />
                                     VÙNG YÊN
                                 </h5>
+                                {isAdmin && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setShowCreateRoom(true)}
+                                        className="btn btn-success btn-sm rounded-circle p-1"
+                                    >
+                                        <Plus size={18} />
+                                    </motion.button>
+                                )}
                                 <div className={`badge rounded-pill ${isConnected ? 'bg-success' : 'bg-danger'} bg-opacity-10 text-${isConnected ? 'success' : 'danger'} small`}>
                                     {isConnected ? 'Trực tuyến' : 'Mất kết nối'}
                                 </div>
@@ -254,11 +392,30 @@ const GroupChat = () => {
                                         <Sparkles size={16} />
                                         <span className="d-none d-md-inline">Gửi năng lượng</span>
                                     </motion.button>
+
+                                    {isAdmin && (
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => {
+                                                setShowMembersModal(true);
+                                                loadUsers();
+                                            }}
+                                            className="btn btn-outline-success btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2"
+                                        >
+                                            <Users size={16} />
+                                            <span className="d-none d-md-inline">Thành viên</span>
+                                        </motion.button>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Messages Container */}
-                            <div className="flex-grow-1 overflow-auto p-4 bg-light bg-opacity-30">
+                            <div
+                                ref={messagesContainerRef}
+                                className="flex-grow-1 overflow-auto p-4 bg-light bg-opacity-30"
+                                style={{ scrollBehavior: 'smooth' }}
+                            >
                                 {isLoading ? (
                                     <div className="d-flex justify-content-center align-items-center h-100 flex-column gap-3 text-muted">
                                         <div className="spinner-grow text-success" />
@@ -300,7 +457,12 @@ const GroupChat = () => {
                                                                     backdropFilter: isMe ? 'none' : 'blur(10px)',
                                                                     backgroundColor: isMe ? '#324d3e' : 'rgba(255,255,255,0.8)'
                                                                 }}>
-                                                                <p className="mb-0 lh-base">{msg.messageText}</p>
+                                                                {msg.mediaUrl && (
+                                                                    <div className="mb-2">
+                                                                        <img src={msg.mediaUrl} alt="uploaded" className="img-fluid rounded-3 shadow-sm" style={{ maxHeight: '300px' }} />
+                                                                    </div>
+                                                                )}
+                                                                <p className="mb-0 lh-base">{renderMessageText(msg.messageText)}</p>
                                                             </div>
                                                             <small className={`text-muted d-block mt-1 ${isMe ? 'text-end' : 'text-start'}`} style={{ fontSize: '0.65rem' }}>
                                                                 {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -310,7 +472,6 @@ const GroupChat = () => {
                                                 );
                                             })}
                                         </AnimatePresence>
-                                        <div ref={messagesEndRef} />
                                     </div>
                                 )}
                             </div>
@@ -333,20 +494,51 @@ const GroupChat = () => {
                                     <small className="text-muted d-none d-md-block opacity-50 italic">Nhấn Enter để gửi</small>
                                 </div>
                                 <form onSubmit={handleSendMessage} className="d-flex gap-3 align-items-center">
+                                    <div className="flex-grow-1 position-relative">
+                                        {selectedImage && (
+                                            <div className="position-absolute bottom-100 start-0 mb-3 p-2 bg-white rounded-4 shadow-lg border" style={{ width: '100px' }}>
+                                                <img src={selectedImage} alt="preview" className="img-fluid rounded-3" />
+                                                <button
+                                                    onClick={() => setSelectedImage(null)}
+                                                    className="position-absolute top-0 end-0 btn btn-danger btn-xs rounded-circle p-0"
+                                                    style={{ width: '20px', height: '20px', marginTop: '-10px', marginRight: '-10px' }}
+                                                >
+                                                    <X size={12} />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="text"
+                                            className="form-control form-control-lg border-0 bg-light rounded-pill px-4 fs-6 py-3"
+                                            placeholder={selectedImage ? "Thêm ghi chú cho ảnh..." : `Gửi tâm tư vào #${selectedRoom?.name}...`}
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            disabled={!isConnected || !selectedRoom}
+                                        />
+                                    </div>
                                     <input
-                                        type="text"
-                                        className="form-control form-control-lg border-0 bg-light rounded-pill px-4 fs-6 py-3"
-                                        placeholder={`Gửi tâm tư vào #${selectedRoom?.name}...`}
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        disabled={!isConnected || !selectedRoom}
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleImageUpload}
+                                        accept="image/*"
+                                        className="d-none"
                                     />
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        type="button"
+                                        onClick={() => fileInputRef.current.click()}
+                                        className="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                                        style={{ width: '56px', height: '56px' }}
+                                    >
+                                        <Camera size={22} className="text-muted" />
+                                    </motion.button>
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         type="submit"
                                         className="btn btn-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                                        disabled={!isConnected || !newMessage.trim() || !selectedRoom}
+                                        disabled={!isConnected || (!newMessage.trim() && !selectedImage) || !selectedRoom}
                                         style={{ width: '56px', height: '56px', backgroundColor: brandGreen }}
                                     >
                                         <Send size={22} className="ms-1" />
@@ -357,6 +549,140 @@ const GroupChat = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Create Room Modal */}
+            <AnimatePresence>
+                {showCreateRoom && (
+                    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ zIndex: 11000 }}>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="position-absolute w-100 h-100 bg-black bg-opacity-50"
+                            onClick={() => setShowCreateRoom(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="card border-0 shadow-lg rounded-5 p-4 bg-white position-relative"
+                            style={{ width: '400px' }}
+                        >
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h5 className="fw-900 mb-0">Tạo Sanctuary Mới</h5>
+                                <button className="btn btn-light rounded-circle p-1" onClick={() => setShowCreateRoom(false)}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <form onSubmit={handleCreateRoom}>
+                                <div className="mb-3">
+                                    <label className="form-label small fw-bold text-muted">Tên Sanctuary</label>
+                                    <input
+                                        type="text"
+                                        className="form-control rounded-4 border-light bg-light"
+                                        placeholder="Ví dụ: Góc Chữa Lành"
+                                        value={newRoomData.name}
+                                        onChange={e => setNewRoomData({ ...newRoomData, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="form-label small fw-bold text-muted">Mô tả mục tiêu</label>
+                                    <textarea
+                                        className="form-control rounded-4 border-light bg-light"
+                                        rows="3"
+                                        placeholder="Mục tiêu của cộng đồng này là gì?"
+                                        value={newRoomData.description}
+                                        onChange={e => setNewRoomData({ ...newRoomData, description: e.target.value })}
+                                    ></textarea>
+                                </div>
+                                <button type="submit" className="btn btn-success w-100 rounded-pill py-3 fw-bold shadow-sm" style={{ backgroundColor: brandGreen }}>
+                                    Xác nhận tạo Vùng Yên
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Members Management Modal */}
+            <AnimatePresence>
+                {showMembersModal && (
+                    <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ zIndex: 11000 }}>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="position-absolute w-100 h-100 bg-black bg-opacity-50"
+                            onClick={() => setShowMembersModal(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="card border-0 shadow-lg rounded-5 p-4 bg-white position-relative d-flex flex-column"
+                            style={{ width: '500px', maxHeight: '80vh' }}
+                        >
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h5 className="fw-900 mb-0">Quản lý Thành viên #{selectedRoom?.name}</h5>
+                                <button className="btn btn-light rounded-circle p-1" onClick={() => setShowMembersModal(false)}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="mb-4">
+                                <div className="input-group rounded-pill bg-light border-0 px-3 py-1">
+                                    <span className="input-group-text bg-transparent border-0 text-muted"><Users size={18} /></span>
+                                    <input
+                                        type="text"
+                                        className="form-control bg-transparent border-0 shadow-none"
+                                        placeholder="Tìm kiếm người dùng..."
+                                        value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex-grow-1 overflow-auto pe-2">
+                                <h6 className="fw-bold mb-3 small text-success">Kết quả tìm kiếm</h6>
+                                {filteredUsers.length === 0 ? (
+                                    <p className="text-center text-muted small py-4">Không tìm thấy người dùng phù hợp.</p>
+                                ) : (
+                                    <div className="d-flex flex-column gap-2 mb-4">
+                                        {filteredUsers.map(user => {
+                                            const isMember = selectedRoom?.members?.some(m => m.id === user.id);
+                                            return (
+                                                <div key={user.id} className="p-3 rounded-4 bg-light d-flex align-items-center justify-content-between">
+                                                    <div>
+                                                        <div className="fw-bold small">{user.fullName || user.username}</div>
+                                                        <div className="text-muted" style={{ fontSize: '0.7rem' }}>@{user.username}</div>
+                                                    </div>
+                                                    {isMember ? (
+                                                        <button
+                                                            onClick={() => handleRemoveMember(user.id)}
+                                                            className="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                                        >
+                                                            Xóa
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleAddMember(user.id)}
+                                                            className="btn btn-success btn-sm rounded-pill px-3"
+                                                            style={{ backgroundColor: brandGreen }}
+                                                        >
+                                                            Thêm
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             <style>{`
                 .backdrop-blur { backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }

@@ -86,6 +86,32 @@ const journalService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    /**
+     * Get AI daily writing prompt
+     * @returns {Promise<string>} AI prompt
+     */
+    getAiPrompt: async () => {
+        try {
+            const response = await api.get('/journals/v1/ai-prompt');
+            return response.result;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    /**
+     * Get journal statistics and AI analysis
+     * @returns {Promise<Object>} Statistics data
+     */
+    getStats: async () => {
+        try {
+            const response = await api.get('/journals/v1/stats');
+            return response.result;
+        } catch (error) {
+            throw error;
+        }
     }
 };
 
