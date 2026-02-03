@@ -3,8 +3,8 @@
  * Hỗ trợ: interceptors, token management, error handling
  */
 
-// Base URL - có thể cấu hình qua environment variable
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+// Base URL -có thể cấu hình qua environment variable
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://calmistry-backend-production.up.railway.app/calmistry';
 
 /**
  * Lấy token từ localStorage
