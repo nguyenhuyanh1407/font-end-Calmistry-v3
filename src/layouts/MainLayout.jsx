@@ -100,7 +100,7 @@ const MainLayout = () => {
         }}
       >
         <div className="container-fluid">
-            <a
+          <a
             className="navbar-brand fw-bold fs-3 d-flex align-items-center"
             href="/"
             style={{
@@ -209,6 +209,29 @@ const MainLayout = () => {
                     </button>
                   </li>
 
+                  <li>
+                    <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/workshops')}>
+                      <i className="bi bi-calendar-event text-success"></i>
+                      Tham gia Workshop
+                    </button>
+                  </li>
+
+                  <li>
+                    <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/ai-chat')}>
+                      <i className="bi bi-robot text-info"></i>
+                      Trò chuyện AI
+                    </button>
+                  </li>
+
+                  {currentUser.roles && currentUser.roles.includes('ADMIN') && (
+                    <li>
+                      <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/admin/workshops')}>
+                        <i className="bi bi-calendar-plus text-warning"></i>
+                        Quản lý Workshop
+                      </button>
+                    </li>
+                  )}
+
                   {currentUser.roles && currentUser.roles.includes('ADMIN') && (
                     <li>
                       <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/admin/accounts')}>
@@ -295,6 +318,17 @@ const MainLayout = () => {
               >
                 <i className="bi bi-grid-1x2"></i>
                 <span>Dashboard</span>
+              </button>
+
+              <button
+                className="mobile-menu-item"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate('/workshops');
+                }}
+              >
+                <i className="bi bi-calendar-event"></i>
+                <span>Workshops</span>
               </button>
 
               {currentUser.roles && currentUser.roles.includes('ADMIN') && (
@@ -402,14 +436,14 @@ const MainLayout = () => {
                     transition: 'all 0.3s ease',
                     boxShadow: '0 4px 12px rgba(142, 195, 57, 0.2)'
                   }}
-                  onMouseOver={(e) => {
-                    e.target.style.transform = 'translateY(-2px)';
-                    e.target.style.filter = 'brightness(1.1)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.filter = 'brightness(1)';
-                  }}
+                    onMouseOver={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.filter = 'brightness(1.1)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.filter = 'brightness(1)';
+                    }}
                   >
                     Đăng ký
                   </button>
@@ -423,6 +457,7 @@ const MainLayout = () => {
                 <li><a href="#" className="footer-link">Trị liệu cá nhân</a></li>
                 <li><a href="#" className="footer-link">Tư vấn cặp đôi</a></li>
                 <li><a href="#" className="footer-link">Trị liệu nhóm</a></li>
+                <li><a href="/workshops" className="footer-link">Workshop chữa lành</a></li>
                 <li><a href="#" className="footer-link">Test tâm lý</a></li>
               </ul>
             </div>

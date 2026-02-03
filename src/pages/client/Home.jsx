@@ -111,7 +111,7 @@ const Home = () => {
               style={{ width: '120px' }}
             />
             <p className="fw-bold text-white mt-2 mb-0"
-               style={{ textAlign: 'left', marginLeft: '-62px', fontFamily: 'Rubik, sans-serif' }}>
+              style={{ textAlign: 'left', marginLeft: '-62px', fontFamily: 'Rubik, sans-serif' }}>
               Khám phá ngay!
             </p>
 
@@ -146,7 +146,7 @@ const Home = () => {
       img: blogImg,
       activeImg: blogImg1,
       subOptions: [
-        { title: "Đặt lịch tham gia workshop", icon: <People /> },
+        { title: "Đặt lịch tham gia workshop", icon: <People />, action: () => navigate("/workshops") },
         { title: "Nhóm chat chữa lành", icon: <ChatDots />, action: () => navigate("/group-chat") },
         { title: "Chia sẽ câu chuyện của bạn", icon: <Stars />, action: () => navigate("/shareStories") }
       ]
@@ -159,7 +159,7 @@ const Home = () => {
       img: aiChatBot,
       activeImg: aiChatBot1,
       subOptions: [
-        { title: "AI cá nhân hóa", icon: <Robot /> },
+        { title: "AI cá nhân hóa", icon: <Robot />, action: () => navigate("/ai-chat") },
       ]
     }
   ];
@@ -319,12 +319,12 @@ const Home = () => {
                   <div className="pe-lg-5">
                     {/* Badge nhỏ tạo điểm nhấn chuyên nghiệp */}
                     <span className="text-uppercase fw-bold mb-3 d-inline-block"
-                          style={{ color: '#74c655', letterSpacing: '2px', fontSize: '0.85rem' }}>
+                      style={{ color: '#74c655', letterSpacing: '2px', fontSize: '0.85rem' }}>
                       Đội ngũ chuyên gia
                     </span>
 
                     <h2 className="display-4 mb-4" style={{ color: '#324d3e', lineHeight: '1.2', fontWeight: '600' }}>
-                      Chuyên gia trị liệu <br/> bạn có thể tin tưởng.
+                      Chuyên gia trị liệu <br /> bạn có thể tin tưởng.
                     </h2>
 
                     {/* Chia nhỏ nội dung bằng list để dễ đọc hơn thay vì một đoạn văn dài */}
@@ -357,10 +357,10 @@ const Home = () => {
 
                   {/* Các ảnh nhỏ xung quanh */}
                   <div className="img-wrapper sub-img top-left shadow-sm">
-                      <img
-                        src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200"
-                        alt="Therapist 1"
-                      />
+                    <img
+                      src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200"
+                      alt="Therapist 1"
+                    />
                   </div>
                   <div className="img-wrapper sub-img top-right shadow-sm">
                     <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=200" alt="Therapist" />

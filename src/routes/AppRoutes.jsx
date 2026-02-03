@@ -31,6 +31,13 @@ import AccountManagement from "../pages/admin/AccountManagement";
 // Auth pages
 import Login from "../pages/auth/Login";
 
+// AI Chat
+import AiPersonalizedChat from "../pages/client/AiPersonalizedChat";
+
+// Workshops
+import WorkshopList from "../pages/client/WorkshopList";
+import WorkshopManagement from "../pages/admin/WorkshopManagement";
+
 // Common pages
 import NotFound from "../pages/common/NotFound";
 
@@ -98,6 +105,21 @@ function AppRoutes() {
             <Route path="/fuieds-quiz" element={
               <PrivateRoute>
                 <FuiedsQuiz />
+              </PrivateRoute>
+            } />
+
+            {/* Workshops */}
+            <Route path="/workshops" element={<WorkshopList />} />
+            <Route path="/admin/workshops" element={
+              <PrivateRoute>
+                <WorkshopManagement />
+              </PrivateRoute>
+            } />
+
+            {/* AI Chat */}
+            <Route path="/ai-chat" element={
+              <PrivateRoute>
+                <AiPersonalizedChat />
               </PrivateRoute>
             } />
 

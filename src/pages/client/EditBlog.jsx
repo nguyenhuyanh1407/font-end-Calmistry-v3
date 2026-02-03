@@ -76,8 +76,8 @@ const EditBlog = () => {
         if (files.length === 0) return;
 
         const totalImages = formData.imageUrls.length + files.length;
-        if (totalImages > 7) {
-            toast.error(`Tối đa 7 ảnh. Bạn đã có ${formData.imageUrls.length} ảnh.`);
+        if (totalImages > 20) {
+            toast.error(`Tối đa 20 ảnh. Bạn đã có ${formData.imageUrls.length} ảnh.`);
             return;
         }
 
@@ -192,10 +192,10 @@ const EditBlog = () => {
 
                                 <div className="mb-4">
                                     <label className="form-label fw-bold text-muted">
-                                        Ảnh bài viết ({formData.imageUrls.length}/7)
+                                        Ảnh bài viết ({formData.imageUrls.length}/20)
                                     </label>
 
-                                    {formData.imageUrls.length < 7 && (
+                                    {formData.imageUrls.length < 20 && (
                                         <div className="mb-3">
                                             <label className="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2" style={{ cursor: 'pointer' }}>
                                                 <Upload size={20} />
