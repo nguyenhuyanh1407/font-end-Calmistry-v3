@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-export default function SleepResult({ score, onDashboard }) {
+export default function SleepResult({ score, sessionData, onDashboard }) {
   const [displayScore, setDisplayScore] = useState(0);
 
   // Hiệu ứng đếm số chạy từ 0 đến score
@@ -14,20 +14,22 @@ export default function SleepResult({ score, onDashboard }) {
       start += 1;
       setDisplayScore(start);
       if (start === end) clearInterval(timer);
-    }, 20);
+    }, 15);
 
     return () => clearInterval(timer);
   }, [score]);
 
   // Phân loại trạng thái & màu sắc dựa trên điểm
   const getStatus = (s) => {
-    if (s >= 85) return { label: "Tuyệt vời", color: "#3a5a40", subColor: "#8ec339", icon: "bi-check-circle-fill", msg: "Giấc ngủ của bạn đạt chuẩn khoa học. Hãy duy trì thói quen này!" };
-    if (s >= 70) return { label: "Khá ổn", color: "#3a5a40", subColor: "#8ec339", icon: "bi-emoji-smile-fill", msg: "Bạn ngủ khá tốt, nhưng có thể cải thiện thêm thời gian ngủ sâu." };
-    if (s >= 50) return { label: "Cần cải thiện", color: "#92400e", subColor: "#f59e0b", icon: "bi-exclamation-circle-fill", msg: "Bạn đang có dấu hiệu thiếu ngủ. Thử tắt thiết bị điện tử sớm hơn nhé." };
-    return { label: "Báo động", color: "#991b1b", subColor: "#ef4444", icon: "bi-shield-exclamation", msg: "Cơ thể bạn đang mệt mỏi. Hãy cân nhắc nghỉ ngơi nhiều hơn." };
+    if (s >= 85) return { color: "#3a5a40", subColor: "#8ec339", icon: "bi-check-circle-fill" };
+    if (s >= 70) return { color: "#3a5a40", subColor: "#8ec339", icon: "bi-emoji-smile-fill" };
+    if (s >= 50) return { color: "#92400e", subColor: "#f59e0b", icon: "bi-exclamation-circle-fill" };
+    return { color: "#991b1b", subColor: "#ef4444", icon: "bi-shield-exclamation" };
   };
 
   const status = getStatus(score);
+  const resultTitle = sessionData?.categoryTitle || (score >= 70 ? "Giấc ngủ khá" : "Cần lưu ý");
+  const resultDesc = sessionData?.description || (score >= 70 ? "Bạn ngủ khá tốt, hãy tiếp tục duy trì." : "Bạn đang có dấu hiệu mệt mỏi.");
 
   return (
     <motion.div
@@ -36,20 +38,20 @@ export default function SleepResult({ score, onDashboard }) {
       style={containerStyle}
     >
       <header style={{ marginBottom: "20px" }}>
-        <span style={labelStyle}>KẾT QUẢ SÁNG NAY</span>
+        <span style={labelStyle}>KẾT QUẢ PHÂN TÍCH</span>
       </header>
 
       {/* Vòng tròn điểm số chính */}
       <div style={scoreCircleWrapper}>
-        <svg width="160" height="160">
-          <circle cx="80" cy="80" r="70" fill="none" stroke="#f0f3f0" strokeWidth="10" />
+        <svg width="140" height="140">
+          <circle cx="70" cy="70" r="60" fill="none" stroke="#f0f3f0" strokeWidth="10" />
           <motion.circle
-            cx="80" cy="80" r="70" fill="none"
+            cx="70" cy="70" r="60" fill="none"
             stroke={status.subColor}
             strokeWidth="10"
-            strokeDasharray="440"
-            initial={{ strokeDashoffset: 440 }}
-            animate={{ strokeDashoffset: 440 - (440 * score) / 100 }}
+            strokeDasharray="377"
+            initial={{ strokeDashoffset: 377 }}
+            animate={{ strokeDashoffset: 377 - (377 * score) / 100 }}
             transition={{ duration: 1.5, ease: "easeOut" }}
             strokeLinecap="round"
           />
@@ -63,38 +65,75 @@ export default function SleepResult({ score, onDashboard }) {
       <div style={{ margin: "20px 0" }}>
         <div style={{ ...statusBadge, backgroundColor: `${status.subColor}20`, color: status.color }}>
           <i className={`bi ${status.icon} me-2`}></i>
-          {status.label}
+          {resultTitle}
         </div>
       </div>
 
       <div style={insightBox}>
-        <p style={insightText}>"{status.msg}"</p>
+        <p style={insightText}>"{resultDesc}"</p>
       </div>
 
-      {/* Chỉ số phụ (Mock data để giao diện chuyên nghiệp hơn) */}
+      {sessionData?.advice && (
+        <div style={adviceBox}>
+          <div style={adviceHeader}><i className="bi bi-lightbulb-fill me-2"></i>GỢI Ý CHO BẠN</div>
+          <p style={adviceText}>{sessionData.advice}</p>
+        </div>
+      )}
+
+      {/* Chỉ số phụ */}
       <div style={rowStats}>
         <div style={statItem}>
           <span style={statLabel}>Hiệu suất</span>
-          <span style={statValue}>88%</span>
+          <span style={statValue}>{sessionData?.sleepEfficiencyPercent || 85}%</span>
         </div>
         <div style={{ ...statItem, borderLeft: "1px solid #eee", borderRight: "1px solid #eee" }}>
-          <span style={statLabel}>Thời gian</span>
-          <span style={statValue}>7.5h</span>
+          <span style={statLabel}>Trạng thái</span>
+          <span style={statValue}>{sessionData?.status === "EXCELLENT" ? "Tốt" : sessionData?.status === "GOOD" ? "Khá" : "Kém"}</span>
         </div>
         <div style={statItem}>
-          <span style={statLabel}>Độ sâu</span>
-          <span style={statValue}>Ổn định</span>
+          <span style={statLabel}>Chỉ số PSQI</span>
+          <span style={statValue}>{sessionData?.psqiScore || "-"}</span>
         </div>
       </div>
 
       <button onClick={onDashboard} style={primaryBtn}>
-        Xem Dashboard chi tiết <i className="bi bi-arrow-right ms-2"></i>
+        Xem Lịch sử chi tiết <i className="bi bi-arrow-right ms-2"></i>
       </button>
 
-      <p style={footerNote}>Kết quả dựa trên phản hồi cá nhân của bạn</p>
+      <p style={footerNote}>Kết quả được tính toán theo thuật toán PSQI cải tiến</p>
     </motion.div>
   );
 }
+
+const adviceBox = {
+  backgroundColor: "#f0fdf4",
+  padding: "20px",
+  borderRadius: "20px",
+  marginBottom: "30px",
+  textAlign: "left",
+  borderLeft: "5px solid #8ec339",
+  boxShadow: "0 10px 25px rgba(142, 195, 57, 0.1)"
+};
+
+const adviceHeader = {
+  fontSize: "13px",
+  fontWeight: "800",
+  color: "#3a5a40",
+  marginBottom: "10px",
+  display: "flex",
+  alignItems: "center",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px"
+};
+
+const adviceText = {
+  fontSize: "14.5px",
+  color: "#166534",
+  margin: 0,
+  lineHeight: "1.6",
+  fontWeight: "500",
+  fontStyle: "italic"
+};
 
 // --- STYLES ---
 const containerStyle = {

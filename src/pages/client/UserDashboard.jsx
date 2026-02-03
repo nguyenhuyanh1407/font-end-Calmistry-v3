@@ -4,6 +4,7 @@ import '../../styles/UserDashboard.css';
 // Đảm bảo bạn đã cài: npm install bootstrap-icons hoặc thêm CDN vào index.html
 import { useState, useEffect } from 'react';
 import fuiedsService from '../../services/fuiedsService';
+import userService from '../../services/userService';
 import { toast } from 'react-toastify';
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -28,28 +29,54 @@ const UserDashboard = () => {
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
     address: "Hà Nội, Việt Nam",
     bio: "Mọi sự thay đổi lớn đều bắt đầu từ những bước chân nhỏ bé nhất.",
-    tier: "Gold" // Có thể là: "Bronze", "Silver", "Gold"
+    tier: "Gold",
+    currentStreak: 0,
+    totalPoints: 0,
+    email: ""
   });
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [tempProfile, setTempProfile] = useState({ ...userProfile });
 
-  // Fetch FUIEDS score on mount
+  // Fetch data on mount
   useEffect(() => {
-    const fetchFuiedsScore = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const response = await fuiedsService.getTodayScore();
-        if (response.code === 1000) {
-          setFuiedsScore(response.result);
+        // Fetch FUIEDS
+        const fuiedsRes = await fuiedsService.getTodayScore();
+        if (fuiedsRes.code === 1000) {
+          setFuiedsScore(fuiedsRes.result);
         }
       } catch (error) {
         console.log('No FUIEDS score today');
       } finally {
         setIsLoadingFuieds(false);
       }
+
+      try {
+        // Fetch User Info
+        const userInfo = await userService.getMyInfo();
+        if (userInfo) {
+          const points = userInfo.fuedScore || 0;
+          let calculatedTier = "Bronze";
+          if (points >= 300) calculatedTier = "Gold";
+          else if (points >= 100) calculatedTier = "Silver";
+
+          setUserProfile(prev => ({
+            ...prev,
+            name: userInfo.fullName || userInfo.username,
+            email: userInfo.email,
+            currentStreak: userInfo.currentStreak || 0,
+            totalPoints: points,
+            tier: calculatedTier
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
     };
 
-    fetchFuiedsScore();
+    fetchDashboardData();
   }, []);
 
   // Hàm xác định Icon và Màu sắc dựa trên hạng thành viên
@@ -333,7 +360,7 @@ const UserDashboard = () => {
                     <i className="bi bi-lightning-charge-fill fs-3 text-warning"></i>
                     <i className="bi bi-three-dots"></i>
                   </div>
-                  <h2 className="fw-bold mb-0">12</h2>
+                  <h2 className="fw-bold mb-0">{userProfile.currentStreak || 0}</h2>
                   <p className="small opacity-75">Ngày duy trì liên tiếp (Streak)</p>
                   <div className="mt-4 p-2 rounded-4 border border-white-50 text-center small">
                     <i className="bi bi-trophy me-2"></i> Nhận huy hiệu mới

@@ -1,6 +1,7 @@
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
+import api from './api';
 
 const WS_URL = 'http://localhost:8080/calmistry/ws';
 
@@ -9,7 +10,7 @@ class ChatService {
         this.stompClient = null;
     }
 
-    connect(onMessageReceived, onConnectedCallback, onErrorCallback) {
+    connect(onConnectedCallback, onErrorCallback) {
         // Prevent duplicate connections
         if (this.stompClient && this.stompClient.connected) {
             console.log('Already connected to chat');
@@ -19,26 +20,31 @@ class ChatService {
 
         const socket = new SockJS(WS_URL);
         this.stompClient = Stomp.over(socket);
-
-        // Disable debug logs for cleaner console
         this.stompClient.debug = () => { };
 
         this.stompClient.connect({},
             () => {
-                // Subscribe to Public Topic
-                this.stompClient.subscribe('/topic/public', onMessageReceived);
-
-                // Add user to chat (optional, triggers "join" message)
-                // this.stompClient.send("/app/chat.addUser", {}, JSON.stringify({ sender: username, type: 'JOIN' }));
-
                 if (onConnectedCallback) onConnectedCallback();
             },
             (error) => {
-                console.error('Could not connect to WebSocket server. Please refresh this page to try again!', error);
+                console.error('WebSocket connection error:', error);
                 if (onErrorCallback) onErrorCallback(error);
                 toast.error("Lost connection to chat server.");
             }
         );
+    }
+
+    subscribeToRoom(roomId, onMessageReceived) {
+        if (this.stompClient && this.stompClient.connected) {
+            return this.stompClient.subscribe(`/topic/room.${roomId}`, onMessageReceived);
+        }
+        return null;
+    }
+
+    unsubscribe(subscription) {
+        if (subscription) {
+            subscription.unsubscribe();
+        }
     }
 
     disconnect() {
@@ -54,6 +60,10 @@ class ChatService {
         } else {
             toast.error("Not connected to chat.");
         }
+    }
+
+    async getRooms() {
+        return api.get('/chat/rooms');
     }
 }
 

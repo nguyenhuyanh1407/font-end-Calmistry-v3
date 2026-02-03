@@ -16,9 +16,15 @@ export default function SleepManagement() {
 
   // Question ID to question code mapping
   const QUESTION_CODE_MAP = {
-    1: "Q1_SLEEP_LATENCY",
-    2: "Q2_SLEEP_DURATION",
-    3: "Q3_WAKE_FREQUENCY"
+    1: "Q1_DURATION",
+    2: "Q2_LATENCY",
+    3: "Q3_WAKE_FREQ",
+    4: "Q4_QUALITY",
+    5: "Q5_DAYTIME",
+    6: "Q6_MEDS",
+    7: "Q7_ENV",
+    8: "Q8_THOUGHTS",
+    9: "Q9_MORNING"
   };
 
   const handleAnswer = (qId, point) => {

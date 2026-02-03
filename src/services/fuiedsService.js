@@ -6,7 +6,7 @@ const fuiedsService = {
      */
     submitResponse: async (answers) => {
         const response = await api.post('/fuieds/submit', answers);
-        return response.data;
+        return response;
     },
 
     /**
@@ -14,7 +14,7 @@ const fuiedsService = {
      */
     getTodayScore: async () => {
         const response = await api.get('/fuieds/today');
-        return response.data;
+        return response;
     },
 
     /**
@@ -23,7 +23,7 @@ const fuiedsService = {
      */
     getHistory: async (days = 7) => {
         const response = await api.get(`/fuieds/history?days=${days}`);
-        return response.data;
+        return response;
     }
 };
 

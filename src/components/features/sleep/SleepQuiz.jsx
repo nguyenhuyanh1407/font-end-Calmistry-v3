@@ -4,32 +4,101 @@ import { motion, AnimatePresence } from "framer-motion";
 const QUESTIONS = [
   {
     id: 1,
-    text: "Bạn mất bao lâu để vào giấc?",
-    icon: "bi-clock-history",
+    text: "Trong 7 ngày gần nhất, bạn thường ngủ được bao nhiêu giờ mỗi đêm?",
+    icon: "bi-moon-stars",
     options: [
-      { label: "Dưới 15 phút", point: 30 },
-      { label: "15 – 30 phút", point: 20 },
-      { label: "Trên 30 phút", point: 10 }
+      { label: "≥ 8 giờ", point: 10 },
+      { label: "7–8 giờ", point: 7 },
+      { label: "6–7 giờ", point: 4 },
+      { label: "< 6 giờ", point: 1 }
     ]
   },
   {
     id: 2,
-    text: "Tổng thời gian ngủ của bạn?",
-    icon: "bi-moon-stars",
+    text: "Bạn mất bao lâu để đi vào giấc ngủ sau khi lên giường?",
+    icon: "bi-clock-history",
     options: [
-      { label: "7 – 8 tiếng", point: 40 },
-      { label: "5 – 6 tiếng", point: 25 },
-      { label: "Dưới 5 tiếng", point: 10 }
+      { label: "< 15 phút", point: 10 },
+      { label: "15 - 30 phút", point: 7 },
+      { label: "30 - 60 phút", point: 4 },
+      { label: "> 60 phút", point: 1 }
     ]
   },
   {
     id: 3,
-    text: "Bạn có thức giấc giữa đêm không?",
-    icon: "bi-bell-slash",
+    text: "Bạn có thức dậy giữa đêm hoặc dậy sớm hơn dự định không?",
+    icon: "bi-bell",
     options: [
-      { label: "Không, tôi ngủ một mạch", point: 30 },
-      { label: "1 – 2 lần", point: 20 },
-      { label: "Nhiều lần", point: 10 }
+      { label: "Hiếm khi / không", point: 10 },
+      { label: "1 - 2 lần/tuần", point: 7 },
+      { label: "3 - 4 lần/tuần", point: 4 },
+      { label: "Gần như mỗi đêm", point: 1 }
+    ]
+  },
+  {
+    id: 4,
+    text: "Bạn tự đánh giá chất lượng giấc ngủ của mình là:",
+    icon: "bi-star",
+    options: [
+      { label: "Rất tốt", point: 10 },
+      { label: "Khá tốt", point: 7 },
+      { label: "Khá tệ", point: 4 },
+      { label: "Rất tệ", point: 1 }
+    ]
+  },
+  {
+    id: 5,
+    text: "Ban ngày bạn có gặp khó khăn trong học tập, làm việc hoặc sinh hoạt do buồn ngủ không?",
+    icon: "bi-brightness-high",
+    options: [
+      { label: "Không", point: 10 },
+      { label: "Hơi ảnh hưởng", point: 7 },
+      { label: "Ảnh hưởng rõ", point: 4 },
+      { label: "Ảnh hưởng nghiêm trọng", point: 1 }
+    ]
+  },
+  {
+    id: 6,
+    text: "Trong tháng vừa rồi, bạn có sử dụng thuốc để dễ ngủ hơn không?",
+    icon: "bi-capsule",
+    options: [
+      { label: "Không", point: 10 },
+      { label: "< 1 lần/tuần", point: 7 },
+      { label: "1–2 lần/tuần", point: 4 },
+      { label: "≥ 3 lần/tuần", point: 1 }
+    ]
+  },
+  {
+    id: 7,
+    text: "Môi trường ngủ của bạn (ánh sáng - tiếng ồn - nhiệt độ):",
+    icon: "bi-house-heart",
+    options: [
+      { label: "Rất phù hợp", point: 10 },
+      { label: "Chấp nhận được", point: 7 },
+      { label: "Thường xuyên gây khó ngủ", point: 4 },
+      { label: "Rất khó chịu, hay làm tỉnh giấc", point: 1 }
+    ]
+  },
+  {
+    id: 8,
+    text: "Khi nằm trên giường, đầu bạn thường đang...",
+    icon: "bi-chat-dots",
+    options: [
+      { label: "Đầu óc nhẹ nhõm, chỉ chờ cơn buồn ngủ", point: 10 },
+      { label: "Nghĩ vu vơ vài chuyện trong ngày", point: 7 },
+      { label: "Nghĩ đi nghĩ lại chuyện đã qua/việc ngày mai", point: 4 },
+      { label: "Overthinking, trằn trọc khó ngủ", point: 1 }
+    ]
+  },
+  {
+    id: 9,
+    text: "Nếu đêm đó ngủ kém, sáng hôm sau bạn thường:",
+    icon: "bi-sunrise",
+    options: [
+      { label: "Vẫn ổn, chỉ hơi buồn ngủ", point: 10 },
+      { label: "Cần cafein mới tỉnh táo", point: 7 },
+      { label: "Dễ cáu, khó tập trung", point: 4 },
+      { label: "Mọi thứ đều nặng nề hơn bình thường", point: 1 }
     ]
   }
 ];

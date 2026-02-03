@@ -7,6 +7,15 @@ export default function SleepDashboard({ isLoggedIn = true }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [historyData, setHistoryData] = useState(null);
+  const [completedChallenges, setCompletedChallenges] = useState([]);
+
+  const toggleChallenge = (id) => {
+    if (completedChallenges.includes(id)) {
+      setCompletedChallenges(completedChallenges.filter(c => c !== id));
+    } else {
+      setCompletedChallenges([...completedChallenges, id]);
+    }
+  };
 
   // Màu sắc thương hiệu
   const brandGreen = "#3a5a40";
@@ -174,38 +183,132 @@ export default function SleepDashboard({ isLoggedIn = true }) {
 
           {/* 3. INSIGHT CARD (Thông tin phân tích nhanh) */}
           <div style={insightCard}>
-            <div style={iconBox}><i className="bi bi-lightbulb"></i></div>
+            <div style={iconBox}><i className="bi bi-moon-stars-fill"></i></div>
             <div style={{ flex: 1 }}>
-              <h6 style={insightTitle}>Phát hiện xu hướng</h6>
+              <h6 style={insightTitle}>Tình trạng gần nhất</h6>
               <p style={insightDesc}>
-                Bạn thường ngủ tốt hơn <b>15%</b> vào những ngày có tập thể dục trên 30 phút.
+                {historyData.sessions[0]?.categoryTitle || "Vừa cập nhật"}
               </p>
             </div>
+            <div style={statusDot(historyData.sessions[0]?.status)}></div>
           </div>
 
-          {/* 4. RECOMMENDATION LIST (Gợi ý hành động) */}
-          <h6 style={sectionTitle}>Lời khuyên cho bạn</h6>
+          {/* 4. INTERACTIVE CHALLENGES (Thử thách giấc ngủ) */}
+          <h6 style={sectionTitle}>Thử thách phục hồi</h6>
+          <p style={{ fontSize: '13px', color: '#718096', marginBottom: '15px' }}>
+            Hoàn thành các hành động nhỏ này để cải thiện chất lượng nghỉ ngơi tối nay nhé!
+          </p>
+
           <div style={recommendationRow}>
-            <div style={recItem}>
-              <i className="bi bi-cup-hot mb-2" style={{ color: '#f59e0b' }}></i>
-              <span>Bớt Caffeine</span>
-            </div>
-            <div style={recItem}>
-              <i className="bi bi-phone-vibrate mb-2" style={{ color: brandGreen }}></i>
-              <span>Tắt máy sớm</span>
-            </div>
-            <div style={recItem}>
-              <i className="bi bi-wind mb-2" style={{ color: '#4a90e2' }}></i>
-              <span>Thở đều</span>
-            </div>
+            {[
+              { id: 'caffeine', icon: 'bi-cup-hot', label: 'Bớt Caffeine', color: '#f59e0b' },
+              { id: 'phone', icon: 'bi-phone-vibrate', label: 'Tắt máy sớm', color: brandGreen },
+              { id: 'breath', icon: 'bi-wind', label: 'Thở đều', color: '#4a90e2' }
+            ].map(challenge => {
+              const isDone = completedChallenges.includes(challenge.id);
+              return (
+                <motion.div
+                  key={challenge.id}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => toggleChallenge(challenge.id)}
+                  style={{
+                    ...recItem,
+                    border: isDone ? `2px solid ${lightGreen}` : '2px solid transparent',
+                    backgroundColor: isDone ? '#f0fdf4' : '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <i className={`${challenge.icon} mb-2`} style={{
+                    color: isDone ? lightGreen : challenge.color,
+                    fontSize: '20px'
+                  }}></i>
+                  <span style={{ color: isDone ? brandGreen : '#4a5568' }}>{challenge.label}</span>
+                  {isDone && <i className="bi bi-check-circle-fill" style={{
+                    position: 'absolute', top: '5px', right: '5px', fontSize: '12px', color: lightGreen
+                  }}></i>}
+                </motion.div>
+              );
+            })}
           </div>
+
+          <AnimatePresence>
+            {completedChallenges.length === 3 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                style={successMessageCard}
+              >
+                <div style={successHeader}>
+                  <i className="bi bi-stars me-2"></i> Thật tuyệt vời!
+                </div>
+                <p style={successBody}>
+                  Bạn đã rất nỗ lực để chăm sóc bản thân mình hôm nay. Những bước nhỏ này sẽ tạo nên sự thay đổi lớn cho tinh thần của bạn đấy. 🌿
+                </p>
+                <div style={chatBubble}>
+                  Hãy chuyển sang trang <b>Dashboard</b> để chữa lành chi tiết hơn cùng Calmistry nhé!
+                </div>
+                <button
+                  onClick={() => window.location.href = '/userDashboard'}
+                  style={goToDashboardBtn}
+                >
+                  Tới Dashboard Chữa Lành <i className="bi bi-arrow-right-short ms-1"></i>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
     </div>
   );
 }
 
-// --- HỆ THỐNG STYLES (Đảm bảo copy đầy đủ phần này) ---
+// Thêm các style mới cho phần Thử thách và Thông báo thành công
+const successMessageCard = {
+  marginTop: '25px',
+  padding: '24px',
+  background: 'linear-gradient(135deg, #3a5a40 0%, #588157 100%)',
+  borderRadius: '24px',
+  color: '#fff',
+  textAlign: 'center',
+  boxShadow: '0 15px 35px rgba(58, 90, 64, 0.25)'
+};
+
+const successHeader = { fontSize: '18px', fontWeight: '800', marginBottom: '10px' };
+const successBody = { fontSize: '14px', opacity: 0.9, lineHeight: '1.6', marginBottom: '15px' };
+
+const chatBubble = {
+  backgroundColor: 'rgba(255,255,255,0.15)',
+  padding: '12px 16px',
+  borderRadius: '16px 16px 16px 4px',
+  fontSize: '13px',
+  textAlign: 'left',
+  marginBottom: '20px',
+  border: '1px solid rgba(255,255,255,0.2)'
+};
+
+const goToDashboardBtn = {
+  width: '100%',
+  padding: '14px',
+  backgroundColor: '#fff',
+  color: '#3a5a40',
+  border: 'none',
+  borderRadius: '14px',
+  fontWeight: '700',
+  fontSize: '14px',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease'
+};
+
+// --- HỆ THỐNG STYLES ---
+const statusDot = (status) => ({
+  width: "12px",
+  height: "12px",
+  borderRadius: "50%",
+  backgroundColor: status === "EXCELLENT" ? "#8ec339" : status === "GOOD" ? "#f59e0b" : "#ef4444",
+  border: "2px solid rgba(255,255,255,0.3)"
+});
+
 const dashboardWrapper = { display: "flex", flexDirection: "column", gap: "20px" };
 
 const segmentedControl = {
