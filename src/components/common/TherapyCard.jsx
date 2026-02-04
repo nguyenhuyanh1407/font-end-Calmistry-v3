@@ -1,14 +1,14 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowRight } from 'react-icons/fa'; // Import thêm icon này
-const TherapyCard = ({ 
-  item, 
-  index, 
-  expandedIndex, 
-  hoveredIndex, 
-  onToggle, 
-  onMouseEnter, 
-  onMouseLeave 
+const TherapyCard = ({
+  item,
+  index,
+  expandedIndex,
+  hoveredIndex,
+  onToggle,
+  onMouseEnter,
+  onMouseLeave
 }) => {
   const isCardActive = expandedIndex === index || hoveredIndex === index;
 
@@ -35,13 +35,13 @@ const TherapyCard = ({
         }}
       >
         <div className="p-4">
-          <h2 className="fw-bold fs-2 mb-1">{item.title}</h2>
+          <h2 className="fw-bold fs-2 mb-1" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>{item.title}</h2>
           <div className="d-flex align-items-center opacity-90 mt-2">
-            <span className="fs-5">{item.desc}</span>
+            <span className="fs-6" style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '1.725rem' }}>{item.desc}</span>
             {/* Thêm wrapper vòng tròn ở đây */}
-             <span className={`arrow-circle-wrapper ${expandedIndex === index ? 'active' : ''}`}>
-               <FaArrowRight className={`transition-arrow ${expandedIndex === index ? 'rotate-90' : ''}`} />
-             </span>
+            <span className={`arrow-circle-wrapper ${expandedIndex === index ? 'active' : ''}`}>
+              <FaArrowRight className={`transition-arrow ${expandedIndex === index ? 'rotate-90' : ''}`} />
+            </span>
           </div>
         </div>
 
@@ -80,7 +80,7 @@ const TherapyCard = ({
                 transitionDelay: `${sIdx * 0.1}s`
               }}
             >
-              <span className="fs-5 fw-medium">{sub.title}</span>
+              <span className="fs-6 fw-medium" style={{ fontFamily: "'Be Vietnam Pro', sans-serif", fontSize: '1.725rem' }}>{sub.title}</span>
               <span className="fs-4">{sub.icon}</span>
             </div>
           ))}

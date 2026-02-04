@@ -171,7 +171,7 @@ const Home = () => {
       subOptions: [
         { title: "Đặt lịch tham gia workshop", icon: <People />, action: () => navigate("/workshops") },
         { title: "Nhóm chat chữa lành", icon: <ChatDots />, action: () => navigate("/group-chat") },
-        { title: "Chia sẽ câu chuyện của bạn", icon: <Stars />, action: () => navigate("/shareStories") }
+        { title: "Chia sẻ câu chuyện của bạn", icon: <Stars />, action: () => navigate("/shareStories") }
       ]
     },
     {
@@ -284,7 +284,7 @@ const Home = () => {
                 setRunOnboarding(false);
                 navigate('/fuieds-quiz');
               }}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', fontFamily: "'Be Vietnam Pro', sans-serif", letterSpacing: '0.5px' }}
             >
 
               Hãy để chúng tôi giúp bạn tìm ra phương pháp chữa lành phù hợp với bản thân mình!
@@ -342,26 +342,26 @@ const Home = () => {
                   <div className="pe-lg-5">
                     {/* Badge nhỏ tạo điểm nhấn chuyên nghiệp */}
                     <span className="text-uppercase fw-bold mb-3 d-inline-block"
-                      style={{ color: '#74c655', letterSpacing: '2px', fontSize: '0.85rem' }}>
+                      style={{ color: '#74c655', letterSpacing: '2px', fontSize: '0.85rem', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
                       Đội ngũ chuyên gia
                     </span>
 
-                    <h2 className="display-4 mb-4" style={{ color: '#324d3e', lineHeight: '1.2', fontWeight: '600' }}>
+                    <h2 className="display-4 mb-4" style={{ color: '#324d3e', lineHeight: '1.2', fontWeight: '600', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
                       Chuyên gia trị liệu <br /> bạn có thể tin tưởng.
                     </h2>
 
                     {/* Chia nhỏ nội dung bằng list để dễ đọc hơn thay vì một đoạn văn dài */}
-                    <p className="fs-5 mb-4" style={{ color: '#4a5e54', lineHeight: '1.7', textAlign: 'justify' }}>
+                    <p className="fs-5 mb-4" style={{ color: '#4a5e54', lineHeight: '1.7', textAlign: 'justify', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
                       Kết nối với mạng lưới nhà tư vấn tâm lý có trình độ, giúp bạn vượt qua trầm cảm, lo âu và tìm lại sự cân bằng trong cuộc sống.
                     </p>
 
-                    <ul className="list-unstyled mb-5" style={{ color: '#4a5e54' }}>
-                      <li className="mb-2"><i className="bi bi-check2-circle me-2 text-success"></i> Chuyên gia có bằng cấp quốc tế</li>
-                      <li className="mb-2"><i className="bi bi-check2-circle me-2 text-success"></i> Bảo mật thông tin tuyệt đối</li>
-                      <li className="mb-2"><i className="bi bi-check2-circle me-2 text-success"></i> Thời gian linh hoạt theo ý bạn</li>
+                    <ul className="list-unstyled mb-5" style={{ color: '#4a5e54', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+                      <li className="mb-2" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}><i className="bi bi-check2-circle me-2 text-success"></i> Chuyên gia có bằng cấp quốc tế</li>
+                      <li className="mb-2" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}><i className="bi bi-check2-circle me-2 text-success"></i> Bảo mật thông tin tuyệt đối</li>
+                      <li className="mb-2" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}><i className="bi bi-check2-circle me-2 text-success"></i> Thời gian linh hoạt theo ý bạn</li>
                     </ul>
 
-                    <button className="btn-get-matched-refined">
+                    <button className="btn-get-matched-refined" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
                       Tìm người trị liệu phù hợp
                     </button>
                   </div>
@@ -428,7 +428,7 @@ const Home = () => {
                 <div className="step-collage collage-1">
                   <div className="shape-semi-orange-top"></div>
                   <div className="img-box woman-box shadow-sm"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300" alt="User" /></div>
-                  <div className="img-box doctor-box shadow-sm"><img src="https://images.unsplash.com/photo-1559839734-2b71f1536783?w=300" alt="Doctor" /></div>
+                  <div className="img-box doctor-box shadow-sm"><img src="https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=300" alt="Doctor" /></div>
                   <div className="illustration-puzzle-box shadow-sm">🧩</div>
                   <div className="shape-dot-green"></div>
                 </div>
@@ -436,7 +436,7 @@ const Home = () => {
               <div className="col-lg-6 ps-lg-5">
                 <FadeInUp>
                   <h3 className="h3 mb-3" style={{ color: '#324d3e' }}>Tìm kiếm các hoạt động chữa lành phù hợp với bạn.</h3>
-                  <p className="text-muted fs-5">Trả lời một vài câu hỏi để xác định điểm tâm lí của bạn trong ngày.</p>
+                  <p className="text-muted fs-5" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Trả lời một vài câu hỏi để xác định điểm tâm lí của bạn trong ngày.</p>
                 </FadeInUp>
               </div>
             </div>
@@ -473,7 +473,7 @@ const Home = () => {
               <div className="col-lg-6 ps-lg-5">
                 <FadeInUp>
                   <h3 className="h3 mb-3" style={{ color: '#324d3e' }}>Tính điểm chất lượng giấc ngủ của bạn theo chỉ số PSQI</h3>
-                  <p className="text-muted fs-5">Việc quản lí chất lượng giấc ngủ ảnh hưởng lớn tới sức khỏe tâm lí của bạn. Việc này sẽ giúp việc xác định điểm tâm lí chuẩn xác hơn.</p>
+                  <p className="text-muted fs-5" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Việc quản lí chất lượng giấc ngủ ảnh hưởng lớn tới sức khỏe tâm lí của bạn. Việc này sẽ giúp việc xác định điểm tâm lí chuẩn xác hơn.</p>
                 </FadeInUp>
               </div>
             </div>
@@ -506,7 +506,7 @@ const Home = () => {
                     <div className="chat-demo"><span>Hi!</span><span className="alt">I'm here.</span></div>
                   </div>
                   <div className="phone-frame phone-2 shadow-lg">
-                    <img src="https://images.unsplash.com/photo-1580281658626-ee379f3cce94?w=200" alt="Video" />
+                    <img src="https://images.pexels.com/photos/4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Video" />
                   </div>
                   <div className="shape-rect-orange"></div>
                 </div>
@@ -514,7 +514,7 @@ const Home = () => {
               <div className="col-lg-6 ps-lg-5">
                 <FadeInUp>
                   <h3 className="h3 mb-3" style={{ color: '#324d3e' }}>Giao tiếp và thực hiện các hoạt động chữa lành</h3>
-                  <p className="text-muted fs-5">Nhắn tin tới chuyên gia tâm lí bất cứ lúc nào, chia sẻ câu chuyện của riêng bạn, viết nhật kí và nhận những bài biết hay, chất lượng từ các nguồn uy tín.</p>
+                  <p className="text-muted fs-5" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Nhắn tin tới chuyên gia tâm lí bất cứ lúc nào, chia sẻ câu chuyện của riêng bạn, viết nhật kí và nhận những bài biết hay, chất lượng từ các nguồn uy tín.</p>
                 </FadeInUp>
               </div>
             </div>
@@ -534,7 +534,7 @@ const Home = () => {
             <div className="text-center mb-5">
               <FadeInUp>
                 <h2 className="display-5 fw-normal mb-3" style={{ color: '#324d3e' }}>Chọn hành trình chữa lành của riêng bạn</h2>
-                <p className="text-muted fs-5">Giá cả minh bạch vì sức khỏe tinh thần của bạn</p>
+                <p className="text-muted fs-5" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Giá cả minh bạch vì sức khỏe tinh thần của bạn</p>
               </FadeInUp>
             </div>
 
@@ -547,15 +547,15 @@ const Home = () => {
                     <h3 className="h2 fw-bold mb-2">Gói Bạc</h3>
                     <div className="price-tag mb-4">
                       <span className="display-4 fw-bold">Miễn phí</span>
-                      <span className="text-muted"> / 7 ngày dùng thử</span>
+                      <span className="text-muted"><br /> <br /> / 7 ngày dùng thử</span> <br /><br />
                     </div>
                     <ul className="list-unstyled mb-5">
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Daily Mood Tracking</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Basic AI Assistant access</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Read all Healing Articles</li>
-                      <li className="text-muted opacity-50 d-flex align-items-center"><Check2Circle className="me-2" /> 1-on-1 Private Session</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Theo dõi tâm trạng hàng ngày</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Truy cập AI trợ lý cơ bản</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Đọc tất cả bài viết chữa lành</li>
+                      <li className="text-muted opacity-50 d-flex align-items-center"><Check2Circle className="me-2" /> Buổi tư vấn riêng 1-1</li>
                     </ul>
-                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Bắt đầu hành trình nào!</button>
+                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Bắt đầu hành trình nào!</button>
                   </div>
                 </FadeInUp>
               </div>
@@ -567,16 +567,16 @@ const Home = () => {
                     <div className="popular-ribbon">Khuyến nghị</div>
                     <h3 className="h2 fw-bold mb-2">Gói Vàng</h3>
                     <div className="price-tag mb-4">
-                      <span className="display-4 fw-bold">$49</span>
-                      <span className="opacity-75"> / month</span>
+                      <span className="display-4 fw-bold">49.000 VNĐ</span>
+                      <span className="opacity-75"> / tháng</span>
                     </div>
                     <ul className="list-unstyled mb-5">
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Everything in Silver</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> 2 Private Sessions / month</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Group Healing Workshops</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Priority Chat Support</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Tất cả tính năng gói Bạc</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> 2 buổi tư vấn riêng / tháng</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Workshop chữa lành nhóm</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Hỗ trợ chat ưu tiên</li>
                     </ul>
-                    <button className="btn btn-light w-100 rounded-pill py-3 fw-bold" style={{ color: brandGreen }}>Bắt đầu ngay</button>
+                    <button className="btn btn-light w-100 rounded-pill py-3 fw-bold" style={{ color: brandGreen, fontFamily: "'Be Vietnam Pro', sans-serif" }}>Bắt đầu ngay</button>
                   </div>
                 </FadeInUp>
               </div>
@@ -587,16 +587,16 @@ const Home = () => {
                   <div className="pricing-card diamond-plan h-100 p-5 rounded-5 bg-white shadow-sm border-0 position-relative">
                     <h3 className="h2 fw-bold mb-2">Gói Kim Cương</h3>
                     <div className="price-tag mb-4">
-                      <span className="display-4 fw-bold">$99</span>
-                      <span className="text-muted"> / month</span>
+                      <span className="display-4 fw-bold">99.000 VNĐ</span>
+                      <span className="text-muted"> / tháng</span>
                     </div>
                     <ul className="list-unstyled mb-5">
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Unlimited Private Sessions</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Personal Care Manager</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> 24/7 Crisis Support</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Family Account (Up to 3)</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Buổi tư vấn riêng không giới hạn</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Quản lý chăm sóc cá nhân</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Hỗ trợ khẩn cấp 24/7</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Tài khoản gia đình (Tối đa 3 người)</li>
                     </ul>
-                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold">Nâng cấp lên gói kim cương</button>
+                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Nâng cấp lên gói kim cương</button>
                   </div>
                 </FadeInUp>
               </div>

@@ -481,7 +481,7 @@ const MainLayout = () => {
               </div>
               <div style={{ fontSize: '14px' }} className="opacity-75">
                 <p className="mb-2"><i className="bi bi-envelope-fill me-2"></i> hello@calmistry.vn</p>
-                <p><i className="bi bi-geo-alt-fill me-2"></i> Quận 1, TP. Hồ Chí Minh</p>
+                <p><i className="bi bi-geo-alt-fill me-2"></i> Đống Đa, Hà Nội</p>
               </div>
             </div>
           </div>

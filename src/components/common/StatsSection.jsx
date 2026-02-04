@@ -17,7 +17,7 @@ const StatsSection = ({ stats, statsBg, brandGreen }) => {
                     <line x1="50" y1="20" x2="50" y2="0" stroke="#397a4a" strokeWidth="3" />
                   </svg>
                 </div>
-                <h2 className="display-4 mb-4" style={{ fontWeight: '300', lineHeight: '1.1', letterSpacing: '-1px' }}>
+                <h2 className="display-4 mb-4" style={{ fontWeight: '300', lineHeight: '1.1', letterSpacing: '-1px', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
                   Chăm sóc sức khỏe tinh thần <br /> Mọi lúc, mọi nơi. <br />
                   <span style={{ color: '#397a4a', fontWeight: '400' }}>100% online.</span>
                 </h2>
@@ -29,10 +29,10 @@ const StatsSection = ({ stats, statsBg, brandGreen }) => {
             <div className="stats-list">
               {stats.map((stat, i) => (
                 <div key={i} className="stat-item mb-4">
-                  <h3 className="display-5 fw-bold mb-1" style={{ color: '#397a4a', letterSpacing: '-1px' }}>
+                  <h3 className="display-5 fw-bold mb-1" style={{ color: '#397a4a', letterSpacing: '-1px', fontFamily: "'Be Vietnam Pro', sans-serif" }}>
                     <CountingNumber endValue={stat.val} />
                   </h3>
-                  <p className="fs-5 mb-3 opacity-75">{stat.label}</p>
+                  <p className="fs-5 mb-3 opacity-75" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>{stat.label}</p>
                   {i < stats.length - 1 && <hr style={{ borderTop: '1px solid #324d3e', opacity: '0.15', margin: '0' }} />}
                 </div>
               ))}
