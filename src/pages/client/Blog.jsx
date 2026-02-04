@@ -186,7 +186,7 @@ const Blog = () => {
               >
                 Calmistry Magazine <span className="text-muted fs-4 fw-normal">/ Blog</span>
               </motion.h1>
-              <p className="lead text-muted">Những góc nhìn mới về tâm lý và cuộc sống cân bằng.</p>
+              <p className="lead text-muted" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Những góc nhìn mới về tâm lý và cuộc sống cân bằng.</p>
             </div>
             <div className="col-lg-5">
               <div className="d-flex gap-2 justify-content-lg-end">

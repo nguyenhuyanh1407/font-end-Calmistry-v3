@@ -73,8 +73,13 @@ const Home = () => {
         }
       }
 
-      const hasSeen = localStorage.getItem('HAS_SEEN_HOME_ONBOARDING');
-      if (!hasSeen) {
+      // Check navigation state from Onboarding page
+      const shouldShowOnboarding = location.state?.showOnboarding;
+
+      if (shouldShowOnboarding) {
+        // Clear state to prevent re-trigger on refresh (though location.state usually persists, let's be safe)
+        window.history.replaceState({}, document.title);
+
         const timer = setTimeout(() => {
           setRunOnboarding(true);
         }, 500);

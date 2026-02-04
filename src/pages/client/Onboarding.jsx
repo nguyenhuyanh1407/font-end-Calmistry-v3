@@ -65,7 +65,7 @@ const Onboarding = () => {
         try {
             await userService.completeOnboarding(formData);
             toast.success("Bắt đầu hành trình cùng Calmistry thôi! ✨");
-            navigate('/');
+            navigate('/', { state: { showOnboarding: true } });
         } catch (error) {
             console.error(error);
             toast.error("Có lỗi xảy ra, thử lại sau nhé!");
