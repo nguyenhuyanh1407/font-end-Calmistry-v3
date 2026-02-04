@@ -64,6 +64,19 @@ const Onboarding = () => {
         setLoading(true);
         try {
             await userService.completeOnboarding(formData);
+
+            // Fetch user info to scope the flag
+            try {
+                const user = await userService.getMyInfo();
+                if (user && user.email) {
+                    localStorage.setItem('ONBOARDING_COMPLETED_' + user.email, 'true');
+                }
+            } catch (e) {
+                console.warn('Could not fetch user info for local flag', e);
+                // Fallback global flag if fetch fails
+                localStorage.setItem('JUST_FINISHED_ONBOARDING', 'true');
+            }
+
             toast.success("Bắt đầu hành trình cùng Calmistry thôi! ✨");
             navigate('/', { state: { showOnboarding: true } });
         } catch (error) {
@@ -73,6 +86,7 @@ const Onboarding = () => {
             setLoading(false);
         }
     };
+
 
     const stepVariants = {
         hidden: { opacity: 0, x: 50 },
@@ -301,6 +315,7 @@ const Onboarding = () => {
             `}</style>
         </div>
     );
-};
 
+
+};
 export default Onboarding;

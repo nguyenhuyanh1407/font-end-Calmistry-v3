@@ -71,8 +71,20 @@ const AuthPages = () => {
           await queryClient.invalidateQueries(['me']);
 
           if (result.isOnboarded === false || result.isOnboarded === null || result.isOnboarded === undefined) {
-            console.log('🚀 [Login] User not onboarded, redirecting to /onboarding');
-            navigate('/onboarding', { replace: true });
+            // Check both scoped and global flags
+            const scopedFlag = localStorage.getItem('ONBOARDING_COMPLETED_' + formData.email);
+            const globalFlag = localStorage.getItem('JUST_FINISHED_ONBOARDING');
+
+            if (scopedFlag || globalFlag) {
+              console.log('⚠️ [Login] Backend says not onboarded, but local flag says success. Redirecting to Home.');
+              navigate('/', { replace: true });
+
+              // Optional: Clear global flag to avoid pollution, but keep scoped
+              if (globalFlag) localStorage.removeItem('JUST_FINISHED_ONBOARDING');
+            } else {
+              console.log('🚀 [Login] User not onboarded, redirecting to /onboarding');
+              navigate('/onboarding', { replace: true });
+            }
           } else {
             console.log('🏠 [Login] User already onboarded, redirecting to Home');
             navigate('/', { replace: true });
