@@ -470,7 +470,7 @@ const Home = () => {
                 <div className="step-collage collage-2">
                   <div className="shape-half-yellow"></div>
                   <div className="img-box man-tablet-box shadow-sm"><img src="https://images.unsplash.com/photo-1552581234-26160f608093?w=400" alt="Session" /></div>
-                  <div className="laptop-overlay shadow-sm">💻</div>
+                  <div className="laptop-overlay shadow-sm"><i className="bi bi-moon-stars-fill text-primary fs-2"></i></div>
                   <div className="img-box portrait-box shadow-sm"><img src="https://images.unsplash.com/photo-1548142813-c348350df52b?w=200" alt="Therapist" /></div>
                   <div className="shape-square-teal"></div>
                 </div>
@@ -511,7 +511,7 @@ const Home = () => {
                     <div className="chat-demo"><span>Hi!</span><span className="alt">I'm here.</span></div>
                   </div>
                   <div className="phone-frame phone-2 shadow-lg">
-                    <img src="https://images.pexels.com/photos/4226140/pexels-photo-4226140.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Video" />
+                    <img src="https://images.unsplash.com/photo-1590650516494-0c8e4a4dd67e?w=800&auto=format&fit=crop" alt="Video" />
                   </div>
                   <div className="shape-rect-orange"></div>
                 </div>
