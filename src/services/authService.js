@@ -36,6 +36,29 @@ const authService = {
   },
 
   /**
+   * Đăng nhập bằng Google
+   * @param {string} credential - Google ID token (credential) từ Google Sign-In
+   * @returns {Promise<{token: string, authenticated: boolean, isOnboarded: boolean}>}
+   */
+  googleLogin: async (credential) => {
+    try {
+      const response = await api.post('/auth/google', {
+        idToken: credential
+      });
+
+      const { token, authenticated } = response.result;
+
+      if (authenticated && token) {
+        api.setToken(token, true); // Always remember for Google login
+      }
+
+      return response.result;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
    * Đăng ký
    * @param {object} userData
    * @returns {Promise}

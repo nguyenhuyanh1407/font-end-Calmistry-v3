@@ -115,6 +115,53 @@ const UserDashboard = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  // Helper function to generate contextual advice based on score
+  const getScoreContext = (score) => {
+    if (!score) return null;
+    const value = Math.round(score.smoothedScore);
+
+    if (value >= 80) {
+      return {
+        title: "Trạng thái tuyệt vời 🌟",
+        message: "Năng lượng của bạn đang rất rực rỡ! Đây là thời điểm tốt để lan tỏa năng lượng tích cực hoặc bắt đầu một dự án mới.",
+        actionText: "Chia sẻ câu chuyện",
+        actionIcon: "bi-pencil-square",
+        actionPath: "/blog/create",
+        btnColor: "btn-outline-success"
+      };
+    } else if (value >= 60) {
+      return {
+        title: "Tâm trạng khá ổn định 🌿",
+        message: "Bạn đang giữ được nhịp độ tốt. Hãy tiếp tục duy trì thói quen hiện tại để nuôi dưỡng sự tĩnh tại từ bên trong.",
+        actionText: "Nghe nhạc tần số",
+        actionIcon: "bi-headphones",
+        actionPath: "/relaxation",
+        btnColor: "btn-outline-success"
+      };
+    } else if (value >= 40) {
+      return {
+        title: "Năng lượng đang chùng xuống 🔋",
+        message: "Có vẻ bạn đang mang một chút mệt mỏi hoặc lo âu. Hãy tạm gác lại bộn bề và dành vài phút cho bản thân nhé.",
+        actionText: "Vào Hòn đảo Thư giãn",
+        actionIcon: "bi-wind",
+        actionPath: "/relaxation",
+        btnColor: "btn-outline-warning"
+      };
+    } else {
+      return {
+        title: "Cần được ôm ấp ngay lúc này 🫂",
+        message: "Việc bạn cảm thấy chênh vênh lúc này là hoàn toàn bình thường. Thay vì cố phân tích, hãy xả những muộn phiền đó ra ngoài.",
+        actionText: "Sử dụng Máy Hủy Âu Lo",
+        actionIcon: "bi-trash2",
+        actionPath: "/relaxation",
+        btnColor: "btn-outline-danger"
+      };
+    }
+  };
+
+  const scoreContext = getScoreContext(fuiedsScore);
+
   return (
     <div style={{ backgroundColor: bgSoft, minHeight: '100vh', paddingTop: '120px', paddingBottom: '100px', color: brandGreen }}>
       <div className="container">
@@ -304,37 +351,36 @@ const UserDashboard = () => {
                       </div>
                     </div>
                   ) : fuiedsScore ? (
-                    <>
-                      <h5 className="fw-bold mb-2">Chỉ số FUIEDS</h5>
-                      <div className="d-flex align-items-center gap-3 mb-4">
-                        <div
-                          className="display-4 fw-bold"
-                          style={{ color: fuiedsScore.statusColor }}
-                        >
-                          {Math.round(fuiedsScore.smoothedScore)}
-                        </div>
-                        <div>
-                          <div
-                            className="badge rounded-pill px-3 py-2"
-                            style={{
-                              backgroundColor: fuiedsScore.statusColor + '20',
-                              color: fuiedsScore.statusColor
-                            }}
-                          >
-                            {fuiedsScore.status}
-                          </div>
-                          {fuiedsScore.isGoodEnough && (
-                            <div className="small text-success mt-1">
-                              <i className="bi bi-check-circle-fill me-1"></i>
-                              Đạt chuẩn tốt
-                            </div>
-                          )}
+                    <div className="d-flex flex-column h-100">
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="fw-bold mb-0" style={{ color: fuiedsScore.statusColor }}>
+                          {scoreContext.title}
+                        </h5>
+                        <div className="d-flex align-items-baseline gap-2">
+                          <span className="display-4 fw-bold lh-1" style={{ color: fuiedsScore.statusColor }}>
+                            {Math.round(fuiedsScore.smoothedScore)}
+                          </span>
+                          <span className="text-muted small">điểm</span>
                         </div>
                       </div>
-                      <p className="small text-muted mb-0">
-                        Điểm tổng hợp từ 6 thành phần: Cảm xúc, Tự nhận thức, Xã hội, Năng lượng, Động lực, Ổn định.
-                      </p>
-                    </>
+
+                      <div className="p-3 rounded-4 mb-auto" style={{ backgroundColor: fuiedsScore.statusColor + '15', borderLeft: `4px solid ${fuiedsScore.statusColor}` }}>
+                        <p className="mb-0" style={{ fontSize: '0.95rem', color: '#4a5568', lineHeight: '1.5' }}>
+                          "{scoreContext.message}"
+                        </p>
+                      </div>
+
+                      <hr className="my-3 opacity-10" />
+
+                      <button
+                        onClick={() => navigate(scoreContext.actionPath)}
+                        className={`btn ${scoreContext.btnColor} w-100 rounded-pill py-2 fw-medium d-flex align-items-center justify-content-center gap-2`}
+                        style={{ borderWidth: '2px' }}
+                      >
+                        <i className={`bi ${scoreContext.actionIcon}`}></i>
+                        {scoreContext.actionText}
+                      </button>
+                    </div>
                   ) : (
                     <>
                       <h5 className="fw-bold mb-2">Chưa đánh giá hôm nay</h5>
@@ -370,7 +416,11 @@ const UserDashboard = () => {
 
               {/* Exercises Library */}
               <div className="col-12">
-                <div className="p-4 rounded-5 shadow-sm border-0 bg-white d-flex align-items-center justify-content-between card-hover">
+                <div
+                  className="p-4 rounded-5 shadow-sm border-0 bg-white d-flex align-items-center justify-content-between card-hover"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate('/relaxation')}
+                >
                   <div className="d-flex align-items-center">
                     <div className="p-3 rounded-circle me-3" style={{ backgroundColor: '#e8f5e9' }}>
                       <i className="bi bi-collection-play text-success fs-4"></i>

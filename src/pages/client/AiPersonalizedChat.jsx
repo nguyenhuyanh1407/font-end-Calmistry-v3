@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import aiChatService from '../../services/aiChatService';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, User, Bot, Sparkles, ChevronLeft, Heart, Smile, Zap, Coffee, Cloud, Star } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const BackgroundBlobs = () => (
@@ -67,6 +67,9 @@ const AiPersonalizedChat = () => {
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef(null);
     const navigate = useNavigate();
+    const location = useLocation();
+    const initialMessageRef = useRef(location.state?.initialMessage);
+    const hasInitializedRef = useRef(false);
 
     // Design Tokens
     const brandGreen = '#324d3e';
@@ -103,6 +106,17 @@ const AiPersonalizedChat = () => {
             setMessages([{ role: 'ai', text: 'Chào bạn, mình là trợ lý Calmistry. Hôm nay lòng bạn có điều gì muốn sẻ chia cùng mình không? ❤️' }]);
         } finally {
             setLoading(false);
+
+            // Check if we need to auto-send an initial message from Journal
+            if (initialMessageRef.current && !hasInitializedRef.current) {
+                hasInitializedRef.current = true;
+                const msg = initialMessageRef.current;
+                initialMessageRef.current = null;
+                // We use a timeout to let the UI settle before sending
+                setTimeout(() => {
+                    handleSend(msg);
+                }, 500);
+            }
         }
     };
 
