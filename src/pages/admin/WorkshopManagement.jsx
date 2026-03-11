@@ -20,7 +20,8 @@ const WorkshopManagement = () => {
         speakerBio: '',
         maxParticipants: 20,
         imageUrl: '',
-        location: ''
+        location: '',
+        price: 0
     });
 
     const brandGreen = '#324d3e';
@@ -72,7 +73,8 @@ const WorkshopManagement = () => {
             speakerBio: workshop.speakerBio || '',
             maxParticipants: workshop.maxParticipants,
             imageUrl: workshop.imageUrl || '',
-            location: workshop.location || ''
+            location: workshop.location || '',
+            price: workshop.price || 0
         });
         setImagePreview(workshop.imageUrl || '');
         setSelectedImage(null);
@@ -91,7 +93,8 @@ const WorkshopManagement = () => {
             speakerBio: '',
             maxParticipants: 20,
             imageUrl: '',
-            location: ''
+            location: '',
+            price: 0
         });
         setSelectedImage(null);
         setImagePreview('');
@@ -202,15 +205,19 @@ const WorkshopManagement = () => {
                                     <label className="form-label fw-bold">Thời gian kết thúc</label>
                                     <input type="datetime-local" name="endTime" className="form-control rounded-3" value={formData.endTime} onChange={handleInputChange} required />
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-3">
                                     <label className="form-label fw-bold">Số lượng tối đa</label>
                                     <input type="number" name="maxParticipants" className="form-control rounded-3" value={formData.maxParticipants} onChange={handleInputChange} required />
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-3">
+                                    <label className="form-label fw-bold">Giá vé (VNĐ)</label>
+                                    <input type="number" name="price" className="form-control rounded-3" value={formData.price} onChange={handleInputChange} min="0" required />
+                                </div>
+                                <div className="col-md-6">
                                     <label className="form-label fw-bold">Địa điểm/Link Zoom</label>
                                     <input type="text" name="location" className="form-control rounded-3" value={formData.location} onChange={handleInputChange} placeholder="VD: Zoom hoặc Tầng 2, Tòa nhà A..." />
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-12">
                                     <label className="form-label fw-bold">Ảnh Thumbnail</label>
                                     <input
                                         type="file"
@@ -244,6 +251,7 @@ const WorkshopManagement = () => {
                                     <th className="py-3">Diễn giả</th>
                                     <th className="py-3">Thời gian</th>
                                     <th className="py-3">Tham gia</th>
+                                    <th className="py-3">Giá vé</th>
                                     <th className="py-3">Trạng thái</th>
                                     <th className="px-4 py-3 text-end">Thao tác</th>
                                 </tr>
@@ -266,6 +274,9 @@ const WorkshopManagement = () => {
                                                 <Users size={12} className="me-1" />
                                                 {ws.currentParticipants}/{ws.maxParticipants}
                                             </span>
+                                        </td>
+                                        <td className="py-3 fw-bold text-success">
+                                            {ws.price > 0 ? `${ws.price.toLocaleString('vi-VN')} đ` : 'Miễn phí'}
                                         </td>
                                         <td className="py-3">
                                             <span className={`badge rounded-pill bg-opacity-10 text-${ws.status === 'UPCOMING' ? 'success' : 'secondary'} bg-${ws.status === 'UPCOMING' ? 'success' : 'secondary'}`}>

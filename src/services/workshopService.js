@@ -29,6 +29,10 @@ const workshopService = {
 
     bookWorkshop: async (workshopId) => {
         return api.post(`/workshops/${workshopId}/book`);
+    },
+
+    cancelBooking: async (workshopId) => {
+        return api.delete(`/workshops/${workshopId}/cancel`);
     }
 };
 
