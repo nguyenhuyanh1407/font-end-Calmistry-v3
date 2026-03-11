@@ -7,6 +7,10 @@ import { Plus, Calendar, User, MapPin, Clock, List, Trash2, Edit2, Users } from 
 const WorkshopManagement = () => {
     const [workshops, setWorkshops] = useState([]);
     const [showForm, setShowForm] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState('');
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -46,34 +50,111 @@ const WorkshopManagement = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedImage(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleEdit = (workshop) => {
+        setEditingId(workshop.id);
+        const startTimeStr = new Date(workshop.startTime).toISOString().slice(0, 16);
+        const endTimeStr = new Date(workshop.endTime).toISOString().slice(0, 16);
+
+        setFormData({
+            title: workshop.title,
+            description: workshop.description,
+            startTime: startTimeStr,
+            endTime: endTimeStr,
+            speakerName: workshop.speakerName,
+            speakerBio: workshop.speakerBio || '',
+            maxParticipants: workshop.maxParticipants,
+            imageUrl: workshop.imageUrl || '',
+            location: workshop.location || ''
+        });
+        setImagePreview(workshop.imageUrl || '');
+        setSelectedImage(null);
+        setShowForm(true);
+    };
+
+    const handleCancel = () => {
+        setShowForm(false);
+        setEditingId(null);
+        setFormData({
+            title: '',
+            description: '',
+            startTime: '',
+            endTime: '',
+            speakerName: '',
+            speakerBio: '',
+            maxParticipants: 20,
+            imageUrl: '',
+            location: ''
+        });
+        setSelectedImage(null);
+        setImagePreview('');
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting workshop form:", formData);
+        setIsSubmitting(true);
         try {
-            const response = await workshopService.createWorkshop(formData);
-            console.log("Create workshop response:", response);
-            if (response && response.code === 1000) {
-                toast.success("Workshop đã được tạo thành công!");
-                setShowForm(false);
-                fetchWorkshops();
-                setFormData({
-                    title: '',
-                    description: '',
-                    startTime: '',
-                    endTime: '',
-                    speakerName: '',
-                    speakerBio: '',
-                    maxParticipants: 20,
-                    imageUrl: '',
-                    location: ''
-                });
+            let finalImageUrl = formData.imageUrl;
+
+            // 1. Upload ảnh nếu có chọn file mới
+            if (selectedImage) {
+                toast.info("Đang tải ảnh lên...", { autoClose: 1500 });
+                const uploadRes = await workshopService.uploadImage(selectedImage);
+                if (uploadRes && uploadRes.result) {
+                    finalImageUrl = uploadRes.result;
+                } else {
+                    throw new Error("Tải ảnh thất bại");
+                }
+            }
+
+            const submitData = { ...formData, imageUrl: finalImageUrl };
+
+            // 2. Tạo mới hoặc Cập nhật
+            let response;
+            if (editingId) {
+                response = await workshopService.updateWorkshop(editingId, submitData);
             } else {
-                toast.error(response?.message || "Lỗi khi tạo workshop từ server.");
+                response = await workshopService.createWorkshop(submitData);
+            }
+
+            if (response && response.code === 1000) {
+                toast.success(editingId ? "Cập nhật workshop thành công!" : "Tạo workshop thành công!");
+                handleCancel();
+                fetchWorkshops();
+            } else {
+                toast.error(response?.message || "Có lỗi từ server.");
             }
         } catch (error) {
-            console.error("Create workshop error:", error);
-            const errorMessage = error.response?.data?.message || error.message || "Lỗi khi tạo workshop. Hãy kiểm tra lại quyền Admin.";
+            console.error("Submit error:", error);
+            const errorMessage = error.response?.data?.message || error.message || "Lỗi. Hãy kiểm tra lại.";
             toast.error(errorMessage);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa workshop này không? Việc này cũng sẽ xóa các đăng ký tham gia.")) {
+            try {
+                const response = await workshopService.deleteWorkshop(id);
+                if (response && response.code === 1000) {
+                    toast.success("Đã xóa workshop thành công!");
+                    fetchWorkshops();
+                } else {
+                    toast.error(response?.message || "Có lỗi từ server khi xóa.");
+                }
+            } catch (error) {
+                console.error("Delete error:", error);
+                const errorMessage = error.response?.data?.message || error.message || "Lỗi khi xóa workshop.";
+                toast.error(errorMessage);
+            }
         }
     };
 
@@ -86,8 +167,8 @@ const WorkshopManagement = () => {
                         <p className="text-muted mb-0">Tổ chức và theo dõi các sự kiện cộng đồng Calmistry</p>
                     </div>
                     <button
-                        onClick={() => setShowForm(!showForm)}
-                        className="btn btn-success rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm"
+                        onClick={showForm ? handleCancel : () => setShowForm(true)}
+                        className={`btn ${showForm ? 'btn-outline-secondary' : 'btn-success'} rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm`}
                     >
                         {showForm ? 'Hủy bỏ' : <><Plus size={20} /> Tạo Workshop Mới</>}
                     </button>
@@ -130,11 +211,24 @@ const WorkshopManagement = () => {
                                     <input type="text" name="location" className="form-control rounded-3" value={formData.location} onChange={handleInputChange} placeholder="VD: Zoom hoặc Tầng 2, Tòa nhà A..." />
                                 </div>
                                 <div className="col-md-4">
-                                    <label className="form-label fw-bold">Link ảnh Thumbnail</label>
-                                    <input type="text" name="imageUrl" className="form-control rounded-3" value={formData.imageUrl} onChange={handleInputChange} placeholder="https://..." />
+                                    <label className="form-label fw-bold">Ảnh Thumbnail</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="form-control rounded-3"
+                                        onChange={handleImageChange}
+                                        required={!editingId && !formData.imageUrl}
+                                    />
+                                    {imagePreview && (
+                                        <div className="mt-2 text-center">
+                                            <img src={imagePreview} alt="Preview" style={{ height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="col-12 text-end">
-                                    <button type="submit" className="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm">Lưu Workshop</button>
+                                <div className="col-12 text-end mt-4">
+                                    <button type="submit" disabled={isSubmitting} className="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm">
+                                        {isSubmitting ? 'Đang xử lý...' : (editingId ? 'Cập nhật Workshop' : 'Lưu Workshop')}
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -180,8 +274,8 @@ const WorkshopManagement = () => {
                                         </td>
                                         <td className="px-4 py-3 text-end">
                                             <div className="d-flex justify-content-end gap-2">
-                                                <button className="btn btn-sm btn-light rounded-circle p-2 text-primary" title="Sửa"><Edit2 size={16} /></button>
-                                                <button className="btn btn-sm btn-light rounded-circle p-2 text-danger" title="Xóa"><Trash2 size={16} /></button>
+                                                <button onClick={() => handleEdit(ws)} className="btn btn-sm btn-light rounded-circle p-2 text-primary" title="Sửa"><Edit2 size={16} /></button>
+                                                <button onClick={() => handleDelete(ws.id)} className="btn btn-sm btn-light rounded-circle p-2 text-danger" title="Xóa"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>

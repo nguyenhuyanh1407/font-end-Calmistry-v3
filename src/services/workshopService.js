@@ -13,6 +13,20 @@ const workshopService = {
         return api.post('/workshops/admin/create', workshopData);
     },
 
+    updateWorkshop: async (id, workshopData) => {
+        return api.put(`/workshops/admin/${id}`, workshopData);
+    },
+
+    uploadImage: async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.upload('/files/upload', formData);
+    },
+
+    deleteWorkshop: async (id) => {
+        return api.delete(`/workshops/admin/${id}`);
+    },
+
     bookWorkshop: async (workshopId) => {
         return api.post(`/workshops/${workshopId}/book`);
     }
