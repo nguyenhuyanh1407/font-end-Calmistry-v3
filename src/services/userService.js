@@ -4,7 +4,12 @@ const userService = {
     getMyInfo: async () => {
         try {
             const response = await api.get('/users/my-info');
-            return response.result;
+            // Một số API trả về { code, result } trong khi một số trả trực tiếp object user
+            if (response && typeof response === 'object') {
+                if (response.result !== undefined) return response.result;
+                return response;
+            }
+            return response;
         } catch (error) {
             throw error;
         }
@@ -40,7 +45,11 @@ const userService = {
     updateProfile: async (userData) => {
         try {
             const response = await api.put('/users/update-profile', userData);
-            return response.result;
+            if (response && typeof response === 'object') {
+                if (response.result !== undefined) return response.result;
+                return response;
+            }
+            return response;
         } catch (error) {
             throw error;
         }
