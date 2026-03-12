@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import '../../styles/UserDashboard.css';
-// Đảm bảo bạn đã cài: npm install bootstrap-icons hoặc thêm CDN vào index.html
 import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import fuiedsService from '../../services/fuiedsService';
 import userService from '../../services/userService';
 import fileService from '../../services/fileService';
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 const UserDashboard = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const brandGreen = '#324d3e';
   const lightGreen = '#74c655';
   const bgSoft = '#fcfdfd';
@@ -33,12 +34,12 @@ const UserDashboard = () => {
   const [isLoadingJournal, setIsLoadingJournal] = useState(true);
 
   const [userProfile, setUserProfile] = useState({
-    name: "An Nhiên",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
-    address: "Hà Nội, Việt Nam",
+    name: "",
+    avatar: "",
+    address: "",
     phoneNumber: "",
     bio: "Mọi sự thay đổi lớn đều bắt đầu từ những bước chân nhỏ bé nhất.",
-    tier: "Gold",
+    tier: "Bronze",
     currentStreak: 0,
     totalPoints: 0,
     email: ""
@@ -47,9 +48,40 @@ const UserDashboard = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [tempProfile, setTempProfile] = useState({ ...userProfile });
 
-  // Fetch data on mount
+  // Sử dụng React Query để lấy user info (cùng queryKey ['me'] với Header)
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: userService.getMyInfo,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  // Khi currentUser thay đổi, cập nhật userProfile
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    if (currentUser) {
+      console.log('📋 Dashboard received user data:', currentUser);
+      const points = currentUser.fuedScore || 0;
+      let calculatedTier = "Bronze";
+      if (points >= 300) calculatedTier = "Gold";
+      else if (points >= 100) calculatedTier = "Silver";
+
+      setUserProfile(prev => ({
+        ...prev,
+        name: currentUser.fullName || currentUser.username || prev.name,
+        email: currentUser.email || prev.email,
+        avatar: currentUser.avatarUrl || prev.avatar || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
+        phoneNumber: currentUser.phoneNumber || "",
+        address: currentUser.address || prev.address || "Hà Nội, Việt Nam",
+        currentStreak: currentUser.currentStreak || 0,
+        totalPoints: points,
+        tier: calculatedTier
+      }));
+    }
+  }, [currentUser]);
+
+  // Fetch các dữ liệu khác (FUIEDS, Sleep, Journal)
+  useEffect(() => {
+    const fetchOtherData = async () => {
       // 1. Fetch FUIEDS Score & History
       try {
         const fuiedsRes = await fuiedsService.getTodayScore();
@@ -58,7 +90,7 @@ const UserDashboard = () => {
         const historyRes = await fuiedsService.getHistory(30);
         if (historyRes.code === 1000) setFuiedsHistory(historyRes.result);
       } catch (error) {
-        console.log('FUIEDS data fetch error');
+        console.log('FUIEDS data fetch error:', error);
       } finally {
         setIsLoadingFuieds(false);
       }
@@ -82,33 +114,9 @@ const UserDashboard = () => {
       } finally {
         setIsLoadingJournal(false);
       }
-
-      // 4. Fetch User Info
-      try {
-        const userInfo = await userService.getMyInfo();
-        if (userInfo) {
-          const points = userInfo.fuedScore || 0;
-          let calculatedTier = "Bronze";
-          if (points >= 300) calculatedTier = "Gold";
-          else if (points >= 100) calculatedTier = "Silver";
-          setUserProfile(prev => ({
-            ...prev,
-            name: userInfo.fullName || userInfo.username,
-            email: userInfo.email,
-            avatar: userInfo.avatarUrl || prev.avatar,
-            phoneNumber: userInfo.phoneNumber || "",
-            address: userInfo.address || "Hà Nội, Việt Nam",
-            currentStreak: userInfo.currentStreak || 0,
-            totalPoints: points,
-            tier: calculatedTier
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching user info:', error);
-      }
     };
 
-    fetchDashboardData();
+    fetchOtherData();
   }, []);
 
   // Hàm xác định Icon và Màu sắc dựa trên hạng thành viên
@@ -144,6 +152,8 @@ const UserDashboard = () => {
           address: updatedUser.address || tempProfile.address,
           avatar: updatedUser.avatarUrl || tempProfile.avatar
         });
+        // Invalidate cache để Header cũng cập nhật tên mới
+        queryClient.invalidateQueries({ queryKey: ['me'] });
         toast.success("Cập nhật thông tin thành công! ✨");
         setShowEditModal(false);
       }
