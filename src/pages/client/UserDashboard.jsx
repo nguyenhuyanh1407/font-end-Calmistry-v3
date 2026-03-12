@@ -155,7 +155,7 @@ const UserDashboard = () => {
         message: "Năng lượng của bạn đang rất rực rỡ! Đây là thời điểm tốt để lan tỏa năng lượng tích cực hoặc bắt đầu một dự án mới.",
         actionText: "Chia sẻ câu chuyện",
         actionIcon: "bi-pencil-square",
-        actionPath: "/blog/create",
+        actionPath: "https://www.calmistry.blog/shareStories",
         btnColor: "btn-outline-success"
       };
     } else if (value >= 60) {
@@ -393,7 +393,13 @@ const UserDashboard = () => {
                       <hr className="my-3 opacity-10" />
 
                       <button
-                        onClick={() => navigate(scoreContext.actionPath)}
+                        onClick={() => {
+                          if (scoreContext.actionPath.startsWith('http')) {
+                            window.open(scoreContext.actionPath, '_blank');
+                          } else {
+                            navigate(scoreContext.actionPath);
+                          }
+                        }}
                         className={`btn ${scoreContext.btnColor} w-100 rounded-pill py-2 fw-medium d-flex align-items-center justify-content-center gap-2`}
                         style={{ borderWidth: '2px' }}
                       >
@@ -452,7 +458,11 @@ const UserDashboard = () => {
 
               {/* Community/Support Card */}
               <div className="col-12">
-                <div className="p-4 rounded-5 shadow-sm border-0 bg-white d-flex align-items-center justify-content-between card-hover">
+                <div 
+                  className="p-4 rounded-5 shadow-sm border-0 bg-white d-flex align-items-center justify-content-between card-hover"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => window.open('https://www.calmistry.blog/shareStories', '_blank')}
+                >
                   <div className="d-flex align-items-center">
                     <div className="p-3 rounded-circle me-3" style={{ backgroundColor: '#fff3cd' }}>
                       <i className="bi bi-chat-heart text-warning fs-4"></i>
@@ -535,14 +545,14 @@ const UserDashboard = () => {
                 <div className="sleep-stats-container">
                   <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
                     {sleepStats.sessions.slice(0, 7).reverse().map((session, idx) => {
-                      const height = (session.score / 100) * 100;
+                      const height = (session.finalScore100 / 100) * 100;
                       const date = new Date(session.recordDate).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' });
                       return (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                          <span className="mb-1" style={{ fontSize: '9px', fontWeight: 'bold' }}>{Math.round(session.score)}</span>
+                          <span className="mb-1" style={{ fontSize: '9px', fontWeight: 'bold' }}>{Math.round(session.finalScore100)}</span>
                           <motion.div
                             initial={{ height: 0 }}
-                            animate={{ height: `${height}%` }}
+                            animate={{ height: `${(session.finalScore100 / 100) * 100}%` }}
                             style={{ width: '20px', backgroundColor: brandGreen, borderRadius: '4px 4px 0 0', opacity: 0.8 }}
                           />
                           <span className="mt-2 text-muted" style={{ fontSize: '8px' }}>{date}</span>
@@ -553,7 +563,7 @@ const UserDashboard = () => {
                   <div className="d-flex justify-content-between align-items-center p-3 rounded-4 bg-light">
                     <div>
                       <div className="small text-muted">Điểm trung bình</div>
-                      <div className="fw-bold fs-5 text-success">{Math.round(sleepStats.statistics?.averageScore || 0)}/100</div>
+                      <div className="fw-bold fs-5 text-success">{Math.round(sleepStats.averageScore || 0)}/100</div>
                     </div>
                     <Moon size={24} className="text-muted opacity-50" />
                   </div>
@@ -578,7 +588,7 @@ const UserDashboard = () => {
                   <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
                     {/* Only show 10 sample points to avoid clutter, or a scrollable view */}
                     {fuiedsHistory.slice(0, 10).reverse().map((entry, idx) => {
-                      const height = (entry.score / 100) * 100;
+                      const height = (entry.smoothedScore / 100) * 100;
                       return (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                           <motion.div
