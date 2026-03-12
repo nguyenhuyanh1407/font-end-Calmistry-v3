@@ -34,10 +34,6 @@
           box-shadow: 0 5px 10px rgba(0,0,0,0.1) !important;
         }
 
-        .table-hover tbody tr:hover {
-          background-color: rgba(116, 198, 85, 0.02);
-        }
-
         /* Nút tròn sửa ảnh đại diện */
         .action-btn-edit {
           width: 35px;
@@ -73,6 +69,7 @@
           padding: 2rem;
           border-radius: 2rem;
           animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+          overflow: visible;
         }
 
         @keyframes popIn {
@@ -137,7 +134,47 @@
           opacity: 1;
         }
 
-        /* Đảm bảo modal không bị che khuất */
-        .custom-modal-content {
-          overflow: visible;
+        /* --- NEW DASHBOARD STYLES --- */
+        .journal-cta-card {
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          overflow: hidden;
+          position: relative;
+        }
+        .journal-cta-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 20px 40px rgba(50, 77, 62, 0.1) !important;
+        }
+        .journal-cta-card::after {
+          content: "";
+          position: absolute;
+          top: -50%;
+          right: -50%;
+          width: 200px;
+          height: 200px;
+          background: radial-gradient(circle, rgba(116, 198, 85, 0.1) 0%, transparent 70%);
+          z-index: 0;
+          pointer-events: none;
+        }
+
+        .journal-stats-container, .sleep-stats-container, .fuieds-stats-container {
+          animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .italic {
+          font-style: italic;
+        }
+
+        .bg-success-subtle {
+          background-color: rgba(116, 198, 85, 0.1) !important;
+        }
+
+        @media (max-width: 992px) {
+          .col-lg-4 {
+            margin-bottom: 1.5rem;
+          }
         }

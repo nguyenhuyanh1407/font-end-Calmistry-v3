@@ -5,24 +5,30 @@ import '../../styles/UserDashboard.css';
 import { useState, useEffect } from 'react';
 import fuiedsService from '../../services/fuiedsService';
 import userService from '../../services/userService';
+import sleepService from '../../services/sleepService';
+import journalService from '../../services/journalService';
 import { toast } from 'react-toastify';
+import { 
+  Smile, Meh, Frown, Sparkles, 
+  Moon, Clock, Zap, Book, 
+  ChevronRight, ArrowRight 
+} from 'lucide-react';
 const UserDashboard = () => {
   const navigate = useNavigate();
   const brandGreen = '#324d3e';
   const lightGreen = '#74c655';
   const bgSoft = '#fcfdfd';
 
-  // FUIEDS state
+  // Stats states
   const [fuiedsScore, setFuiedsScore] = useState(null);
   const [isLoadingFuieds, setIsLoadingFuieds] = useState(true);
-
-  // Dữ liệu mẫu để hiển thị trong bảng
-  const myContent = [
-    { id: 1, title: "Hành trình tìm lại sự bình yên", type: "Câu chuyện", status: "Approved", hearts: 125, date: "10/01/2026" },
-    { id: 2, title: "Làm sao để bớt lo âu?", type: "Blog", status: "Pending", hearts: 0, date: "11/01/2026" },
-    { id: 3, title: "Sức mạnh của hơi thở", type: "Câu chuyện", status: "Approved", hearts: 45, date: "05/01/2026" },
-  ];
-
+  const [fuiedsHistory, setFuiedsHistory] = useState([]);
+  
+  const [sleepStats, setSleepStats] = useState(null);
+  const [isLoadingSleep, setIsLoadingSleep] = useState(true);
+  
+  const [journalStats, setJournalStats] = useState(null);
+  const [isLoadingJournal, setIsLoadingJournal] = useState(true);
 
   const [userProfile, setUserProfile] = useState({
     name: "An Nhiên",
@@ -41,20 +47,41 @@ const UserDashboard = () => {
   // Fetch data on mount
   useEffect(() => {
     const fetchDashboardData = async () => {
+      // 1. Fetch FUIEDS Score & History
       try {
-        // Fetch FUIEDS
         const fuiedsRes = await fuiedsService.getTodayScore();
-        if (fuiedsRes.code === 1000) {
-          setFuiedsScore(fuiedsRes.result);
-        }
+        if (fuiedsRes.code === 1000) setFuiedsScore(fuiedsRes.result);
+        
+        const historyRes = await fuiedsService.getHistory(30);
+        if (historyRes.code === 1000) setFuiedsHistory(historyRes.result);
       } catch (error) {
-        console.log('No FUIEDS score today');
+        console.log('FUIEDS data fetch error');
       } finally {
         setIsLoadingFuieds(false);
       }
 
+      // 2. Fetch Sleep History
       try {
-        // Fetch User Info
+        const sleepData = await sleepService.getSleepHistory(0, 7);
+        setSleepStats(sleepData);
+      } catch (error) {
+        console.error('Error fetching sleep history:', error);
+      } finally {
+        setIsLoadingSleep(false);
+      }
+
+      // 3. Fetch Journal Stats
+      try {
+        const journalData = await journalService.getStats();
+        setJournalStats(journalData);
+      } catch (error) {
+        console.error('Error fetching journal stats:', error);
+      } finally {
+        setIsLoadingJournal(false);
+      }
+
+      // 4. Fetch User Info
+      try {
         const userInfo = await userService.getMyInfo();
         if (userInfo) {
           const points = userInfo.fuedScore || 0;
@@ -289,42 +316,34 @@ const UserDashboard = () => {
           </div>
         )}
         <div className="row g-4">
-          {/* --- CỘT TRÁI: DÒNG THỜI GIAN (TIMELINE) --- */}
+          {/* --- CỘT TRÁI: VIẾT NHẬT KÝ (NEW) --- */}
           <div className="col-lg-4">
-            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
-              <h5 className="fw-bold mb-4 d-flex align-items-center">
-                <i className="bi bi-reception-4 me-2" style={{ color: lightGreen }}></i> Lộ trình của bạn
-              </h5>
-
-              <div className="ps-3 border-start border-2" style={{ borderColor: '#f0f0f0 !important' }}>
-
-                {/* Item 1 */}
-                <div className="mb-5 position-relative">
-                  <i className="bi bi-check-circle-fill position-absolute" style={{ left: '-22px', top: '0', fontSize: '18px', color: lightGreen, backgroundColor: 'white' }}></i>
-                  <div className="small text-muted mb-1">08:30 AM</div>
-                  <h6 className="fw-bold mb-0">Thiền định buổi sáng</h6>
-                  <span className="small text-success">Đã hoàn thành <i className="bi bi-patch-check ms-1"></i></span>
-                </div>
-
-                {/* Item 2 */}
-                <div className="mb-5 position-relative">
-                  <i className="bi bi-circle-fill position-absolute" style={{ left: '-22px', top: '0', fontSize: '18px', color: brandGreen, backgroundColor: 'white' }}></i>
-                  <div className="small text-muted mb-1">02:00 PM</div>
-                  <h6 className="fw-bold mb-1">Tư vấn tâm lý trực tuyến</h6>
-                  <p className="small text-muted mb-3"><i className="bi bi-person-video3 me-2"></i>Chuyên gia Minh Anh</p>
-                  <button className="btn btn-sm rounded-pill px-3 shadow-sm" style={{ backgroundColor: brandGreen, color: 'white' }}>
-                    <i className="bi bi-box-arrow-in-right me-1"></i> Tham gia
-                  </button>
-                </div>
-
-                {/* Item 3 */}
-                <div className="position-relative">
-                  <i className="bi bi-circle position-absolute" style={{ left: '-22px', top: '0', fontSize: '18px', color: '#ccc', backgroundColor: 'white' }}></i>
-                  <div className="small text-muted mb-1">09:00 PM</div>
-                  <h6 className="fw-bold mb-0 text-muted">Viết nhật ký cảm xúc</h6>
-                  <i className="bi bi-pencil-square small text-muted"></i>
-                </div>
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0 d-flex flex-column journal-cta-card">
+              <div className="mb-4 p-3 rounded-4" style={{ backgroundColor: `${lightGreen}15`, width: 'fit-content' }}>
+                <Book size={28} color={brandGreen} />
               </div>
+              <h4 className="fw-bold mb-3">Ghi chép tâm hồn</h4>
+              <p className="text-muted mb-4 flex-grow-1">
+                Ghi lại những suy nghĩ, cảm xúc và khoảnh khắc đáng nhớ trong ngày để thấu hiểu bản thân hơn.
+              </p>
+              
+              <div className="p-3 rounded-4 mb-4" style={{ backgroundColor: '#f9fafb', border: '1px dashed #e5e7eb' }}>
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <Sparkles size={16} color={lightGreen} />
+                  <span className="small fw-bold">Gợi ý hôm nay:</span>
+                </div>
+                <p className="small text-muted mb-0 italic">
+                  "Điều gì đã khiến bạn mỉm cười ngày hôm nay?"
+                </p>
+              </div>
+
+              <button 
+                onClick={() => navigate('/journal')}
+                className="btn btn-dark w-100 rounded-pill py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
+                style={{ backgroundColor: brandGreen }}
+              >
+                Viết nhật ký ngay <ArrowRight size={18} />
+              </button>
             </div>
           </div>
 
@@ -460,64 +479,137 @@ const UserDashboard = () => {
         </div>
 
 
-        {/* --- SECTION: QUẢN LÝ NỘI DUNG CỦA TÔI --- */}
-        <div className="row mt-5">
+        {/* --- SECTION: THỐNG KÊ SỨC KHỎE (NEW REPLACEMENT) --- */}
+        <div className="row mt-5 g-4">
           <div className="col-12">
-            <div className="p-4 p-md-5 rounded-5 bg-white shadow-sm border-0">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h5 className="fw-bold mb-0 d-flex align-items-center">
-                  <i className="bi bi-journal-text me-2 text-success"></i> Bài viết & Câu chuyện của bạn
-                </h5>
-                <span className="badge rounded-pill bg-light text-dark border fw-normal">{myContent.length} bài viết</span>
-              </div>
+            <h5 className="fw-bold mb-4 d-flex align-items-center">
+              <Zap size={20} className="me-2" color={lightGreen} /> Chỉ số sức khỏe tinh thần
+            </h5>
+          </div>
 
-              <div className="table-responsive">
-                <table className="table table-hover align-middle border-top">
-                  <thead>
-                    <tr className="small text-muted text-uppercase">
-                      <th className="py-3 border-0">Tiêu đề nội dung</th>
-                      <th className="py-3 border-0 text-center">Trạng thái</th>
-                      <th className="py-3 border-0 text-center">Lượt Tym</th>
-                      <th className="py-3 border-0 text-end">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {myContent.map((item) => (
-                      <tr key={item.id}>
-                        <td className="py-3 border-0">
-                          <div className="fw-bold mb-0 text-truncate" style={{ maxWidth: '250px' }}>{item.title}</div>
-                          <div className="text-muted" style={{ fontSize: '11px' }}>{item.type} • {item.date}</div>
-                        </td>
-                        <td className="py-3 border-0 text-center">
-                          {item.status === 'Approved' ? (
-                            <span className="badge rounded-pill bg-success-subtle text-success px-3 fw-normal">
-                              <i className="bi bi-patch-check-fill me-1"></i> Đã duyệt
-                            </span>
-                          ) : (
-                            <span className="badge rounded-pill bg-warning-subtle text-warning-emphasis px-3 fw-normal">
-                              <i className="bi bi-hourglass-split me-1"></i> Chờ duyệt
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3 border-0 text-center">
-                          <div className="d-flex align-items-center justify-content-center gap-1 text-danger fw-bold">
-                            <i className="bi bi-heart-fill"></i>
-                            <span className="small">{item.hearts}</span>
+          {/* 1. Thống kê Nhật ký */}
+          <div className="col-lg-4">
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
+              <h6 className="fw-bold mb-4">Tâm trạng (Tháng này)</h6>
+              {isLoadingJournal ? (
+                <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
+              ) : journalStats ? (
+                <div className="journal-stats-container">
+                  <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
+                    {[
+                      { label: 'Vui', count: journalStats.happyCount, color: lightGreen, icon: <Smile size={14} /> },
+                      { label: 'Ổn', count: journalStats.neutralCount, color: '#6b7280', icon: <Meh size={14} /> },
+                      { label: 'Buồn', count: journalStats.sadCount, color: '#3b82f6', icon: <Frown size={14} /> }
+                    ].map((item, idx) => {
+                      const max = Math.max(journalStats.happyCount, journalStats.neutralCount, journalStats.sadCount, 1);
+                      const height = (item.count / max) * 100;
+                      return (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                          <span className="small fw-bold mb-1" style={{ color: item.color }}>{item.count}</span>
+                          <motion.div 
+                            initial={{ height: 0 }} 
+                            animate={{ height: `${height}%` }}
+                            style={{ width: '30px', backgroundColor: item.color, borderRadius: '6px 6px 0 0', minHeight: item.count > 0 ? '4px' : '0' }}
+                          />
+                          <div className="mt-2 text-muted" style={{ fontSize: '10px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                            {item.icon} {item.label}
                           </div>
-                        </td>
-                        <td className="py-3 border-0 text-end">
-                          <button className="btn btn-sm btn-light rounded-circle me-2 action-btn shadow-sm">
-                            <i className="bi bi-pencil-square text-primary"></i>
-                          </button>
-                          <button className="btn btn-sm btn-light rounded-circle action-btn shadow-sm">
-                            <i className="bi bi-trash3 text-danger"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="p-3 rounded-4" style={{ backgroundColor: '#fcfcfc', border: '1px solid #f0f0f0' }}>
+                    <div className="d-flex align-items-center gap-2 mb-2 text-success" style={{ fontSize: '12px', fontWeight: '700' }}>
+                      <Sparkles size={14} /> AI Thấu hiểu
+                    </div>
+                    <p className="small text-muted mb-0 italic" style={{ fontSize: '12px', lineHeight: '1.4' }}>
+                      {journalStats.aiAnalysis || "Hãy viết thêm nhật ký để AI có thể phân tích tâm trạng của bạn sâu sắc hơn nhé!"}
+                    </p>
+                  </div>
+                </div>
+              ) : <p className="small text-muted">Chưa có dữ liệu nhật ký.</p>}
+            </div>
+          </div>
+
+          {/* 2. Chất lượng giấc ngủ */}
+          <div className="col-lg-4">
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
+              <h6 className="fw-bold mb-4">Chất lượng giấc ngủ (7 ngày)</h6>
+              {isLoadingSleep ? (
+                <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
+              ) : sleepStats && sleepStats.sessions?.length > 0 ? (
+                <div className="sleep-stats-container">
+                  <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
+                    {sleepStats.sessions.slice(0, 7).reverse().map((session, idx) => {
+                      const height = (session.score / 100) * 100;
+                      const date = new Date(session.recordDate).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' });
+                      return (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                          <span className="mb-1" style={{ fontSize: '9px', fontWeight: 'bold' }}>{Math.round(session.score)}</span>
+                          <motion.div 
+                            initial={{ height: 0 }} 
+                            animate={{ height: `${height}%` }}
+                            style={{ width: '20px', backgroundColor: brandGreen, borderRadius: '4px 4px 0 0', opacity: 0.8 }}
+                          />
+                          <span className="mt-2 text-muted" style={{ fontSize: '8px' }}>{date}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="d-flex justify-content-between align-items-center p-3 rounded-4 bg-light">
+                    <div>
+                      <div className="small text-muted">Điểm trung bình</div>
+                      <div className="fw-bold fs-5 text-success">{Math.round(sleepStats.statistics?.averageScore || 0)}/100</div>
+                    </div>
+                    <Moon size={24} className="text-muted opacity-50" />
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="small text-muted mb-3">Chưa có dữ liệu giấc ngủ 7 ngày qua.</p>
+                  <button onClick={() => navigate('/sleepManagement')} className="btn btn-sm btn-outline-success rounded-pill px-3">Bắt đầu theo dõi</button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 3. Điểm FUIED Scores */}
+          <div className="col-lg-4">
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
+              <h6 className="fw-bold mb-4">Điểm FUIED Scores (30 ngày)</h6>
+              {isLoadingFuieds ? (
+                <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
+              ) : fuiedsHistory && fuiedsHistory.length > 0 ? (
+                <div className="fuieds-stats-container">
+                   <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
+                    {/* Only show 10 sample points to avoid clutter, or a scrollable view */}
+                    {fuiedsHistory.slice(0, 10).reverse().map((entry, idx) => {
+                      const height = (entry.score / 100) * 100;
+                      return (
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                          <motion.div 
+                            initial={{ height: 0 }} 
+                            animate={{ height: `${height}%` }}
+                            style={{ width: '12px', backgroundColor: lightGreen, borderRadius: '10px', opacity: 0.6 }}
+                            whileHover={{ opacity: 1, scaleY: 1.1 }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="d-flex align-items-center justify-content-between">
+                     <div className="small text-muted">Xu hướng tháng này:</div>
+                     <span className="badge rounded-pill bg-success-subtle text-success px-3">Ổn định</span>
+                  </div>
+                  <p className="small text-muted mt-3 mb-0" style={{ fontSize: '11px' }}>
+                    Điểm FUIED phản ánh mức độ cân bằng cảm xúc dựa trên các hoạt động hàng ngày của bạn.
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="small text-muted">Chưa có lịch sử điểm FUIED.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
