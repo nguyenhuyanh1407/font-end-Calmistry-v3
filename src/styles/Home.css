@@ -724,3 +724,26 @@ h4,
   box-shadow: 0 15px 25px rgba(50, 77, 62, 0.25);
   background-color: #3d5a4a;
 }
+
+/* Brand Statement Hover Effect */
+.brand-statement-item {
+  cursor: default;
+  border-radius: 12px;
+  padding: 15px;
+  margin: -15px; /* Offset padding to keep layout stable */
+  margin-bottom: 5px; /* Adjust for margin-bottom in JSX */
+}
+
+.brand-statement-item:hover {
+  background-color: rgba(116, 198, 85, 0.05);
+  transform: translateX(8px);
+}
+
+.brand-statement-item:hover .statement-icon {
+  transform: scale(1.2) rotate(5deg);
+  color: #74c655 !important;
+}
+
+.brand-statement-item:hover p {
+  color: #1a2e35 !important;
+}
