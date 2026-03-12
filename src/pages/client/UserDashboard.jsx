@@ -75,9 +75,21 @@ const UserDashboard = () => {
       placement: 'right'
     },
     {
+      target: '.tour-btn-fuieds',
+      title: 'Tính điểm FUIEDS Score ✨',
+      content: 'FUIEDS đánh giá sức khỏe tinh thần qua 6 yếu tố: F (Familiarity – quen thuộc), U (Utility – hữu ích), I (Interest – hứng thú), E (Emotion – cảm xúc), D (Desire – mong muốn), S (Shareability – lan truyền). Hãy làm bài đánh giá hàng ngày!',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-btn-sleep',
+      title: 'Đánh giá giấc ngủ (PSQI) 🌙',
+      content: 'PSQI (Pittsburgh Sleep Quality Index) là thang đo chuẩn trong tâm lý học và y học, đánh giá chất lượng giấc ngủ của bạn trong 1 tháng gần nhất. Nhấn để bắt đầu kiểm tra!',
+      placement: 'bottom'
+    },
+    {
       target: '.tour-fuieds-card',
-      title: 'Điểm sức khỏe tinh thần FUIEDS 💚',
-      content: 'Đây là điểm số phản ánh trạng thái cảm xúc hiện tại của bạn. Hãy hoàn thành bài đánh giá hàng ngày để theo dõi sự thay đổi.',
+      title: 'Điểm FUIEDS hôm nay 💚',
+      content: 'Sau khi hoàn thành bài đánh giá, điểm số và lời khuyên sẽ hiển thị tại đây. AI sẽ gợi ý hành động phù hợp với trạng thái của bạn.',
       placement: 'bottom'
     },
     {
@@ -88,7 +100,7 @@ const UserDashboard = () => {
     },
     {
       target: '.tour-health-stats',
-      title: 'Chỉ số sức khỏe tinh thần 📊',
+      title: 'Tổng quan chỉ số sức khỏe 📊',
       content: 'Khu vực này tổng hợp toàn bộ dữ liệu: tâm trạng, giấc ngủ và điểm FUIED theo tuần/tháng giúp bạn hiểu rõ bản thân hơn.',
       placement: 'top'
     },
@@ -341,10 +353,10 @@ const UserDashboard = () => {
                   </p>
 
                     <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
-                      <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" style={{ backgroundColor: brandGreen }} onClick={() => navigate('/fuieds-quiz')}>
+                      <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center tour-btn-fuieds" style={{ backgroundColor: brandGreen }} onClick={() => navigate('/fuieds-quiz')}>
                         <Sparkles size={18} className="me-2" /> Tính điểm FUIEDS Score
                       </button>
-                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')}>
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center tour-btn-sleep" onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')}>
                         <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
                       </button>
                     </div>
@@ -704,8 +716,7 @@ const UserDashboard = () => {
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p className="small text-muted mb-3">Chưa có dữ liệu giấc ngủ 7 ngày qua.</p>
-                  <button onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')} className="btn btn-sm btn-outline-success rounded-pill px-3">Bắt đầu theo dõi</button>
+                  <p className="small text-muted mb-0">Chưa có dữ liệu giấc ngủ 7 ngày qua.</p>
                 </div>
               )}
             </div>
