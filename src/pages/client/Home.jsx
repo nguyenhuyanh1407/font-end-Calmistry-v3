@@ -315,9 +315,10 @@ const Home = () => {
         <WaveDivider fillColor="#74c655" statsBg={statsBg} />
         <StatsSection
           stats={[
-            { val: 458415597, label: "Số lượng tin nhắn, câu chuyện đã được chia sẻ, blog" },
-            { val: 32188, label: "Các nhà trị liệu đủ điều kiện sẵn sàng giúp đỡ" },
-            { val: 6150865, label: "Số lượng người đã sử dụng dịch vụ" }
+            "Calmistry – Bạn đồng hành số cho sức khỏe tinh thần.",
+            "Lắng nghe không phán xét.",
+            "Bảo mật tuyệt đối.",
+            "Hỗ trợ mọi lúc, mọi nơi."
           ]}
           statsBg={statsBg}
           brandGreen={brandGreen}
