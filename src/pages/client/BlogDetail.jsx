@@ -460,7 +460,7 @@ const BlogDetail = () => {
                 )}
 
                 <article className="article-content" style={{ fontSize: '18px', lineHeight: '1.8', color: '#212529' }}>
-                  <div dangerouslySetInnerHTML={{ __html: article.content }} />
+                  <div dangerouslySetInnerHTML={{ __html: article.content }} style={{ whiteSpace: 'pre-wrap' }} />
                 </article>
 
                 <div className="mt-5 p-4 rounded-3" style={{ backgroundColor: `${brandGreen}05`, border: `1px solid ${brandGreen}20` }}>
