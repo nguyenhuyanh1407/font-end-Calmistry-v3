@@ -9,10 +9,10 @@ import userService from '../../services/userService';
 import sleepService from '../../services/sleepService';
 import journalService from '../../services/journalService';
 import { toast } from 'react-toastify';
-import { 
-  Smile, Meh, Frown, Sparkles, 
-  Moon, Clock, Zap, Book, 
-  ChevronRight, ArrowRight 
+import {
+  Smile, Meh, Frown, Sparkles,
+  Moon, Clock, Zap, Book,
+  ChevronRight, ArrowRight
 } from 'lucide-react';
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -24,10 +24,10 @@ const UserDashboard = () => {
   const [fuiedsScore, setFuiedsScore] = useState(null);
   const [isLoadingFuieds, setIsLoadingFuieds] = useState(true);
   const [fuiedsHistory, setFuiedsHistory] = useState([]);
-  
+
   const [sleepStats, setSleepStats] = useState(null);
   const [isLoadingSleep, setIsLoadingSleep] = useState(true);
-  
+
   const [journalStats, setJournalStats] = useState(null);
   const [isLoadingJournal, setIsLoadingJournal] = useState(true);
 
@@ -52,7 +52,7 @@ const UserDashboard = () => {
       try {
         const fuiedsRes = await fuiedsService.getTodayScore();
         if (fuiedsRes.code === 1000) setFuiedsScore(fuiedsRes.result);
-        
+
         const historyRes = await fuiedsService.getHistory(30);
         if (historyRes.code === 1000) setFuiedsHistory(historyRes.result);
       } catch (error) {
@@ -327,7 +327,7 @@ const UserDashboard = () => {
               <p className="text-muted mb-4 flex-grow-1">
                 Ghi lại những suy nghĩ, cảm xúc và khoảnh khắc đáng nhớ trong ngày để thấu hiểu bản thân hơn.
               </p>
-              
+
               <div className="p-3 rounded-4 mb-4" style={{ backgroundColor: '#f9fafb', border: '1px dashed #e5e7eb' }}>
                 <div className="d-flex align-items-center gap-2 mb-2">
                   <Sparkles size={16} color={lightGreen} />
@@ -338,7 +338,7 @@ const UserDashboard = () => {
                 </p>
               </div>
 
-              <button 
+              <button
                 onClick={() => navigate('/journal')}
                 className="btn btn-dark w-100 rounded-pill py-3 fw-bold d-flex align-items-center justify-content-center gap-2"
                 style={{ backgroundColor: brandGreen }}
@@ -507,8 +507,8 @@ const UserDashboard = () => {
                       return (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                           <span className="small fw-bold mb-1" style={{ color: item.color }}>{item.count}</span>
-                          <motion.div 
-                            initial={{ height: 0 }} 
+                          <motion.div
+                            initial={{ height: 0 }}
                             animate={{ height: `${height}%` }}
                             style={{ width: '30px', backgroundColor: item.color, borderRadius: '6px 6px 0 0', minHeight: item.count > 0 ? '4px' : '0' }}
                           />
@@ -547,8 +547,8 @@ const UserDashboard = () => {
                       return (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
                           <span className="mb-1" style={{ fontSize: '9px', fontWeight: 'bold' }}>{Math.round(session.score)}</span>
-                          <motion.div 
-                            initial={{ height: 0 }} 
+                          <motion.div
+                            initial={{ height: 0 }}
                             animate={{ height: `${height}%` }}
                             style={{ width: '20px', backgroundColor: brandGreen, borderRadius: '4px 4px 0 0', opacity: 0.8 }}
                           />
@@ -582,14 +582,14 @@ const UserDashboard = () => {
                 <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
               ) : fuiedsHistory && fuiedsHistory.length > 0 ? (
                 <div className="fuieds-stats-container">
-                   <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
+                  <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
                     {/* Only show 10 sample points to avoid clutter, or a scrollable view */}
                     {fuiedsHistory.slice(0, 10).reverse().map((entry, idx) => {
                       const height = (entry.score / 100) * 100;
                       return (
                         <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                          <motion.div 
-                            initial={{ height: 0 }} 
+                          <motion.div
+                            initial={{ height: 0 }}
                             animate={{ height: `${height}%` }}
                             style={{ width: '12px', backgroundColor: lightGreen, borderRadius: '10px', opacity: 0.6 }}
                             whileHover={{ opacity: 1, scaleY: 1.1 }}
@@ -599,8 +599,8 @@ const UserDashboard = () => {
                     })}
                   </div>
                   <div className="d-flex align-items-center justify-content-between">
-                     <div className="small text-muted">Xu hướng tháng này:</div>
-                     <span className="badge rounded-pill bg-success-subtle text-success px-3">Ổn định</span>
+                    <div className="small text-muted">Xu hướng tháng này:</div>
+                    <span className="badge rounded-pill bg-success-subtle text-success px-3">Ổn định</span>
                   </div>
                   <p className="small text-muted mt-3 mb-0" style={{ fontSize: '11px' }}>
                     Điểm FUIED phản ánh mức độ cân bằng cảm xúc dựa trên các hoạt động hàng ngày của bạn.
