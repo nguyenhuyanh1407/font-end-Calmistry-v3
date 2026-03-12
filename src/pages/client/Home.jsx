@@ -385,7 +385,7 @@ const Home = () => {
                     </ul>
 
                     <button className="btn-get-matched-refined" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
-                      Tìm người trị liệu phù hợp
+                      Tính năng này đang được phát triển.
                     </button>
                   </div>
                 </FadeInUp>
@@ -586,7 +586,7 @@ const Home = () => {
               {/* GÓI VÀNG */}
               <div className="col-lg-4">
                 <FadeInUp delay={0.2}>
-                  <div className="pricing-card gold-plan h-100 p-5 rounded-5 text-white shadow-lg border-0 position-relative" style={{ backgroundColor: brandGreen }}>
+                  <div className="pricing-card gold-plan locked-plan h-100 p-5 rounded-5 text-white shadow-lg border-0 position-relative" style={{ backgroundColor: brandGreen }}>
                     <div className="popular-ribbon">Khuyến nghị</div>
                     <h3 className="h2 fw-bold mb-2">Gói Vàng</h3>
                     <div className="price-tag mb-4">
@@ -599,7 +599,7 @@ const Home = () => {
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Workshop chữa lành nhóm</li>
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Hỗ trợ chat ưu tiên</li>
                     </ul>
-                    <button className="btn btn-light w-100 rounded-pill py-3 fw-bold" style={{ color: brandGreen, fontFamily: "'Be Vietnam Pro', sans-serif" }}>Bắt đầu ngay</button>
+                    <button className="btn btn-light w-100 rounded-pill py-3 fw-bold" style={{ color: brandGreen, fontFamily: "'Be Vietnam Pro', sans-serif" }}>Sớm ra mắt</button>
                   </div>
                 </FadeInUp>
               </div>
@@ -607,7 +607,7 @@ const Home = () => {
               {/* GÓI KIM CƯƠNG */}
               <div className="col-lg-4">
                 <FadeInUp delay={0.3}>
-                  <div className="pricing-card diamond-plan h-100 p-5 rounded-5 bg-white shadow-sm border-0 position-relative">
+                  <div className="pricing-card diamond-plan locked-plan h-100 p-5 rounded-5 bg-white shadow-sm border-0 position-relative">
                     <h3 className="h2 fw-bold mb-2">Gói Kim Cương</h3>
                     <div className="price-tag mb-4">
                       <span className="display-4 fw-bold">99.000 VNĐ</span>
@@ -619,7 +619,7 @@ const Home = () => {
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Hỗ trợ khẩn cấp 24/7</li>
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-primary me-2" /> Tài khoản gia đình (Tối đa 3 người)</li>
                     </ul>
-                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Nâng cấp lên gói kim cương</button>
+                    <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Sớm ra mắt</button>
                   </div>
                 </FadeInUp>
               </div>

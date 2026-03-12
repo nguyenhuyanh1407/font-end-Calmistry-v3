@@ -627,7 +627,7 @@ const cardExcerpt = { fontSize: '14px', color: '#666', lineHeight: '1.6', height
 
 const fabButton = {
   position: 'fixed', bottom: '40px', right: '40px',
-  width: '65px', height: '65px', borderRadius: '50%',
+  width: '60px', height: '60px', borderRadius: '50%',
   backgroundColor: '#8ec339', color: '#fff', border: 'none',
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   cursor: 'pointer', boxShadow: '0 10px 25px rgba(142, 195, 57, 0.4)',

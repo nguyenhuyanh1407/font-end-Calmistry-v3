@@ -14,17 +14,21 @@ export default function AIChatWidget() {
   const chatBodyRef = useRef(null);
 
   // --- CẤU HÌNH KHOẢNG CÁCH ---
-  const paddingX = 57;
+  const isMobile = window.innerWidth <= 768;
+  const paddingX = isMobile ? 20 : 57;
   const paddingTop = 60;
-  const paddingBottom = 42;
-  const iconSize = 60;
-  const journalFabSize = 65;
-  const gapBetweenButtons = 15;
+  const paddingBottom = isMobile ? 25 : 42;
+  const iconSize = isMobile ? 50 : 60;
+  const journalFabSize = isMobile ? 55 : 65;
+  const gapBetweenButtons = isMobile ? 25 : 20;
   const brandLightGreen = "#8ec339";
 
   // --- STATES ---
   const [chatHistory, setChatHistory] = useState([]);
-  const [dimensions, setDimensions] = useState({ width: 330, height: 480 });
+  const [dimensions, setDimensions] = useState({
+    width: isMobile ? Math.min(300, window.innerWidth - 30) : 330,
+    height: isMobile ? 420 : 480
+  });
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
 
@@ -329,7 +333,7 @@ export default function AIChatWidget() {
           className="ai-chat-fab"
           onClick={() => setIsOpen(!isOpen)}
           style={{
-            ...fabButton,
+            ...fabButtonStyle,
             backgroundColor: isOpen ? "#ffffff" : brandLightGreen,
             color: isOpen ? brandLightGreen : "#ffffff",
             border: isOpen ? `2px solid ${brandLightGreen}` : "none",
@@ -345,9 +349,9 @@ export default function AIChatWidget() {
 // --- STYLES ĐẦY ĐỦ ---
 const fixedContainer = { position: "fixed", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10000 };
 const fabWrapper = { position: "absolute", width: "60px", height: "60px", pointerEvents: "auto" };
-const fabButton = { width: "60px", height: "60px", borderRadius: "50%", boxShadow: "0 8px 25px rgba(142, 195, 57, 0.3)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 2 };
+const fabButtonStyle = { width: "60px", height: "60px", borderRadius: "50%", boxShadow: "0 8px 25px rgba(142, 195, 57, 0.3)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 2 };
 const pulse = { position: "absolute", width: "60px", height: "60px", borderRadius: "50%", zIndex: 1, top: 0, left: 0 };
-const chatWindow = { position: "absolute", backgroundColor: "#fff", borderRadius: "24px", boxShadow: "0 15px 40px rgba(0,0,0,0.15)", display: "flex", flexDirection: "column", overflow: "hidden", pointerEvents: "auto", border: "1px solid #eef2ef" };
+const chatWindow = { position: "absolute", backgroundColor: "#fff", borderRadius: "24px", boxShadow: "0 15px 40px rgba(0,0,0,0.15)", display: "flex", flexDirection: "column", overflow: "hidden", pointerEvents: "auto", border: "1px solid #eef2ef", maxWidth: 'calc(100vw - 20px)', maxHeight: 'calc(100vh - 120px)' };
 const chatHeader = { padding: "15px 20px", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" };
 const avatarCircle = { width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" };
 const closeBtn = { border: "none", background: "none", color: "#fff", cursor: "pointer", fontSize: "18px" };
