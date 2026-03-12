@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 import {
   Smile, Meh, Frown, Sparkles,
   Moon, Clock, Zap, Book,
-  ChevronRight, ArrowRight
+  ChevronRight, ArrowRight, MoonStar
 } from 'lucide-react';
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -229,14 +229,17 @@ const UserDashboard = () => {
                     "{userProfile.bio}"
                   </p>
 
-                  <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
-                    <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" style={{ backgroundColor: brandGreen }}>
-                      <i className="bi bi-play-fill me-2"></i> Tiếp tục bài học
-                    </button>
-                    <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center">
-                      <i className="bi bi-calendar-event me-2"></i> Lịch sử trị liệu
-                    </button>
-                  </div>
+                    <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
+                      <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" style={{ backgroundColor: brandGreen }} onClick={() => navigate('/sleepManagement')}>
+                        <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
+                      </button>
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center">
+                        <i className="bi bi-play-fill me-2"></i> Tiếp tục bài học
+                      </button>
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center">
+                        <i className="bi bi-calendar-event me-2"></i> Lịch sử trị liệu
+                      </button>
+                    </div>
                 </div>
               </div>
             </div>
@@ -409,7 +412,8 @@ const UserDashboard = () => {
                       </p>
                       <button
                         onClick={() => navigate('/fuieds-quiz')}
-                        className="btn btn-success w-100 rounded-pill py-2"
+                        className="btn btn-dark w-100 rounded-pill py-2"
+                        style={{ backgroundColor: brandGreen }}
                       >
                         <i className="bi bi-clipboard-check me-2"></i>
                         Bắt đầu đánh giá
@@ -535,7 +539,16 @@ const UserDashboard = () => {
           {/* 2. Chất lượng giấc ngủ */}
           <div className="col-lg-4">
             <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
-              <h6 className="fw-bold mb-4">Chất lượng giấc ngủ (7 ngày)</h6>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h6 className="fw-bold mb-0">Chất lượng giấc ngủ (7 ngày)</h6>
+                <button 
+                  onClick={() => navigate('/sleepManagement')}
+                  className="btn btn-link p-0 text-success text-decoration-none small fw-bold d-flex align-items-center gap-1"
+                  style={{ fontSize: '13px' }}
+                >
+                  Đánh giá ngay <ChevronRight size={14} />
+                </button>
+              </div>
               {isLoadingSleep ? (
                 <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
               ) : sleepStats && sleepStats.sessions?.length > 0 ? (
