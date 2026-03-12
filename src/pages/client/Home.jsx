@@ -91,14 +91,21 @@ const Home = () => {
   };
 
   const handleUserTourStepChange = (stepIndex) => {
-    // Open dropdown for menu item steps (step 1 onwards)
-    if (stepIndex >= 1) {
-      const dropdownMenu = document.querySelector('.user-menu-list-target');
-      if (dropdownMenu && !dropdownMenu.classList.contains('show')) {
-        const toggleBtn = document.querySelector('.user-profile-target');
-        if (toggleBtn) toggleBtn.click();
+    // Trigger opening/closing user menu based on step
+    setTimeout(() => {
+      const toggleBtn = document.querySelector('.user-profile-target');
+      if (stepIndex >= 1) {
+        // Should be open
+        if (toggleBtn && toggleBtn.getAttribute('aria-expanded') === 'false') {
+          toggleBtn.click();
+        }
+      } else {
+        // Step 0: Should be closed
+        if (toggleBtn && toggleBtn.getAttribute('aria-expanded') === 'true') {
+          toggleBtn.click();
+        }
       }
-    }
+    }, 50);
   };
 
 
