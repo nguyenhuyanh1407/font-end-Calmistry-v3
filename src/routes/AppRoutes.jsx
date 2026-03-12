@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import { AnimatePresence } from "framer-motion";
 import PrivateRoute from "./PrivateRoute";
+import OnboardingRoute from "./OnboardingRoute";
 
 // Client pages
 import Home from "../pages/client/Home";
@@ -18,6 +19,7 @@ import ShareStories from "../pages/client/ShareStories";
 import GroupChat from "../pages/client/GroupChat";
 import Checkout from "../pages/client/Checkout";
 import FuiedsQuiz from "../pages/client/FuiedsQuiz";
+import RelaxationLibrary from '../pages/client/RelaxationLibrary';
 
 // Author pages
 import AuthorDashboard from "../pages/author/AuthorDashboard";
@@ -27,6 +29,7 @@ import ExpertDashboardPro from "../pages/expert/ExpertDashboardPro";
 
 // Admin pages
 import AccountManagement from "../pages/admin/AccountManagement";
+import UserStatistics from "../pages/admin/UserStatistics";
 
 // Auth pages
 import Login from "../pages/auth/Login";
@@ -57,6 +60,7 @@ function AppRoutes() {
             <Route path="/" element={<Home />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route path="/relaxation" element={<RelaxationLibrary />} />
 
             {/* Create Blog - Protected */}
             <Route path="/blog/create" element={
@@ -93,6 +97,7 @@ function AppRoutes() {
             <Route path="/group-chat" element={<GroupChat />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/admin/accounts" element={<AccountManagement />} />
+            <Route path="/admin/number-users" element={<UserStatistics />} />
 
             {/* Admin Route - Account Management */}
             {/* Admin Route - Account Management
@@ -126,9 +131,9 @@ function AppRoutes() {
 
             {/* Onboarding */}
             <Route path="/onboarding" element={
-              <PrivateRoute>
+              <OnboardingRoute>
                 <Onboarding />
-              </PrivateRoute>
+              </OnboardingRoute>
             } />
 
           </Route>

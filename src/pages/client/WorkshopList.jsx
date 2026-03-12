@@ -30,13 +30,35 @@ const WorkshopList = () => {
         try {
             const response = await workshopService.bookWorkshop(workshopId);
             if (response && response.code === 1000) {
-                toast.success("✨ Đặt chỗ thành công! Hẹn gặp bạn tại workshop.");
-                fetchWorkshops(); // Refresh to update participant count
+                if (response.result?.checkoutUrl) {
+                    toast.info("Đang chuyển hướng sang trang thanh toán...");
+                    window.location.href = response.result.checkoutUrl;
+                } else {
+                    toast.success("✨ Đặt chỗ thành công! Hẹn gặp bạn tại workshop.");
+                    fetchWorkshops(); // Refresh to update participant count
+                }
             } else {
                 toast.error(response?.message || "Lỗi đặt chỗ.");
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "Bạn cần đăng nhập để đặt workshop.");
+        }
+    };
+
+    const handleCancel = async (workshopId) => {
+        if (!window.confirm("Bạn có chắc chắn muốn hủy đăng ký tham gia workshop này?")) {
+            return;
+        }
+        try {
+            const response = await workshopService.cancelBooking(workshopId);
+            if (response && response.code === 1000) {
+                toast.success("Đã hủy đăng ký thành công.");
+                fetchWorkshops(); // Refresh to update participant count
+            } else {
+                toast.error(response?.message || "Lỗi hủy đăng ký.");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Không thể hủy đăng ký. Có thể đã quá 1 giờ từ lúc đăng ký?");
         }
     };
 
@@ -110,9 +132,14 @@ const WorkshopList = () => {
                                                     <Clock size={14} />
                                                     <span>{formatDate(ws.startTime)}</span>
                                                 </div>
-                                                <div className="d-flex align-items-center gap-2 text-muted small">
+                                                <div className="d-flex align-items-center gap-2 text-muted small mb-1">
                                                     <MapPin size={14} />
                                                     <span>{ws.location || "Online qua Zoom"}</span>
+                                                </div>
+                                                <div className="d-flex align-items-center gap-2 mt-2">
+                                                    <span className={`badge ${ws.price > 0 ? 'bg-success' : 'bg-primary'} rounded-pill px-3 py-2 fw-bold`}>
+                                                        {ws.price > 0 ? `${ws.price.toLocaleString('vi-VN')} đ` : 'Miễn phí'}
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -140,17 +167,33 @@ const WorkshopList = () => {
                                                     </span>
                                                 </div>
 
-                                                <motion.button
-                                                    whileHover={{ scale: 1.05 }}
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => handleBook(ws.id)}
-                                                    disabled={ws.currentParticipants >= ws.maxParticipants}
-                                                    className={`btn ${ws.currentParticipants >= ws.maxParticipants ? 'btn-secondary' : 'btn-success'} rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2`}
-                                                    style={ws.currentParticipants < ws.maxParticipants ? { backgroundColor: brandGreen, borderColor: brandGreen } : {}}
-                                                >
-                                                    Đăng ký ngay
-                                                    <ChevronRight size={16} />
-                                                </motion.button>
+                                                {ws.isBooked ? (
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <span className="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2" style={{ cursor: 'default' }}>
+                                                            Đã đăng ký
+                                                        </span>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => handleCancel(ws.id)}
+                                                            className="btn btn-danger rounded-pill px-3 py-2 fw-bold shadow-sm d-flex align-items-center gap-2"
+                                                        >
+                                                            Hủy
+                                                        </motion.button>
+                                                    </div>
+                                                ) : (
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.05 }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={() => handleBook(ws.id)}
+                                                        disabled={ws.currentParticipants >= ws.maxParticipants}
+                                                        className={`btn ${ws.currentParticipants >= ws.maxParticipants ? 'btn-secondary' : 'btn-success'} rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2`}
+                                                        style={ws.currentParticipants < ws.maxParticipants ? { backgroundColor: brandGreen, borderColor: brandGreen } : {}}
+                                                    >
+                                                        {ws.price > 0 ? 'Thanh toán & Đăng ký' : 'Đăng ký ngay'}
+                                                        <ChevronRight size={16} />
+                                                    </motion.button>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

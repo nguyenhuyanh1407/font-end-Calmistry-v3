@@ -113,9 +113,29 @@ const AuthPages = () => {
         console.log('✅ [Register] Success:', result);
 
         if (result) {
-          alert('Đăng ký thành công! Vui lòng đăng nhập.');
-          setCurrentPage('login');
-          setFormData({ name: '', email: '', password: '', confirmPassword: '', phoneNumber: '' });
+          console.log('🔑 [Auto-Login] Starting...');
+          const loginResult = await authService.login(
+            formData.email,
+            formData.password,
+            true
+          );
+
+          if (loginResult && loginResult.authenticated) {
+            console.log('🔑 [Auto-Login] Success! Result:', loginResult);
+            await queryClient.invalidateQueries(['me']);
+
+            if (loginResult.isOnboarded === false || loginResult.isOnboarded === null || loginResult.isOnboarded === undefined) {
+              console.log('🚀 [Auto-Login] User not onboarded, redirecting to /onboarding');
+              navigate('/onboarding', { replace: true });
+            } else {
+              console.log('🏠 [Auto-Login] User already onboarded, redirecting to Home');
+              navigate('/', { replace: true });
+            }
+          } else {
+            alert('Đăng ký thành công! Vui lòng đăng nhập.');
+            setCurrentPage('login');
+            setFormData({ name: '', email: '', password: '', confirmPassword: '', phoneNumber: '' });
+          }
         }
       }
     } catch (e) {
@@ -128,6 +148,36 @@ const AuthPages = () => {
           : 'Đăng ký thất bại.');
 
       setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credential) => {
+    console.log('🔑 [Google] Processing credential...');
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await authService.googleLogin(credential);
+
+      if (result && result.authenticated) {
+        console.log('✅ [Google Login] Success!');
+        await queryClient.invalidateQueries(['me']);
+
+        if (result.isOnboarded === false || result.isOnboarded === null || result.isOnboarded === undefined) {
+          console.log('🚀 [Google Login] User not onboarded, redirecting to /onboarding');
+          navigate('/onboarding', { replace: true });
+        } else {
+          console.log('🏠 [Google Login] User already onboarded, redirecting to Home');
+          navigate('/', { replace: true });
+        }
+      } else {
+        setError('Đăng nhập Google thất bại. Vui lòng thử lại.');
+      }
+    } catch (e) {
+      console.error('❌ [Google Login] Error:', e);
+      setError(e?.data?.message || e?.message || 'Đăng nhập Google thất bại.');
     } finally {
       setLoading(false);
     }
@@ -286,7 +336,7 @@ const AuthPages = () => {
                   <hr style={{ border: '0', borderTop: '1px solid #edf2f7' }} />
                   <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#fff', padding: '0 12px', color: '#a0aec0', fontSize: '11px', fontWeight: '600' }}>HOẶC TIẾP TỤC VỚI</span>
                 </div>
-                <SocialButtons />
+                <SocialButtons onGoogleSuccess={handleGoogleSuccess} loading={loading} />
               </div>
             </motion.div>
           </motion.div>

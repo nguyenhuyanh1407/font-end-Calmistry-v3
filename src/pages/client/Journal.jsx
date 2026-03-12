@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Search, Smile, Meh, Frown, Plus, Edit2, Trash2, X, Save, Sparkles, BarChart3 } from 'lucide-react';
+import { Calendar, Search, Smile, Meh, Frown, Plus, Edit2, Trash2, X, Save, Sparkles, BarChart3, Loader, Bot } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import journalService from '../../services/journalService';
 import '../../styles/Journal.css';
@@ -7,12 +8,14 @@ import '../../styles/Journal.css';
 const Journal = () => {
   const brandGreen = '#324d3e';
   const lightGreen = '#8ec339';
+  const navigate = useNavigate();
 
   const [entries, setEntries] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [moodFilter, setMoodFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [fetchingPrompt, setFetchingPrompt] = useState(false);
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const [statsData, setStatsData] = useState(null);
@@ -50,9 +53,10 @@ const Journal = () => {
   };
 
   const handleSaveEntry = async () => {
-    if (!currentEntry.title.trim() || !currentEntry.content.trim()) return;
+    if (!currentEntry.title.trim() || !currentEntry.content.trim() || isSaving) return;
 
     try {
+      setIsSaving(true);
       setError('');
       if (currentEntry.id) {
         // Update existing entry
@@ -75,6 +79,8 @@ const Journal = () => {
     } catch (e) {
       console.error('Error saving journal:', e);
       setError(e?.data?.message || 'Không thể lưu nhật ký. Vui lòng thử lại.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -273,7 +279,30 @@ const Journal = () => {
             >
               <div style={modalHeader}>
                 <h3 style={{ margin: 0, color: brandGreen }}>{currentEntry.id ? 'Xem chi tiết & Chỉnh sửa' : 'Viết bài mới'}</h3>
-                <X onClick={() => setIsModalOpen(false)} style={{ cursor: 'pointer', color: '#999' }} />
+                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                  {currentEntry.id && currentEntry.content && (
+                    <button
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        navigate('/ai-chat', {
+                          state: {
+                            initialMessage: `Đây là nhật ký của tôi ngày hôm nay tiêu đề: "${currentEntry.title}". Nội dung: "${currentEntry.content}". Hãy tâm sự, phân tích và cho tôi lời khuyên nhé!`
+                          }
+                        });
+                      }}
+                      style={{
+                        border: `1px solid ${lightGreen}`, color: brandGreen, backgroundColor: `${lightGreen}15`,
+                        padding: '6px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
+                        display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = `${lightGreen}30`}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = `${lightGreen}15`}
+                    >
+                      <Bot size={15} /> Tâm sự cùng AI
+                    </button>
+                  )}
+                  <X onClick={() => setIsModalOpen(false)} style={{ cursor: 'pointer', color: '#999' }} />
+                </div>
               </div>
               <div style={{ padding: '24px' }}>
                 <textarea
@@ -343,8 +372,13 @@ const Journal = () => {
                     </p>
                   </motion.div>
                 )}
-                <button onClick={handleSaveEntry} style={{ ...saveBtn, backgroundColor: brandGreen }}>
-                  <Save size={18} style={{ marginRight: '8px' }} /> Lưu vào nhật ký
+                <button
+                  onClick={handleSaveEntry}
+                  disabled={isSaving}
+                  style={{ ...saveBtn, backgroundColor: brandGreen, opacity: isSaving ? 0.7 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
+                >
+                  {isSaving ? <Loader size={18} className="animate-spin" style={{ marginRight: '8px' }} /> : <Save size={18} style={{ marginRight: '8px' }} />}
+                  {isSaving ? 'Đang lưu...' : 'Lưu vào nhật ký'}
                 </button>
               </div>
             </motion.div>

@@ -217,6 +217,13 @@ const MainLayout = () => {
                   </li>
 
                   <li>
+                    <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/relaxation')}>
+                      <i className="bi bi-collection-play text-warning"></i>
+                      Kho bài tập thư giãn
+                    </button>
+                  </li>
+
+                  <li>
                     <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/ai-chat')}>
                       <i className="bi bi-robot text-info"></i>
                       Trò chuyện AI
@@ -237,6 +244,15 @@ const MainLayout = () => {
                       <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/admin/accounts')}>
                         <i className="bi bi-shield-lock text-danger"></i>
                         Manager Account
+                      </button>
+                    </li>
+                  )}
+
+                  {currentUser.roles && currentUser.roles.includes('ADMIN') && (
+                    <li>
+                      <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/admin/number-users')}>
+                        <i className="bi bi-people-fill text-primary"></i>
+                        Manager number user
                       </button>
                     </li>
                   )}
@@ -331,17 +347,41 @@ const MainLayout = () => {
                 <span>Workshops</span>
               </button>
 
+              <button
+                className="mobile-menu-item"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate('/relaxation');
+                }}
+              >
+                <i className="bi bi-collection-play"></i>
+                <span>Thư giãn</span>
+              </button>
+
               {currentUser.roles && currentUser.roles.includes('ADMIN') && (
-                <button
-                  className="mobile-menu-item"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    navigate('/admin/accounts');
-                  }}
-                >
-                  <i className="bi bi-shield-lock"></i>
-                  <span>Manager Account</span>
-                </button>
+                <>
+                  <button
+                    className="mobile-menu-item"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/admin/accounts');
+                    }}
+                  >
+                    <i className="bi bi-shield-lock"></i>
+                    <span>Manager Account</span>
+                  </button>
+
+                  <button
+                    className="mobile-menu-item"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/admin/number-users');
+                    }}
+                  >
+                    <i className="bi bi-people-fill"></i>
+                    <span>Manager number user</span>
+                  </button>
+                </>
               )}
 
               <div className="mobile-menu-divider"></div>

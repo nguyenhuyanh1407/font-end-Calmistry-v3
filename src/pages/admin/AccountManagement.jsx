@@ -43,13 +43,23 @@ const AccountManagement = () => {
         </div>
     );
 
+    // Calculate Returning Users (Anyone who has logged in)
+    const getReturningUsersCount = () => {
+        return users.filter(u => {
+            // If they have a lastLoginDate, they have used the app.
+            return !!u.lastLoginDate;
+        }).length;
+    };
+
+    const returningUsers = getReturningUsersCount();
+
     return (
         <div className="container py-5 animate-fade-in"
-        style={{
-                     fontFamily: "'Rubik', sans-serif",
-                     marginTop: '100px', // Đẩy nội dung xuống 100px để không bị Navbar che
-                     minHeight: '80vh'
-                 }}>
+            style={{
+                fontFamily: "'Rubik', sans-serif",
+                marginTop: '100px', // Đẩy nội dung xuống 100px để không bị Navbar che
+                minHeight: '80vh'
+            }}>
             {/* Header Section */}
             <div className="row align-items-end mb-5">
                 <div className="col-md-8">
@@ -66,11 +76,27 @@ const AccountManagement = () => {
                     </h1>
                     <p className="text-muted mb-0">Hệ thống quản trị viên: Quản lý quyền hạn và phân quyền chuyên gia.</p>
                 </div>
-                <div className="col-md-4 text-md-end mt-4 mt-md-0">
-                    <div className="d-inline-flex align-items-center gap-2 bg-white px-4 py-2 rounded-pill shadow-sm border">
-                        <Users size={18} className="text-muted" />
-                        <span className="fw-bold">{users.length}</span>
-                        <span className="text-muted">Thành viên</span>
+                <div className="col-md-5 text-md-end mt-4 mt-md-0">
+                    <div className="d-inline-flex align-items-center gap-3 bg-white px-4 py-3 rounded-4 shadow-sm border ms-auto">
+                        <div className="d-flex flex-column align-items-end pe-3 border-end">
+                            <span className="text-muted small fw-bold text-uppercase mb-1">Tổng thành viên</span>
+                            <div className="d-flex align-items-center gap-2">
+                                <Users size={20} style={{ color: brandGreen }} />
+                                <span className="fs-4 fw-900 mb-0" style={{ color: brandGreen }}>{users.length}</span>
+                            </div>
+                        </div>
+
+                        <div className="d-flex flex-column align-items-start ps-2">
+                            <span className="text-muted small fw-bold text-uppercase mb-1 d-flex gap-1 align-items-center">
+                                <ArrowUpCircle size={14} className="text-success" /> Returning
+                            </span>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="fs-4 fw-900 mb-0 text-success">{returningUsers}</span>
+                                <span className="small fw-bold px-2 py-1 bg-success bg-opacity-10 text-success rounded-pill">
+                                    {users.length > 0 ? Math.round((returningUsers / users.length) * 100) : 0}%
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -110,13 +136,12 @@ const AccountManagement = () => {
                                         </div>
                                     </td>
                                     <td className="py-4">
-                                        <span className={`role-badge ${
-                                            user.roles.includes('ADMIN') ? 'rb-admin' :
+                                        <span className={`role-badge ${user.roles.includes('ADMIN') ? 'rb-admin' :
                                             user.roles.includes('EXPERT') ? 'rb-expert' : 'rb-user'
-                                        }`}>
+                                            }`}>
                                             <span className="dot"></span>
                                             {user.roles.includes('ADMIN') ? 'Quản trị viên' :
-                                             user.roles.includes('EXPERT') ? 'Chuyên gia' : 'Người dùng'}
+                                                user.roles.includes('EXPERT') ? 'Chuyên gia' : 'Người dùng'}
                                         </span>
                                     </td>
                                     <td className="pe-4 py-4 text-end">

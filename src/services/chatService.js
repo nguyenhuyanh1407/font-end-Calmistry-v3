@@ -66,8 +66,8 @@ class ChatService {
         return api.get('/chat/rooms');
     }
 
-    async getRoomHistory(roomId) {
-        return api.get(`/chat/rooms/${roomId}/messages`);
+    async getRoomHistory(roomId, page = 0, size = 50) {
+        return api.get(`/chat/rooms/${roomId}/messages?page=${page}&size=${size}`);
     }
 
     async createRoom(roomData) {

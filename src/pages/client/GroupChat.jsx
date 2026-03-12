@@ -42,6 +42,9 @@ const GroupChat = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [selectedRoom, setSelectedRoom] = useState(null);
+    const [page, setPage] = useState(0);
+    const [hasMoreMessages, setHasMoreMessages] = useState(true);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [isAnonymous, setIsAnonymous] = useState(false);
     const [particles, setParticles] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +72,50 @@ const GroupChat = () => {
     const getRoomIcon = (name) => roomSpecs[name]?.icon || "💬";
     const getRoomPrompt = (name) => roomSpecs[name]?.prompt || "Chia sẻ tâm tư của bạn...";
 
-    const anonIcons = ["☁️", "🌙", "⭐", "🍃", "🍄", "🌊"];
+    const anonIcons = ["☁️", "🌙", "⭐", "🍃", "🍄", "🌊", "🦊", "🐢", "🐳", "🦉", "🍀", "🌸"];
+    const anonColors = ["#FFB6C1", "#FFDAB9", "#E6E6FA", "#FFF0F5", "#F0F8FF", "#F5FFFA", "#F0FFF0", "#FFFFE0", "#FFFACD", "#FFE4E1", "#F5F5DC", "#FAF0E6"];
+
+    const getAnonymousProfile = (id) => {
+        if (!id) return { icon: "🎭", color: "#f8f9fa" };
+        const index = id % anonIcons.length;
+        return { icon: anonIcons[index], color: anonColors[index] };
+    };
+
+    // --- Sound Effects ---
+    const playSound = (type = "message") => {
+        try {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = context.createOscillator();
+            const gainNode = context.createGain();
+
+            osc.connect(gainNode);
+            gainNode.connect(context.destination);
+
+            if (type === "healing") {
+                // Gentle chime
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(523.25, context.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, context.currentTime + 0.5); // C6
+                gainNode.gain.setValueAtTime(0, context.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, context.currentTime + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 1.5);
+                osc.start(context.currentTime);
+                osc.stop(context.currentTime + 1.5);
+            } else {
+                // Soft pop
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(400, context.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, context.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0, context.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.2, context.currentTime + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+                osc.start(context.currentTime);
+                osc.stop(context.currentTime + 0.2);
+            }
+        } catch (e) {
+            console.log("Audio not supported or blocked", e);
+        }
+    };
 
     useEffect(() => {
         const init = async () => {
@@ -126,12 +172,17 @@ const GroupChat = () => {
                     }
 
                     // Fetch history first
-                    const historyRes = await chatService.getRoomHistory(selectedRoom.id);
+                    setPage(0);
+                    setHasMoreMessages(true);
+                    const historyRes = await chatService.getRoomHistory(selectedRoom.id, 0, 50);
                     if (historyRes && historyRes.code === 1000) {
-                        setMessages(historyRes.result);
+                        const initMessages = historyRes.result;
+                        setMessages([...initMessages].reverse());
+                        setHasMoreMessages(initMessages.length === 50);
                         scrollToBottom();
                     } else {
                         setMessages([]);
+                        setHasMoreMessages(false);
                     }
 
                     // Then subscribe for new ones
@@ -139,9 +190,13 @@ const GroupChat = () => {
                         const message = JSON.parse(payload.body);
                         if (message.messageType === 'SYSTEM' && message.messageText === 'HEALING_VIBES') {
                             triggerParticles();
+                            playSound("healing");
                         } else {
                             setMessages(prev => [...prev, message]);
                             scrollToBottom();
+                            if (message.sender?.id !== currentUser?.id) {
+                                playSound("message");
+                            }
                         }
                     });
                 } catch (error) {
@@ -155,6 +210,42 @@ const GroupChat = () => {
         }
     }, [isConnected, selectedRoom]);
 
+    const loadMoreMessages = async () => {
+        if (!hasMoreMessages || isLoadingMore || !selectedRoom) return;
+
+        setIsLoadingMore(true);
+        try {
+            const nextPage = page + 1;
+            const res = await chatService.getRoomHistory(selectedRoom.id, nextPage, 50);
+
+            if (res && res.code === 1000) {
+                const olderMessages = res.result;
+                if (olderMessages.length > 0) {
+                    const container = messagesContainerRef.current;
+                    const previousScrollHeight = container ? container.scrollHeight : 0;
+
+                    setMessages(prev => [...[...olderMessages].reverse(), ...prev]);
+                    setPage(nextPage);
+                    setHasMoreMessages(olderMessages.length === 50);
+
+                    setTimeout(() => {
+                        if (container) {
+                            const newScrollHeight = container.scrollHeight;
+                            container.scrollTop = newScrollHeight - previousScrollHeight;
+                        }
+                    }, 0);
+                } else {
+                    setHasMoreMessages(false);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading more messages:", error);
+            toast.error("Không tải thêm được tin nhắn.");
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
+
     const scrollToBottom = () => {
         setTimeout(() => {
             if (messagesContainerRef.current) {
@@ -167,15 +258,18 @@ const GroupChat = () => {
         e.preventDefault();
         if ((!newMessage.trim() && !selectedImage) || !currentUser || !selectedRoom) return;
 
+        const isAnon = isAnonymous;
+        const senderUsername = isAnon ? `Ẩn Danh` : (currentUser.fullName || currentUser.username);
+
         const messagePayload = {
             sender: {
                 id: currentUser.id,
-                username: isAnonymous ? `Bạn ${anonIcons[currentUser.id % anonIcons.length]}` : (currentUser.fullName || currentUser.username)
+                username: senderUsername
             },
             messageText: newMessage,
             mediaUrl: selectedImage,
             messageType: selectedImage ? 'IMAGE' : 'TEXT',
-            isAnonymous: isAnonymous,
+            isAnonymous: isAnon,
             room: { id: selectedRoom.id }
         };
 
@@ -423,11 +517,27 @@ const GroupChat = () => {
                                     </div>
                                 ) : (
                                     <div className="d-flex flex-column gap-3">
-                                        <div className="text-center py-5">
-                                            <div className="bg-white bg-opacity-50 rounded-4 p-4 d-inline-block shadow-sm">
-                                                <Flower2 size={40} className="text-success mb-3 opacity-50" />
-                                                <h5 className="fw-bold">Chào mừng bạn đến với {selectedRoom?.name}</h5>
-                                                <p className="text-muted small mb-0">Nơi mọi tâm tư đều được lắng nghe và trân trọng.</p>
+                                        {hasMoreMessages && (
+                                            <div className="text-center mb-2 mt-2">
+                                                <button
+                                                    onClick={loadMoreMessages}
+                                                    disabled={isLoadingMore}
+                                                    className="btn btn-sm btn-outline-success rounded-pill px-4 shadow-sm"
+                                                    style={{ color: brandGreen, borderColor: brandGreen }}
+                                                >
+                                                    {isLoadingMore ? "Đang tải..." : "Tải thêm tin nhắn cũ"}
+                                                </button>
+                                            </div>
+                                        )}
+                                        <div className="text-center py-4 mb-3 position-sticky top-0" style={{ zIndex: 5 }}>
+                                            <div className="bg-white bg-opacity-90 backdrop-blur rounded-4 p-3 d-inline-block shadow-sm border border-success border-opacity-25" style={{ maxWidth: '80%' }}>
+                                                <div className="d-flex align-items-center justify-content-center gap-2 mb-2">
+                                                    <Sparkles size={16} className="text-warning" />
+                                                    <span className="fw-bold text-success small text-uppercase tracking-wider">Châm ngôn hôm nay</span>
+                                                    <Sparkles size={16} className="text-warning" />
+                                                </div>
+                                                <h6 className="fw-bold mb-1" style={{ color: brandGreen }}>"{getRoomPrompt(selectedRoom?.name)}"</h6>
+                                                <p className="text-muted small mb-0 mt-2 italic">Hãy cùng chia sẻ những năng lượng chữa lành vào vùng yên này nhé.</p>
                                             </div>
                                         </div>
 
@@ -443,19 +553,21 @@ const GroupChat = () => {
                                                     >
                                                         <div style={{ maxWidth: '80%' }}>
                                                             {!isMe && (
-                                                                <small className="text-muted fw-bold ms-2 mb-1 d-block opacity-75">
+                                                                <small className="text-muted fw-bold ms-2 mb-1 d-block opacity-75 d-flex align-items-center gap-1">
+                                                                    {msg.isAnonymous && <span className="fs-6">{getAnonymousProfile(msg.sender?.id).icon}</span>}
                                                                     {msg.sender?.username}
                                                                 </small>
                                                             )}
                                                             <div className={`p-3 rounded-4 shadow-sm ${isMe
                                                                 ? 'bg-success text-white'
-                                                                : 'bg-white text-dark border border-white'
+                                                                : 'text-dark border'
                                                                 }`}
                                                                 style={{
                                                                     borderBottomRightRadius: isMe ? '4px' : '20px',
                                                                     borderBottomLeftRadius: isMe ? '20px' : '4px',
                                                                     backdropFilter: isMe ? 'none' : 'blur(10px)',
-                                                                    backgroundColor: isMe ? '#324d3e' : 'rgba(255,255,255,0.8)'
+                                                                    backgroundColor: isMe ? brandGreen : (msg.isAnonymous ? getAnonymousProfile(msg.sender?.id).color : '#ffffff'),
+                                                                    borderColor: isMe ? 'transparent' : 'rgba(0,0,0,0.05)'
                                                                 }}>
                                                                 {msg.mediaUrl && (
                                                                     <div className="mb-2">
