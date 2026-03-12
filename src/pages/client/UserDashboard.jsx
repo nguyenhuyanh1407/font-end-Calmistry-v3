@@ -564,6 +564,13 @@ const UserDashboard = () => {
                     <div>
                       <div className="small text-muted">Điểm trung bình</div>
                       <div className="fw-bold fs-5 text-success">{Math.round(sleepStats.averageScore || 0)}/100</div>
+                      <div 
+                        onClick={() => navigate('/sleepManagement')} 
+                        className="small text-primary mt-1" 
+                        style={{ cursor: 'pointer', textDecoration: 'underline', fontSize: '12px' }}
+                      >
+                        Xem chi tiết
+                      </div>
                     </div>
                     <Moon size={24} className="text-muted opacity-50" />
                   </div>
