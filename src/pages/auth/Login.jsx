@@ -27,7 +27,7 @@ const AuthPages = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const isValidEmail = (email) => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
+  const isValidEmail = (email) => /^[a-zA-Z0-9._%+-]+@(gmail\.com|calmistry\.com)$/.test(email);
   const isValidPhone = (phone) => {
     return /^\d{10}$/.test(phone);
   };
@@ -40,7 +40,7 @@ const AuthPages = () => {
       if (!formData.email.includes('@')) {
         return setError('Email không hợp lệ'), false;
       }
-      return setError('Vui lòng sử dụng địa chỉ @gmail.com'), false;
+      return setError('Vui lòng sử dụng địa chỉ @gmail.com hoặc @calmistry.com'), false;
     }
 
     // Password Validation
