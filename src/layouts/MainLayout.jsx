@@ -165,7 +165,7 @@ const MainLayout = () => {
             ) : (
               <div className="dropdown">
                 <button
-                  className="btn d-flex align-items-center dropdown-toggle border-0"
+                  className="btn d-flex align-items-center dropdown-toggle border-0 user-profile-target"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                   style={{
@@ -192,7 +192,7 @@ const MainLayout = () => {
                   </span>
                 </button>
 
-                <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2" style={{ minWidth: '260px', borderRadius: '15px' }}>
+                <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2 user-menu-list-target" style={{ minWidth: '260px', borderRadius: '15px' }}>
                   <li className="px-3 py-3 mb-2 border-bottom bg-light rounded-top-4">
                     <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>
                       Xin chào, {currentUser.fullName || currentUser.name}!
@@ -203,28 +203,28 @@ const MainLayout = () => {
                   </li>
 
                   <li>
-                    <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/userDashboard')}>
+                    <button className="dropdown-item user-dashboard-target" style={dropdownItemStyle} onClick={() => navigate('/userDashboard')}>
                       <i className="bi bi-grid-1x2 text-primary"></i>
                       Dashboard
                     </button>
                   </li>
 
                   <li>
-                    <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/workshops')}>
+                    <button className="dropdown-item user-workshops-target" style={dropdownItemStyle} onClick={() => navigate('/workshops')}>
                       <i className="bi bi-calendar-event text-success"></i>
                       Tham gia Workshop
                     </button>
                   </li>
 
                   <li>
-                    <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/relaxation')}>
+                    <button className="dropdown-item user-exercises-target" style={dropdownItemStyle} onClick={() => navigate('/relaxation')}>
                       <i className="bi bi-collection-play text-warning"></i>
                       Kho bài tập thư giãn
                     </button>
                   </li>
 
                   <li>
-                    <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/ai-chat')}>
+                    <button className="dropdown-item user-aichat-target" style={dropdownItemStyle} onClick={() => navigate('/ai-chat')}>
                       <i className="bi bi-robot text-info"></i>
                       Trò chuyện AI
                     </button>

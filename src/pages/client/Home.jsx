@@ -34,6 +34,8 @@ const Home = () => {
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [showGuestTour, setShowGuestTour] = useState(false);
+  const [showUserTour, setShowUserTour] = useState(false);
+  const [userData, setUserData] = useState(null);
 
 
   // 🔥 SỬA LỖI: Tự động chạy khi Component Mount
@@ -51,6 +53,13 @@ const Home = () => {
             console.log('🚀 [Home] Redirecting to onboarding...');
             navigate('/onboarding');
             return;
+          }
+
+          // User is onboarded, now check for Home Tour
+          setUserData(user);
+          const hasSeenUserTour = localStorage.getItem('HAS_SEEN_USER_HOME_TOUR');
+          if (!hasSeenUserTour) {
+            setTimeout(() => setShowUserTour(true), 1500);
           }
         } catch (error) {
           console.error("Failed to fetch user info for onboarding check:", error);
@@ -78,6 +87,17 @@ const Home = () => {
       setExpandedIndex(2);
     } else {
       setExpandedIndex(null);
+    }
+  };
+
+  const handleUserTourStepChange = (stepIndex) => {
+    // Open dropdown for menu item steps (step 1 onwards)
+    if (stepIndex >= 1) {
+      const dropdownMenu = document.querySelector('.user-menu-list-target');
+      if (dropdownMenu && !dropdownMenu.classList.contains('show')) {
+        const toggleBtn = document.querySelector('.user-profile-target');
+        if (toggleBtn) toggleBtn.click();
+      }
     }
   };
 
@@ -195,21 +215,43 @@ const Home = () => {
       placement: 'top'
     },
     {
-      target: '.therapist-image-grid',
-      title: 'Chuyên gia tin cậy',
-      content: 'Kết nối với mạng lưới nhà tư vấn tâm lý có trình độ, giúp bạn vượt qua lo âu và tìm lại sự cân bằng.'
-    },
-    {
-      target: '#pricing-section',
-      title: 'Lựa chọn gói hội viên',
-      content: 'Chọn gói dịch vụ phù hợp nhất với nhu cầu của bạn để tận hưởng đầy đủ các tiện ích chăm sóc sức khỏe.',
-      placement: 'bottom'
-    },
-    {
       target: '.login-target',
       title: 'Bắt đầu ngay',
       content: 'Đăng nhập ngay để bắt đầu hành trình chữa lành và khám phá đầy đủ các tính năng tuyệt vời của Calmistry!',
       placement: 'bottom'
+    }
+  ];
+
+  const userTourSteps = [
+    {
+      target: '.user-profile-target',
+      title: `Xin chào, ${userData?.fullName || userData?.name || 'bạn'}!`,
+      content: 'Chào mừng bạn quay lại! Đây là khu vực quản lý tài khoản, nơi tập trung các tính năng dành riêng cho thành viên.',
+      placement: 'bottom'
+    },
+    {
+      target: '.user-dashboard-target',
+      title: 'Dashboard cá nhân',
+      content: 'Theo dõi hành trình, lịch sử và các chỉ số sức khỏe tinh thần của bạn một cách trực quan.',
+      placement: 'left'
+    },
+    {
+      target: '.user-workshops-target',
+      title: 'Tham gia Workshop',
+      content: 'Đừng bỏ lỡ các buổi trị liệu nhóm và Workshop chuyên sâu cùng các chuyên gia hàng đầu.',
+      placement: 'left'
+    },
+    {
+      target: '.user-exercises-target',
+      title: 'Kho bài tập thư giãn',
+      content: 'Hệ thống các bài thực hành đa dạng giúp bạn thư giãn và cân bằng cảm xúc mỗi ngày.',
+      placement: 'left'
+    },
+    {
+      target: '.user-aichat-target',
+      title: 'Trò chuyện AI',
+      content: 'Trợ lý AI luôn sẵn sàng 24/7 để lắng nghe, thấu hiểu và đưa ra những lời khuyên hữu ích cho bạn.',
+      placement: 'left'
     }
   ];
 
@@ -231,11 +273,18 @@ const Home = () => {
             navigate('/login');
           }}
         />
+      )}      {/* 2. AUTHENTICATED USER TOUR */}
+      {showUserTour && (
+        <GuestOnboarding 
+          steps={userTourSteps} 
+          onComplete={() => setShowUserTour(false)} 
+          onStepChange={handleUserTourStepChange}
+          onFinish={() => {
+            setShowUserTour(false);
+            localStorage.setItem('HAS_SEEN_USER_HOME_TOUR', 'true');
+          }}
+        />
       )}
-
-
-
-
 
 
       <div style={{ backgroundColor: brandGreen, overflowX: 'hidden' }}>
