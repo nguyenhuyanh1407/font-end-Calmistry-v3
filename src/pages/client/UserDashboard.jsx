@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import '../../styles/UserDashboard.css';
 // Đảm bảo bạn đã cài: npm install bootstrap-icons hoặc thêm CDN vào index.html
 import { useState, useEffect } from 'react';
