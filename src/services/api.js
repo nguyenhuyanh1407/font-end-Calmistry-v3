@@ -68,26 +68,30 @@ const handleResponse = async (response) => {
 
 /**
  * Tạo headers cho request
+ * @param {object} customHeaders
+ * @param {string} endpoint - Endpoint URL để kiểm tra security
  */
-const createHeaders = (customHeaders = {}) => {
+const createHeaders = (customHeaders = {}, endpoint = '') => {
   const headers = {
     'Content-Type': 'application/json',
     ...customHeaders
   };
 
+  // Các public endpoints KHÔNG nên gửi token (đặc biệt là login/register)
+  // để tránh việc token cũ/hết hạn làm request bị reject (401/400)
+  const isPublicAuthEndpoint = endpoint.includes('/auth/token') || 
+                               endpoint.includes('/auth/register') || 
+                               endpoint.includes('/auth/google');
+
+  if (isPublicAuthEndpoint) {
+    console.log('🛡️ [API] Public auth endpoint detected - skipping Authorization header');
+    return headers;
+  }
+
   // Thêm token nếu có
   const token = getToken();
-  console.log('🔑 [API] Token check:', {
-    hasToken: !!token,
-    tokenLength: token?.length,
-    tokenPreview: token ? token.substring(0, 20) + '...' : 'null'
-  });
-
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
-    console.log('✅ [API] Authorization header added');
-  } else {
-    console.warn('⚠️ [API] No token found - request will be sent without auth');
   }
 
   return headers;
@@ -103,7 +107,7 @@ const apiRequest = async (endpoint, options = {}) => {
 
   const config = {
     ...options,
-    headers: createHeaders(options.headers)
+    headers: createHeaders(options.headers, endpoint)
   };
 
   try {
