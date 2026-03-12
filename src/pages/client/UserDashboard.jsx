@@ -354,7 +354,7 @@ const UserDashboard = () => {
 
               {/* FUIEDS Score Card */}
               <div className="col-md-7">
-                <div className="p-4 rounded-5 h-100 shadow-sm border-0 bg-white card-hover">
+                <div className="p-4 rounded-5 shadow-sm border-0 bg-white card-hover">
                   <div className="d-flex justify-content-between align-items-start mb-4">
                     <div className="p-3 rounded-4" style={{ backgroundColor: 'rgba(50, 77, 62, 0.05)' }}>
                       <i className="bi bi-heart-pulse fs-4" style={{ color: lightGreen }}></i>
@@ -371,7 +371,7 @@ const UserDashboard = () => {
                       </div>
                     </div>
                   ) : fuiedsScore ? (
-                    <div className="d-flex flex-column h-100">
+                    <div className="d-flex flex-column">
                       <div className="d-flex justify-content-between align-items-center mb-3">
                         <h5 className="fw-bold mb-0" style={{ color: fuiedsScore.statusColor }}>
                           {scoreContext.title}
@@ -414,7 +414,7 @@ const UserDashboard = () => {
 
               {/* Stats Card */}
               <div className="col-md-5">
-                <div className="p-4 rounded-5 h-100 shadow-sm border-0 text-white" style={{ backgroundColor: brandGreen }}>
+                <div className="p-4 rounded-5 shadow-sm border-0 text-white" style={{ backgroundColor: brandGreen }}>
                   <div className="d-flex justify-content-between mb-4">
                     <i className="bi bi-lightning-charge-fill fs-3 text-warning"></i>
                     <i className="bi bi-three-dots"></i>
