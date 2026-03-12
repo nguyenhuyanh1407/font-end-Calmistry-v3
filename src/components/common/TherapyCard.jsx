@@ -15,7 +15,7 @@ const TherapyCard = ({
   return (
     <div className="col-12 col-md-4" style={{ maxWidth: '400px' }}>
       <div
-        className={`therapy-card ${expandedIndex === index ? 'active' : ''}`}
+        className={`therapy-card therapy-card-${index} ${expandedIndex === index ? 'active' : ''}`}
         onClick={() => onToggle(index)}
         onMouseEnter={() => onMouseEnter(index)}
         onMouseLeave={() => onMouseLeave()}
@@ -67,7 +67,7 @@ const TherapyCard = ({
           {item.subOptions.map((sub, sIdx) => (
             <div
               key={sIdx}
-              className="sub-card-item mb-2 p-3 d-flex align-items-center justify-content-between"
+              className={`sub-card-item sub-card-item-${index}-${sIdx} mb-2 p-3 d-flex align-items-center justify-content-between`}
               onClick={(e) => {
                 e.stopPropagation();
                 sub.action && sub.action();

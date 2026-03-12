@@ -27,17 +27,35 @@ const AuthPages = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
+  const isValidEmail = (email) => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
+  const isValidPhone = (phone) => {
+    return /^\d{10}$/.test(phone);
+  };
   const validateForm = () => {
     setError('');
+    
+    // Email Validation
     if (!formData.email.trim()) return setError('Vui lòng nhập email'), false;
-    if (!isValidEmail(formData.email)) return setError('Email không hợp lệ'), false;
+    if (!isValidEmail(formData.email)) {
+      if (!formData.email.includes('@')) {
+        return setError('Email không hợp lệ'), false;
+      }
+      return setError('Vui lòng sử dụng địa chỉ @gmail.com'), false;
+    }
+
+    // Password Validation
     if (!formData.password.trim()) return setError('Vui lòng nhập mật khẩu'), false;
+    if (formData.password.length < 6) return setError('Mật khẩu phải có ít nhất 6 ký tự'), false;
 
     if (currentPage === 'register') {
+      // Name Validation
       if (!formData.name.trim()) return setError('Vui lòng nhập họ và tên'), false;
-      if (formData.password.length < 6) return setError('Mật khẩu phải có ít nhất 6 ký tự'), false;
+      
+      // Phone Validation
+      if (!formData.phoneNumber.trim()) return setError('Vui lòng nhập số điện thoại'), false;
+      if (!isValidPhone(formData.phoneNumber)) return setError('Số điện thoại không đúng định dạng Việt Nam'), false;
+
+      // Confirm Password
       if (formData.password !== formData.confirmPassword)
         return setError('Mật khẩu xác nhận không khớp'), false;
     }
@@ -221,21 +239,22 @@ const AuthPages = () => {
               <WelcomeContent type={currentPage} brandGreen={brandGreen} lightGreen={lightGreen} />
             </motion.div>
 
-            <motion.div style={{ flex: 1.1, padding: '45px 50px', backgroundColor: '#fff' }} layout>
-              <div className="tab-container">
-                {['login', 'register'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => {
-                      setCurrentPage(tab);
-                      setError(''); // Clear error when switching tabs
-                    }}
-                    className={`tab-button ${currentPage === tab ? 'active' : ''}`}
-                  >
-                    {tab === 'login' ? 'Đăng nhập' : 'Đăng ký'}
-                  </button>
-                ))}
-              </div>
+            <motion.div style={{ flex: 1.1, padding: '45px 50px', backgroundColor: '#fff', display: 'flex', flexDirection: 'column' }} layout>
+              <div style={{ maxWidth: '400px', width: '100%', margin: '0 auto' }}>
+                <div className="tab-container">
+                  {['login', 'register'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => {
+                        setCurrentPage(tab);
+                        setError(''); // Clear error when switching tabs
+                      }}
+                      className={`tab-button ${currentPage === tab ? 'active' : ''}`}
+                    >
+                      {tab === 'login' ? 'Đăng nhập' : 'Đăng ký'}
+                    </button>
+                  ))}
+                </div>
 
               <AnimatePresence mode="wait">
                 <motion.div
@@ -331,12 +350,13 @@ const AuthPages = () => {
                 </motion.div>
               </AnimatePresence>
 
-              <div style={{ marginTop: '40px' }}>
-                <div style={{ position: 'relative', textAlign: 'center', marginBottom: '20px' }}>
-                  <hr style={{ border: '0', borderTop: '1px solid #edf2f7' }} />
-                  <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#fff', padding: '0 12px', color: '#a0aec0', fontSize: '11px', fontWeight: '600' }}>HOẶC TIẾP TỤC VỚI</span>
+                <div style={{ marginTop: '40px' }}>
+                  <div style={{ position: 'relative', textAlign: 'center', marginBottom: '20px' }}>
+                    <hr style={{ border: '0', borderTop: '1px solid #edf2f7' }} />
+                    <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#fff', padding: '0 12px', color: '#a0aec0', fontSize: '11px', fontWeight: '600' }}>HOẶC TIẾP TỤC VỚI</span>
+                  </div>
+                  <SocialButtons onGoogleSuccess={handleGoogleSuccess} loading={loading} />
                 </div>
-                <SocialButtons onGoogleSuccess={handleGoogleSuccess} loading={loading} />
               </div>
             </motion.div>
           </motion.div>

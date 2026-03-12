@@ -326,6 +326,7 @@ export default function AIChatWidget() {
         )}
 
         <button
+          className="ai-chat-fab"
           onClick={() => setIsOpen(!isOpen)}
           style={{
             ...fabButton,

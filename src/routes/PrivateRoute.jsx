@@ -9,8 +9,7 @@ import api from '../services/api';
 const PrivateRoute = ({ children }) => {
     const token = api.getToken();
 
-    // If no token, redirect to login
-    if (!token) {
+    if (token) {
         return <Navigate to="/login" replace />;
     }
 

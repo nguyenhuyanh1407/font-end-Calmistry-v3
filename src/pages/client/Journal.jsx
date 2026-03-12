@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Search, Smile, Meh, Frown, Plus, Edit2, Trash2, X, Save, Sparkles, BarChart3, Loader, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import journalService from '../../services/journalService';
+import GuestOnboarding from '../../components/common/GuestOnboarding';
 import '../../styles/Journal.css';
 
 const Journal = () => {
@@ -24,6 +25,81 @@ const Journal = () => {
   const [currentEntry, setCurrentEntry] = useState({
     id: null, title: '', content: '', mood: 'neutral', createdAt: new Date().toISOString(), aiResponse: ''
   });
+
+  const saveLock = useRef(false);
+
+  // --- ONBOARDING TOUR ---
+  const [tourStage, setTourStage] = useState(null); // 'main', 'form', 'stats', or null
+  
+  useEffect(() => {
+    const hasSeenJournalTour = localStorage.getItem('HAS_SEEN_JOURNAL_TOUR');
+    if (!hasSeenJournalTour) {
+      setTourStage('main');
+    }
+  }, []);
+
+  const mainTourSteps = [
+    {
+      target: '.tour-search',
+      title: 'Tìm kiếm nhanh chóng',
+      content: 'Bạn có thể dễ dàng tìm lại những dòng nhật ký cũ bằng cách nhập từ khóa tại đây.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-filter',
+      title: 'Lọc theo cảm xúc',
+      content: 'Chọn icon cảm xúc để xem lại những ngày bạn thấy vui, buồn hay bình yên.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-add-journal',
+      title: 'Viết nhật ký mới',
+      content: 'Hãy nhấn vào nút dấu cộng này để bắt đầu ghi lại cảm xúc của bạn ngay bây giờ!',
+      placement: 'top'
+    }
+  ];
+
+  const formTourSteps = [
+    {
+      target: '.tour-title',
+      title: 'Tiêu đề bài viết',
+      content: 'Bắt đầu bằng một tiêu đề ngắn gọn cho nhật ký ngày hôm nay của bạn.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-suggest-btn',
+      title: 'Cần một gợi ý?',
+      content: 'Nếu bạn chưa biết viết gì, hãy nhấn vào đây. AI sẽ gợi ý cho bạn những chủ đề tâm sự thật ý nghĩa!',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-mood-select',
+      title: 'Ghi lại cảm xúc',
+      content: 'Chọn trạng thái cảm xúc hiện tại của bạn để chúng mình có thể theo dõi sự thay đổi tâm trạng của bạn theo thời gian nhé.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-content',
+      title: 'Không gian riêng tư của bạn',
+      content: 'Hãy trút bỏ mọi muộn phiền hoặc ghi lại những niềm vui nhỏ bé vào đây. Không ai có thể xem ngoài bạn!',
+      placement: 'right'
+    },
+    {
+      target: '.tour-save',
+      title: 'Hoàn tất bài viết',
+      content: 'Đừng quên nhấn "Lưu" để bài viết được lưu trữ và AI có thể đưa ra những lời khuyên hữu ích cho bạn.',
+      placement: 'top'
+    }
+  ];
+
+  const statsTourSteps = [
+    {
+      target: '.tour-stats-btn',
+      title: 'Thống kê tâm hồn',
+      content: 'Sau khi lưu, bạn có thể nhấn vào đây để xem biểu đồ tâm trạng và nhận lời khuyên tổng quát từ AI!',
+      placement: 'bottom'
+    }
+  ];
 
   // --- LOGIC DỮ LIỆU ---
   useEffect(() => {
@@ -53,7 +129,11 @@ const Journal = () => {
   };
 
   const handleSaveEntry = async () => {
-    if (!currentEntry.title.trim() || !currentEntry.content.trim() || isSaving) return;
+    if (!currentEntry.title.trim() || !currentEntry.content.trim()) return;
+    
+    // Synchronous Lock Check
+    if (saveLock.current) return;
+    saveLock.current = true;
 
     try {
       setIsSaving(true);
@@ -65,7 +145,7 @@ const Journal = () => {
           content: currentEntry.content,
           mood: currentEntry.mood
         });
-        setEntries(entries.map(e => e.id === updated.id ? updated : e));
+        setEntries(prev => prev.map(e => e.id === updated.id ? updated : e));
       } else {
         // Create new entry
         const created = await journalService.createJournal({
@@ -73,7 +153,13 @@ const Journal = () => {
           content: currentEntry.content,
           mood: currentEntry.mood
         });
-        setEntries([created, ...entries]);
+        setEntries(prev => [created, ...prev]);
+        
+        // Trigger stats tour if it's the first time
+        const hasSeenStats = localStorage.getItem('HAS_SEEN_JOURNAL_STATS_TOUR');
+        if (!hasSeenStats) {
+          setTourStage('stats');
+        }
       }
       setIsModalOpen(false);
     } catch (e) {
@@ -81,6 +167,7 @@ const Journal = () => {
       setError(e?.data?.message || 'Không thể lưu nhật ký. Vui lòng thử lại.');
     } finally {
       setIsSaving(false);
+      saveLock.current = false;
     }
   };
 
@@ -142,7 +229,7 @@ const Journal = () => {
             </div>
 
             <div style={searchFilterRow}>
-              <div style={searchContainer}>
+              <div style={searchContainer} className="tour-search">
                 <Search size={18} style={searchIcon} />
                 <input
                   type="text"
@@ -153,7 +240,7 @@ const Journal = () => {
                 />
               </div>
 
-              <div style={moodButtonGroup}>
+              <div style={moodButtonGroup} className="tour-filter">
                 {['all', 'happy', 'neutral', 'sad'].map((m) => (
                   <button
                     key={m}
@@ -181,7 +268,7 @@ const Journal = () => {
                     alignItems: 'center',
                     gap: '8px'
                   }}
-                  className="stats-btn"
+                  className="stats-btn tour-stats-btn"
                 >
                   <BarChart3 size={18} /> Thống kê
                 </button>
@@ -260,8 +347,15 @@ const Journal = () => {
           onClick={() => {
             setCurrentEntry({ id: null, title: '', content: '', mood: 'neutral', createdAt: new Date().toISOString() });
             setIsModalOpen(true);
+            
+            // Trigger form tour if it's the first time
+            const hasSeenForm = localStorage.getItem('HAS_SEEN_JOURNAL_FORM_TOUR');
+            if (!hasSeenForm) {
+              setTourStage('form');
+            }
           }}
           style={fabButton}
+          className="tour-add-journal"
         >
           <Plus size={32} />
         </motion.button>
@@ -277,7 +371,7 @@ const Journal = () => {
               exit={{ opacity: 0, y: 50, scale: 0.9 }}
               style={modalContent}
             >
-              <div style={modalHeader}>
+              <div style={modalHeader} className="tour-modal-header">
                 <h3 style={{ margin: 0, color: brandGreen }}>{currentEntry.id ? 'Xem chi tiết & Chỉnh sửa' : 'Viết bài mới'}</h3>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                   {currentEntry.id && currentEntry.content && (
@@ -308,12 +402,14 @@ const Journal = () => {
                 <textarea
                   style={modalInput}
                   placeholder="Tiêu đề hôm nay..."
+                  className="tour-title"
                   value={currentEntry.title}
                   onChange={e => setCurrentEntry({ ...currentEntry, title: e.target.value })}
                 />
                 <button
                   onClick={handleSuggestPrompt}
                   disabled={fetchingPrompt}
+                  className="tour-suggest-btn"
                   style={{
                     backgroundColor: 'transparent',
                     border: 'none',
@@ -329,7 +425,7 @@ const Journal = () => {
                 >
                   <Sparkles size={14} /> {fetchingPrompt ? 'Đang suy nghĩ...' : 'Gợi ý chủ đề cho tôi'}
                 </button>
-                <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }}>
+                <div style={{ display: 'flex', gap: '10px', margin: '20px 0' }} className="tour-mood-select">
                   {['happy', 'neutral', 'sad'].map(m => (
                     <button
                       key={m}
@@ -348,6 +444,7 @@ const Journal = () => {
                 <textarea
                   style={modalTextarea}
                   placeholder="Hãy chia sẻ cảm xúc của bạn..."
+                  className="tour-content"
                   value={currentEntry.content}
                   onChange={e => setCurrentEntry({ ...currentEntry, content: e.target.value })}
                 />
@@ -375,6 +472,7 @@ const Journal = () => {
                 <button
                   onClick={handleSaveEntry}
                   disabled={isSaving}
+                  className="tour-save"
                   style={{ ...saveBtn, backgroundColor: brandGreen, opacity: isSaving ? 0.7 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
                 >
                   {isSaving ? <Loader size={18} className="animate-spin" style={{ marginRight: '8px' }} /> : <Save size={18} style={{ marginRight: '8px' }} />}
@@ -470,6 +568,39 @@ const Journal = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* --- ONBOARDING TOURS BY STAGES --- */}
+      {tourStage === 'main' && (
+        <GuestOnboarding 
+          steps={mainTourSteps} 
+          onComplete={() => {
+            // Only clear if we didn't already transition to form
+            setTourStage(prev => prev === 'main' ? null : prev);
+          }} 
+        />
+      )}
+
+      {tourStage === 'form' && isModalOpen && (
+        <GuestOnboarding 
+          steps={formTourSteps} 
+          onComplete={() => {
+            setTourStage(null);
+            localStorage.setItem('HAS_SEEN_JOURNAL_FORM_TOUR', 'true');
+          }} 
+        />
+      )}
+
+      {tourStage === 'stats' && (
+        <GuestOnboarding 
+          steps={statsTourSteps} 
+          onComplete={() => {
+            setTourStage(null);
+            localStorage.setItem('HAS_SEEN_JOURNAL_STATS_TOUR', 'true');
+            // This also completes the overall journal tour
+            localStorage.setItem('HAS_SEEN_JOURNAL_TOUR', 'true');
+          }} 
+        />
+      )}
 
     </motion.div>
   );

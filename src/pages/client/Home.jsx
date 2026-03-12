@@ -6,11 +6,8 @@ import blogImg1 from "../../assets/blogImg1.jpg";
 import aiChatBot from "../../assets/aiChatbot.jpg";
 import aiChatBot1 from "../../assets/aiChatbot1.jpg";
 
-// Import ảnh mũi tên của bạn
-import arrowFirst from "../../assets/arrowfirst.png";
 
-import { motion } from 'framer-motion';
-import Joyride, { STATUS } from 'react-joyride';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Book, PencilSquare, EmojiExpressionless,
   People, ChatDots, Stars,
@@ -23,6 +20,7 @@ import FadeInUp from "../../components/ui/FadeInUp";
 import TherapyCard from "../../components/common/TherapyCard";
 import WaveDivider from "../../components/common/WaveDivider";
 import StatsSection from "../../components/common/StatsSection";
+import GuestOnboarding from "../../components/common/GuestOnboarding";
 import userService from "../../services/userService";
 import api from "../../services/api";
 import "../../styles/Home.css";
@@ -33,24 +31,10 @@ const Home = () => {
   const navigate = useNavigate();
 
   // --- STATE QUẢN LÝ ---
-  const [runOnboarding, setRunOnboarding] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [showGuestTour, setShowGuestTour] = useState(false);
 
-  useEffect(() => {
-    if (runOnboarding) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.height = '100vh';
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.height = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.height = '';
-    };
-  }, [runOnboarding]);
 
   // 🔥 SỬA LỖI: Tự động chạy khi Component Mount
   useEffect(() => {
@@ -71,86 +55,32 @@ const Home = () => {
         } catch (error) {
           console.error("Failed to fetch user info for onboarding check:", error);
         }
+      } else {
+        // Guest mode - Check if they should see the tour
+        const hasSeenTour = localStorage.getItem('HAS_SEEN_GUEST_TOUR');
+        if (!hasSeenTour) {
+          setTimeout(() => setShowGuestTour(true), 1500);
+        }
       }
 
-      // Check navigation state from Onboarding page
-      const shouldShowOnboarding = location.state?.showOnboarding;
-
-      if (shouldShowOnboarding) {
-        // Clear state to prevent re-trigger on refresh (though location.state usually persists, let's be safe)
-        window.history.replaceState({}, document.title);
-
-        const timer = setTimeout(() => {
-          setRunOnboarding(true);
-        }, 500);
-        return () => clearTimeout(timer);
-      }
     };
 
     checkOnboarding();
   }, [navigate]);
 
-  const handleJoyrideCallback = (data) => {
-    const { status } = data;
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-      localStorage.setItem('HAS_SEEN_HOME_ONBOARDING', 'true');
-      setRunOnboarding(false);
+  const handleOnboardingStepChange = (stepIndex) => {
+    // Tự động mở card tương ứng khi đến các bước liên quan
+    if (stepIndex >= 1 && stepIndex <= 4) {
+      setExpandedIndex(0);
+    } else if (stepIndex >= 5 && stepIndex <= 8) {
+      setExpandedIndex(1);
+    } else if (stepIndex >= 9 && stepIndex <= 10) {
+      setExpandedIndex(2);
+    } else {
+      setExpandedIndex(null);
     }
   };
 
-  // Cấu hình các bước với ảnh mũi tên của bạn
-  const joyrideSteps = [
-    {
-      target: '.home-hero-text',
-      disableBeacon: true,
-      placement: 'bottom',
-      floaterProps: {
-        styles: {
-          arrow: {
-            display: 'none'
-          }
-        }
-      },
-      content: (
-        <div
-          className="custom-onboarding-content"
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: '16px',
-            minWidth: '260px'
-          }}
-        >
-          {/* LEFT: Arrow + Text (stack dọc) */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              marginLeft: -450,
-              paddingLeft: 0
-            }}
-          >
-            <img
-              src={arrowFirst}
-              alt="arrow"
-              className="onboarding-arrow-animation"
-              style={{ width: '120px' }}
-            />
-            <p className="fw-bold text-white mt-2 mb-0"
-              style={{ textAlign: 'left', marginLeft: '-62px', fontFamily: 'Rubik, sans-serif' }}>
-              Khám phá ngay!
-            </p>
-
-          </div>
-
-
-        </div>
-      ),
-    }
-
-  ];
 
   const therapyTypes = [
     {
@@ -192,87 +122,120 @@ const Home = () => {
     }
   ];
 
+  const guestTourSteps = [
+    {
+      target: '.home-hero-text',
+      title: 'Chào mừng bạn đến với Calmistry',
+      content: 'Nơi bạn tìm thấy sự bình yên và hỗ trợ cho sức khỏe tinh thần của mình. Hãy bắt đầu hành trình chữa lành ngay hôm nay.'
+    },
+    {
+      target: '.therapy-card-0', // Bước này giới thiệu tổng quan và mở card
+      title: 'Hoạt động chữa lành',
+      content: 'Khám phá các phương pháp tự chữa lành đa dạng dành riêng cho bạn.',
+      placement: 'bottom'
+    },
+    {
+      target: '.sub-card-item-0-0',
+      title: 'Blog chữa lành',
+      content: 'Đọc các bài viết chuyên sâu về tâm lý và các câu chuyện truyền cảm hứng để vỗ về tâm hồn.',
+      placement: 'bottom'
+    },
+    {
+      target: '.sub-card-item-0-1',
+      title: 'Viết nhật kí',
+      content: 'Ghi lại những cảm xúc trong ngày để thấu hiểu bản thân hơn từng chút một.',
+      placement: 'bottom'
+    },
+    {
+      target: '.sub-card-item-0-2',
+      title: 'Chất lượng giấc ngủ',
+      content: 'Theo dõi và cải thiện giấc ngủ - chìa khóa cho một tinh thần minh mẫn và khỏe mạnh.',
+      placement: 'bottom'
+    },
+    {
+      target: '.therapy-card-1',
+      title: 'Cộng đồng',
+      content: 'Chia sẻ và kết nối với những người cùng chí hướng trong không gian an toàn.',
+      placement: 'bottom'
+    },
+    {
+      target: '.sub-card-item-1-0',
+      title: 'Workshop',
+      content: 'Tham gia các buổi thảo luận và đào tạo trực tiếp cùng chuyên gia.',
+      placement: 'bottom'
+    },
+    {
+      target: '.sub-card-item-1-1',
+      title: 'Nhóm chat',
+      content: 'Thảo luận và nhận hỗ trợ tức thì từ cộng đồng những người đồng hành.',
+      placement: 'bottom'
+    },
+    {
+      target: '.sub-card-item-1-2',
+      title: 'Chia sẻ câu chuyện',
+      content: 'Kể lại hành trình của bạn để truyền cảm hứng và nhận lại sự thấu cảm.',
+      placement: 'bottom'
+    },
+    {
+      target: '.therapy-card-2',
+      title: 'Kết nối',
+      content: 'Cá nhân hóa hành trình của bạn với công nghệ AI tiên tiến.',
+      placement: 'bottom'
+    },
+    {
+      target: '.sub-card-item-2-0',
+      title: 'AI cá nhân hóa',
+      content: 'Trò chuyện với AI được huấn luyện riêng để thấu hiểu trạng thái tâm lý của bạn.',
+      placement: 'bottom'
+    },
+    {
+      target: '.ai-chat-fab',
+      title: 'Trợ lý AI 24/7',
+      content: 'Bất cứ lúc nào bạn cần, AI của chúng tôi luôn sẵn sàng lắng nghe và phản hồi ngay lập tức.',
+      placement: 'top'
+    },
+    {
+      target: '.therapist-image-grid',
+      title: 'Chuyên gia tin cậy',
+      content: 'Kết nối với mạng lưới nhà tư vấn tâm lý có trình độ, giúp bạn vượt qua lo âu và tìm lại sự cân bằng.'
+    },
+    {
+      target: '#pricing-section',
+      title: 'Lựa chọn gói hội viên',
+      content: 'Chọn gói dịch vụ phù hợp nhất với nhu cầu của bạn để tận hưởng đầy đủ các tiện ích chăm sóc sức khỏe.',
+      placement: 'bottom'
+    },
+    {
+      target: '.login-target',
+      title: 'Bắt đầu ngay',
+      content: 'Đăng nhập ngay để bắt đầu hành trình chữa lành và khám phá đầy đủ các tính năng tuyệt vời của Calmistry!',
+      placement: 'bottom'
+    }
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* 1. JOYRIDE LUÔN Ở TRÊN CÙNG */}
-      <Joyride
-        steps={joyrideSteps}
-        run={runOnboarding}
-        continuous={false}
-
-        disableScrolling={true}       // 🔥 KHÔNG CHO JOYRIDE TỰ CUỘN
-        scrollToFirstStep={false}    // 🔥 KHÔNG TỰ SCROLL STEP ĐẦU
-
-        disableOverlayClose={false}
-        spotlightClicks={true}
-        callback={handleJoyrideCallback}
-        showSkipButton={false}
-        showProgress={false}
-        styles={{
-          options: {
-            zIndex: 100000,
-            primaryColor: brandGreen,
-          },
-          overlay: {
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-          },
-          tooltip: {
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-            padding: 0,
-            borderRadius: 0,
-            pointerEvents: 'none',
-          },
-          tooltipContainer: {
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-            padding: 0,
-            pointerEvents: 'none',
-          },
-          tooltipArrow: { display: 'none' },
-          buttonNext: { display: 'none' },
-          buttonBack: { display: 'none' },
-          buttonSkip: { display: 'none' },
-        }}
-      />
+      {/* 1. GUEST ONBOARDING */}
+      {showGuestTour && (
+        <GuestOnboarding 
+          steps={guestTourSteps} 
+          onComplete={() => setShowGuestTour(false)} 
+          onStepChange={handleOnboardingStepChange}
+          onFinish={() => {
+            setShowGuestTour(false);
+            localStorage.setItem('HAS_SEEN_GUEST_TOUR', 'true');
+            navigate('/login');
+          }}
+        />
+      )}
 
 
 
 
-      {/* CSS cho mũi tên nhún nhảy */}
-      <style>{`
-        @keyframes bounceArrow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-
-        .onboarding-arrow-animation {
-          animation: bounceArrow 1.5s infinite;
-        }
-
-        .custom-onboarding-content {
-          text-align: center;
-        }
-
-        .custom-skip-btn {
-          background: none;
-          border: none;
-          color: #ffffff;
-          font-size: 1rem;
-          font-weight: 500;
-          text-decoration: underline;
-          cursor: pointer;
-          margin-top: 6px;
-        }
-
-        .custom-skip-btn:hover {
-          opacity: 0.8;
-        }
-      `}</style>
 
 
       <div style={{ backgroundColor: brandGreen, overflowX: 'hidden' }}>
@@ -285,8 +248,6 @@ const Home = () => {
             <p
               className="fs-4 opacity-75 home-hero-text d-inline-block"
               onClick={() => {
-                localStorage.setItem('HAS_SEEN_HOME_ONBOARDING', 'true');
-                setRunOnboarding(false);
                 navigate('/fuieds-quiz');
               }}
               style={{ cursor: 'pointer', fontFamily: "'Be Vietnam Pro', sans-serif", letterSpacing: '0.5px' }}

@@ -747,3 +747,142 @@ h4,
 .brand-statement-item:hover p {
   color: #1a2e35 !important;
 }
+
+/* Guest Onboarding Styles */
+.guest-onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.spotlight-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.onboarding-tooltip {
+  position: absolute;
+  width: 400px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  z-index: 100000;
+  pointer-events: auto;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* PLACEMENT TOP */
+.placement-top .tooltip-arrow {
+  bottom: -12px;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid #ffffff;
+}
+
+/* PLACEMENT BOTTOM */
+.placement-bottom .tooltip-arrow {
+  top: -12px;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid #ffffff;
+}
+
+/* PLACEMENT RIGHT */
+.placement-right .tooltip-arrow {
+  left: -12px;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-right: 12px solid #ffffff;
+}
+
+/* PLACEMENT LEFT */
+.placement-left .tooltip-arrow {
+  right: -12px;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 12px solid #ffffff;
+}
+
+.close-tour {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close-tour:hover {
+  color: #e50914;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  transition: all 0.3s ease;
+}
+
+.progress-dot.active {
+  background: #e50914;
+  width: 24px;
+  border-radius: 10px;
+}
+
+.btn-tour-primary {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+  font-family: 'Rubik', sans-serif;
+}
+
+.btn-tour-primary:hover {
+  background: #b20710;
+}
+
+.btn-tour-secondary {
+  background: #f4f4f4;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+  font-family: 'Rubik', sans-serif;
+}
+
+.btn-tour-secondary:hover {
+  background: #e6e6e6;
+}
+
+@media (max-width: 576px) {
+  .onboarding-tooltip {
+    width: calc(100vw - 40px);
+    left: 20px !important;
+  }
+}
