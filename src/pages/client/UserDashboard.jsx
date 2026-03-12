@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import '../../styles/UserDashboard.css';
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import GuestOnboarding from '../../components/common/GuestOnboarding';
 import fuiedsService from '../../services/fuiedsService';
 import userService from '../../services/userService';
 import fileService from '../../services/fileService';
@@ -47,6 +48,75 @@ const UserDashboard = () => {
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [tempProfile, setTempProfile] = useState({ ...userProfile });
+
+  // --- ONBOARDING TOUR ---
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    const hasSeenDashboardTour = localStorage.getItem('HAS_SEEN_DASHBOARD_TOUR');
+    if (!hasSeenDashboardTour) {
+      // Chờ 1.5s để trang load xong trước khi hiển thị tour
+      const timer = setTimeout(() => setShowTour(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const dashboardTourSteps = [
+    {
+      target: '.tour-welcome-card',
+      title: 'Chào mừng bạn đến Dashboard! 🎉',
+      content: 'Đây là trung tâm điều khiển cá nhân của bạn. Tại đây bạn có thể xem tổng quan sức khỏe tinh thần và quản lý hồ sơ.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-edit-profile',
+      title: 'Thiết lập hồ sơ cá nhân ✏️',
+      content: 'Nhấn vào biểu tượng bút chì để thay đổi ảnh đại diện, tên, địa chỉ và số điện thoại của bạn.',
+      placement: 'right'
+    },
+    {
+      target: '.tour-fuieds-card',
+      title: 'Điểm sức khỏe tinh thần FUIEDS 💚',
+      content: 'Đây là điểm số phản ánh trạng thái cảm xúc hiện tại của bạn. Hãy hoàn thành bài đánh giá hàng ngày để theo dõi sự thay đổi.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-journal-card',
+      title: 'Ghi chép tâm hồn 📖',
+      content: 'Viết nhật ký mỗi ngày để giải tỏa cảm xúc. AI sẽ phân tích và đưa ra lời khuyên hữu ích cho bạn!',
+      placement: 'right'
+    },
+    {
+      target: '.tour-health-stats',
+      title: 'Chỉ số sức khỏe tinh thần 📊',
+      content: 'Khu vực này tổng hợp toàn bộ dữ liệu: tâm trạng, giấc ngủ và điểm FUIED theo tuần/tháng giúp bạn hiểu rõ bản thân hơn.',
+      placement: 'top'
+    },
+    {
+      target: '.tour-relaxation',
+      title: 'Kho bài tập thư giãn 🧘',
+      content: 'Khám phá bài tập hít thở, âm nhạc trắng và podcast chữa lành. Đây là nơi bạn "sạc pin" cho tâm hồn mỗi ngày!',
+      placement: 'top'
+    },
+    {
+      target: '.tour-journal-stats',
+      title: 'Thống kê tâm trạng 😊',
+      content: 'Biểu đồ tâm trạng theo tháng giúp bạn nhìn lại cảm xúc qua từng giai đoạn. AI sẽ phân tích xu hướng và đưa ra nhận xét riêng cho bạn.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-sleep-stats',
+      title: 'Chất lượng giấc ngủ 🌙',
+      content: 'Biểu đồ 7 ngày gần nhất cho thấy chất lượng giấc ngủ của bạn. Nhấn "Xem chi tiết" để xem báo cáo đầy đủ hơn.',
+      placement: 'bottom'
+    },
+    {
+      target: '.tour-fuieds-stats',
+      title: 'Lịch sử điểm FUIEDS 📈',
+      content: 'Theo dõi xu hướng điểm sức khỏe tinh thần theo tuần. Điểm ổn định hoặc tăng dần là dấu hiệu rất tích cực!',
+      placement: 'bottom'
+    }
+  ];
 
   // Sử dụng React Query để lấy user info (cùng queryKey ['me'] với Header)
   const { data: currentUser } = useQuery({
@@ -238,7 +308,7 @@ const UserDashboard = () => {
         {/* --- HEADER: CHÀO MỪNG --- */}
         <div className="row mb-5">
           <div className="col-12">
-            <div className="p-4 p-md-5 rounded-5 shadow-sm position-relative overflow-hidden border-0 bg-white">
+            <div className="p-4 p-md-5 rounded-5 shadow-sm position-relative overflow-hidden border-0 bg-white tour-welcome-card">
               <i className="bi bi-flower1 position-absolute" style={{ right: '-20px', top: '-20px', fontSize: '150px', color: '#f0f7f0', zIndex: 0 }}></i>
 
               <div className="position-relative d-flex flex-column flex-md-row align-items-center" style={{ zIndex: 1 }}>
@@ -248,7 +318,7 @@ const UserDashboard = () => {
                   <img src={userProfile.avatar} alt="Avatar" className="rounded-circle border border-4 border-white shadow-sm" style={{ width: '120px', height: '120px', objectFit: 'cover' }} />
                   <button
                     onClick={() => { setTempProfile({ ...userProfile }); setShowEditModal(true); }}
-                    className="btn btn-light btn-sm rounded-circle position-absolute bottom-0 end-0 shadow-sm border action-btn-edit"
+                    className="btn btn-light btn-sm rounded-circle position-absolute bottom-0 end-0 shadow-sm border action-btn-edit tour-edit-profile"
                   >
                     <i className="bi bi-pencil-fill text-muted"></i>
                   </button>
@@ -372,7 +442,7 @@ const UserDashboard = () => {
         <div className="row g-4">
           {/* --- CỘT TRÁI: VIẾT NHẬT KÝ (NEW) --- */}
           <div className="col-lg-4">
-            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0 d-flex flex-column journal-cta-card">
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0 d-flex flex-column journal-cta-card tour-journal-card">
               <div className="mb-4 p-3 rounded-4" style={{ backgroundColor: `${lightGreen}15`, width: 'fit-content' }}>
                 <Book size={28} color={brandGreen} />
               </div>
@@ -407,7 +477,7 @@ const UserDashboard = () => {
 
               {/* FUIEDS Score Card */}
               <div className="col-md-7">
-                <div className="p-4 rounded-5 shadow-sm border-0 bg-white card-hover">
+                <div className="p-4 rounded-5 shadow-sm border-0 bg-white card-hover tour-fuieds-card">
                   <div className="d-flex justify-content-between align-items-start mb-4">
                     <div className="p-3 rounded-4" style={{ backgroundColor: 'rgba(50, 77, 62, 0.05)' }}>
                       <i className="bi bi-heart-pulse fs-4" style={{ color: lightGreen }}></i>
@@ -489,7 +559,7 @@ const UserDashboard = () => {
               {/* Exercises Library */}
               <div className="col-12">
                 <div
-                  className="p-4 rounded-5 shadow-sm border-0 bg-white d-flex align-items-center justify-content-between card-hover"
+                  className="p-4 rounded-5 shadow-sm border-0 bg-white d-flex align-items-center justify-content-between card-hover tour-relaxation"
                   style={{ cursor: 'pointer' }}
                   onClick={() => navigate('/relaxation')}
                 >
@@ -537,7 +607,7 @@ const UserDashboard = () => {
 
 
         {/* --- SECTION: THỐNG KÊ SỨC KHỎE (NEW REPLACEMENT) --- */}
-        <div className="row mt-5 g-4">
+        <div className="row mt-5 g-4 tour-health-stats">
           <div className="col-12">
             <h5 className="fw-bold mb-4 d-flex align-items-center">
               <Zap size={20} className="me-2" color={lightGreen} /> Chỉ số sức khỏe tinh thần
@@ -546,7 +616,7 @@ const UserDashboard = () => {
 
           {/* 1. Thống kê Nhật ký */}
           <div className="col-lg-4">
-            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0 tour-journal-stats">
               <h6 className="fw-bold mb-4">Tâm trạng (Tháng này)</h6>
               {isLoadingJournal ? (
                 <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
@@ -590,7 +660,7 @@ const UserDashboard = () => {
 
           {/* 2. Chất lượng giấc ngủ */}
           <div className="col-lg-4">
-            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0 tour-sleep-stats">
               <div className="d-flex justify-content-between align-items-center mb-4">
                 <h6 className="fw-bold mb-0">Chất lượng giấc ngủ (7 ngày)</h6>
                 <span 
@@ -643,7 +713,7 @@ const UserDashboard = () => {
 
           {/* 3. Điểm FUIED Scores */}
           <div className="col-lg-4">
-            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
+            <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0 tour-fuieds-stats">
               <h6 className="fw-bold mb-4">Điểm FUIED Scores (7 ngày)</h6>
               {isLoadingFuieds ? (
                 <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
@@ -687,6 +757,16 @@ const UserDashboard = () => {
         </div>
       </div>
 
+      {/* --- ONBOARDING TOUR --- */}
+      {showTour && (
+        <GuestOnboarding
+          steps={dashboardTourSteps}
+          onComplete={() => {
+            setShowTour(false);
+            localStorage.setItem('HAS_SEEN_DASHBOARD_TOUR', 'true');
+          }}
+        />
+      )}
     </div>
   );
 };
