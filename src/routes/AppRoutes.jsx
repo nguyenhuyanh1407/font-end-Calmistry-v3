@@ -96,8 +96,16 @@ function AppRoutes() {
             <Route path="/shareStories" element={<ShareStories />} />
             <Route path="/group-chat" element={<GroupChat />} />
             <Route path="/checkout" element={<Checkout />} />
-            <Route path="/admin/accounts" element={<AccountManagement />} />
-            <Route path="/admin/number-users" element={<UserStatistics />} />
+            <Route path="/admin/accounts" element={
+              <PrivateRoute>
+                <AccountManagement />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/number-users" element={
+              <PrivateRoute>
+                <UserStatistics />
+              </PrivateRoute>
+            } />
 
             {/* Admin Route - Account Management */}
             {/* Admin Route - Account Management
