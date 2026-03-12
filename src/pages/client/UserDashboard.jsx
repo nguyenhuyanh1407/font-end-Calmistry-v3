@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 import {
   Smile, Meh, Frown, Sparkles,
   Moon, Clock, Zap, Book,
-  ChevronRight, ArrowRight, MoonStar
+  ArrowRight, MoonStar
 } from 'lucide-react';
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const UserDashboard = () => {
         const fuiedsRes = await fuiedsService.getTodayScore();
         if (fuiedsRes.code === 1000) setFuiedsScore(fuiedsRes.result);
 
-        const historyRes = await fuiedsService.getHistory(30);
+        const historyRes = await fuiedsService.getHistory(7);
         if (historyRes.code === 1000) setFuiedsHistory(historyRes.result);
       } catch (error) {
         console.log('FUIEDS data fetch error');
@@ -230,14 +230,11 @@ const UserDashboard = () => {
                   </p>
 
                     <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
-                      <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" style={{ backgroundColor: brandGreen }} onClick={() => navigate('/sleepManagement')}>
+                      <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" style={{ backgroundColor: brandGreen }} onClick={() => navigate('/fuieds-quiz')}>
+                        <Sparkles size={18} className="me-2" /> Tính điểm FUIEDS Score
+                      </button>
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" onClick={() => navigate('/sleepManagement')}>
                         <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
-                      </button>
-                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center">
-                        <i className="bi bi-play-fill me-2"></i> Tiếp tục bài học
-                      </button>
-                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center">
-                        <i className="bi bi-calendar-event me-2"></i> Lịch sử trị liệu
                       </button>
                     </div>
                 </div>
@@ -407,17 +404,9 @@ const UserDashboard = () => {
                   ) : (
                     <>
                       <h5 className="fw-bold mb-2">Chưa đánh giá hôm nay</h5>
-                      <p className="small text-muted mb-4">
+                      <p className="small text-muted mb-0">
                         Hoàn thành bài đánh giá FUIEDS để theo dõi sức khỏe tinh thần của bạn.
                       </p>
-                      <button
-                        onClick={() => navigate('/fuieds-quiz')}
-                        className="btn btn-dark w-100 rounded-pill py-2"
-                        style={{ backgroundColor: brandGreen }}
-                      >
-                        <i className="bi bi-clipboard-check me-2"></i>
-                        Bắt đầu đánh giá
-                      </button>
                     </>
                   )}
                 </div>
@@ -539,16 +528,7 @@ const UserDashboard = () => {
           {/* 2. Chất lượng giấc ngủ */}
           <div className="col-lg-4">
             <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h6 className="fw-bold mb-0">Chất lượng giấc ngủ (7 ngày)</h6>
-                <button 
-                  onClick={() => navigate('/sleepManagement')}
-                  className="btn btn-link p-0 text-success text-decoration-none small fw-bold d-flex align-items-center gap-1"
-                  style={{ fontSize: '13px' }}
-                >
-                  Đánh giá ngay <ChevronRight size={14} />
-                </button>
-              </div>
+              <h6 className="fw-bold mb-4">Chất lượng giấc ngủ (7 ngày)</h6>
               {isLoadingSleep ? (
                 <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
               ) : sleepStats && sleepStats.sessions?.length > 0 ? (
@@ -590,7 +570,7 @@ const UserDashboard = () => {
           {/* 3. Điểm FUIED Scores */}
           <div className="col-lg-4">
             <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
-              <h6 className="fw-bold mb-4">Điểm FUIED Scores (30 ngày)</h6>
+              <h6 className="fw-bold mb-4">Điểm FUIED Scores (7 ngày)</h6>
               {isLoadingFuieds ? (
                 <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
               ) : fuiedsHistory && fuiedsHistory.length > 0 ? (
@@ -612,7 +592,7 @@ const UserDashboard = () => {
                     })}
                   </div>
                   <div className="d-flex align-items-center justify-content-between">
-                    <div className="small text-muted">Xu hướng tháng này:</div>
+                    <div className="small text-muted">Xu hướng tuần này:</div>
                     <span className="badge rounded-pill bg-success-subtle text-success px-3">Ổn định</span>
                   </div>
                   <p className="small text-muted mt-3 mb-0" style={{ fontSize: '11px' }}>
