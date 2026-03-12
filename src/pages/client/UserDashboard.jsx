@@ -97,6 +97,7 @@ const UserDashboard = () => {
             email: userInfo.email,
             avatar: userInfo.avatarUrl || prev.avatar,
             phoneNumber: userInfo.phoneNumber || "",
+            address: userInfo.address || "Hà Nội, Việt Nam",
             currentStreak: userInfo.currentStreak || 0,
             totalPoints: points,
             tier: calculatedTier
@@ -129,7 +130,8 @@ const UserDashboard = () => {
       const updateData = {
         fullName: tempProfile.name,
         phoneNumber: tempProfile.phoneNumber,
-        avatarUrl: tempProfile.avatar // Note: Backend handles String, if base64 is too long, it might need optimization
+        address: tempProfile.address,
+        avatarUrl: tempProfile.avatar
       };
       
       const updatedUser = await userService.updateProfile(updateData);
@@ -138,7 +140,9 @@ const UserDashboard = () => {
         setUserProfile({ 
           ...tempProfile,
           name: updatedUser.fullName || updatedUser.username,
-          phoneNumber: updatedUser.phoneNumber || ""
+          phoneNumber: updatedUser.phoneNumber || "",
+          address: updatedUser.address || tempProfile.address,
+          avatar: updatedUser.avatarUrl || tempProfile.avatar
         });
         toast.success("Cập nhật thông tin thành công! ✨");
         setShowEditModal(false);
