@@ -41,7 +41,7 @@ const WorkshopList = () => {
                 toast.error(response?.message || "Lỗi đặt chỗ.");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Bạn cần đăng nhập để đặt workshop.");
+            toast.error(error.message || "Có lỗi xảy ra khi đặt workshop.");
         }
     };
 
@@ -58,7 +58,7 @@ const WorkshopList = () => {
                 toast.error(response?.message || "Lỗi hủy đăng ký.");
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Không thể hủy đăng ký. Có thể đã quá 1 giờ từ lúc đăng ký?");
+            toast.error(error.message || "Không thể hủy đăng ký. Có thể đã quá 1 giờ từ lúc đăng ký?");
         }
     };
 
