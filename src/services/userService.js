@@ -35,6 +35,15 @@ const userService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    updateProfile: async (userData) => {
+        try {
+            const response = await api.put('/users/update-profile', userData);
+            return response.result;
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

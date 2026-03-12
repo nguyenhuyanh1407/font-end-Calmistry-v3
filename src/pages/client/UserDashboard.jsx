@@ -6,6 +6,7 @@ import '../../styles/UserDashboard.css';
 import { useState, useEffect } from 'react';
 import fuiedsService from '../../services/fuiedsService';
 import userService from '../../services/userService';
+import fileService from '../../services/fileService';
 import sleepService from '../../services/sleepService';
 import journalService from '../../services/journalService';
 import { toast } from 'react-toastify';
@@ -35,6 +36,7 @@ const UserDashboard = () => {
     name: "An Nhiên",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop",
     address: "Hà Nội, Việt Nam",
+    phoneNumber: "",
     bio: "Mọi sự thay đổi lớn đều bắt đầu từ những bước chân nhỏ bé nhất.",
     tier: "Gold",
     currentStreak: 0,
@@ -89,11 +91,12 @@ const UserDashboard = () => {
           let calculatedTier = "Bronze";
           if (points >= 300) calculatedTier = "Gold";
           else if (points >= 100) calculatedTier = "Silver";
-
           setUserProfile(prev => ({
             ...prev,
             name: userInfo.fullName || userInfo.username,
             email: userInfo.email,
+            avatar: userInfo.avatarUrl || prev.avatar,
+            phoneNumber: userInfo.phoneNumber || "",
             currentStreak: userInfo.currentStreak || 0,
             totalPoints: points,
             tier: calculatedTier
@@ -121,26 +124,50 @@ const UserDashboard = () => {
   const currentTier = getTierDetails(userProfile.tier);
 
   // Hàm lưu thông tin sau khi sửa
-  const handleSaveProfile = () => {
-    setUserProfile({ ...tempProfile });
-    setShowEditModal(false);
+  const handleSaveProfile = async () => {
+    try {
+      const updateData = {
+        fullName: tempProfile.name,
+        phoneNumber: tempProfile.phoneNumber,
+        avatarUrl: tempProfile.avatar // Note: Backend handles String, if base64 is too long, it might need optimization
+      };
+      
+      const updatedUser = await userService.updateProfile(updateData);
+      
+      if (updatedUser) {
+        setUserProfile({ 
+          ...tempProfile,
+          name: updatedUser.fullName || updatedUser.username,
+          phoneNumber: updatedUser.phoneNumber || ""
+        });
+        toast.success("Cập nhật thông tin thành công! ✨");
+        setShowEditModal(false);
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Không thể cập nhật thông tin. Vui lòng thử lại.");
+    }
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Kiểm tra định dạng file là ảnh
       if (!file.type.startsWith('image/')) {
-        alert("Vui lòng chọn một file ảnh!");
+        toast.error("Vui lòng chọn một file ảnh!");
         return;
       }
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        // Cập nhật ảnh vào tempProfile dưới dạng base64 để xem trước
-        setTempProfile({ ...tempProfile, avatar: reader.result });
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Tải ảnh lên ngay để lấy URL
+        const uploadedUrl = await fileService.upload(file);
+        if (uploadedUrl) {
+          setTempProfile({ ...tempProfile, avatar: uploadedUrl });
+          toast.success("Tải ảnh lên thành công! 📸");
+        }
+      } catch (error) {
+        console.error("Upload error:", error);
+        toast.error("Không thể tải ảnh lên. Vui lòng thử lại.");
+      }
     }
   };
 
@@ -294,7 +321,7 @@ const UserDashboard = () => {
               </div>
 
               {/* Sửa Địa chỉ */}
-              <div className="mb-4">
+              <div className="mb-3">
                 <label className="form-label small fw-bold text-muted">Địa chỉ</label>
                 <input
                   type="text"
@@ -302,6 +329,18 @@ const UserDashboard = () => {
                   value={tempProfile.address}
                   onChange={(e) => setTempProfile({ ...tempProfile, address: e.target.value })}
                   placeholder="Ví dụ: Hà Nội, Việt Nam"
+                />
+              </div>
+
+              {/* Sửa Số điện thoại */}
+              <div className="mb-4">
+                <label className="form-label small fw-bold text-muted">Số điện thoại</label>
+                <input
+                  type="text"
+                  className="form-control form-control-custom"
+                  value={tempProfile.phoneNumber}
+                  onChange={(e) => setTempProfile({ ...tempProfile, phoneNumber: e.target.value })}
+                  placeholder="Ví dụ: 0912345678"
                 />
               </div>
 
