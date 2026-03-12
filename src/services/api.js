@@ -4,6 +4,8 @@
  */
 
 // Base URL -có thể cấu hình qua environment variable
+//const API_BASE_URL = 'http://localhost:8080/calmistry';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://calmistry-backend-production.up.railway.app/calmistry';
 
 /**
@@ -79,9 +81,9 @@ const createHeaders = (customHeaders = {}, endpoint = '') => {
 
   // Các public endpoints KHÔNG nên gửi token (đặc biệt là login/register)
   // để tránh việc token cũ/hết hạn làm request bị reject (401/400)
-  const isPublicAuthEndpoint = endpoint.includes('/auth/token') || 
-                               endpoint.includes('/auth/register') || 
-                               endpoint.includes('/auth/google');
+  const isPublicAuthEndpoint = endpoint.includes('/auth/token') ||
+    endpoint.includes('/auth/register') ||
+    endpoint.includes('/auth/google');
 
   if (isPublicAuthEndpoint) {
     console.log('🛡️ [API] Public auth endpoint detected - skipping Authorization header');
