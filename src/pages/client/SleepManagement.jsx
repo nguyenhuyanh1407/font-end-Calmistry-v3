@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckInCard from "../../components/features/sleep/CheckInCard";
 import SleepQuiz from "../../components/features/sleep/SleepQuiz";
@@ -7,7 +8,8 @@ import SleepDashboard from "../../components/features/sleep/SleepDashboard";
 import sleepService from "../../services/sleepService";
 
 export default function SleepManagement() {
-  const [step, setStep] = useState("checkin");
+  const location = useLocation();
+  const [step, setStep] = useState(location.state?.step || "checkin");
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
   const [loading, setLoading] = useState(false);

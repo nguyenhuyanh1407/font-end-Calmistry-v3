@@ -538,7 +538,16 @@ const UserDashboard = () => {
           {/* 2. Chất lượng giấc ngủ */}
           <div className="col-lg-4">
             <div className="p-4 rounded-5 bg-white shadow-sm h-100 border-0">
-              <h6 className="fw-bold mb-4">Chất lượng giấc ngủ (7 ngày)</h6>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h6 className="fw-bold mb-0">Chất lượng giấc ngủ (7 ngày)</h6>
+                <span 
+                  onClick={() => navigate('/sleepManagement', { state: { step: 'dashboard' } })} 
+                  className="small text-primary fw-bold" 
+                  style={{ cursor: 'pointer', textDecoration: 'underline', fontSize: '13px' }}
+                >
+                  Xem chi tiết
+                </span>
+              </div>
               {isLoadingSleep ? (
                 <div className="text-center py-5"><div className="spinner-border spinner-border-sm text-success"></div></div>
               ) : sleepStats && sleepStats.sessions?.length > 0 ? (
@@ -566,13 +575,6 @@ const UserDashboard = () => {
                     <div>
                       <div className="small text-muted">Điểm trung bình</div>
                       <div className="fw-bold fs-5 text-success">{Math.round(sleepStats.averageScore || 0)}/100</div>
-                      <div 
-                        onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')} 
-                        className="small text-primary mt-1" 
-                        style={{ cursor: 'pointer', textDecoration: 'underline', fontSize: '12px' }}
-                      >
-                        Xem chi tiết
-                      </div>
                     </div>
                     <Moon size={24} className="text-muted opacity-50" />
                   </div>
