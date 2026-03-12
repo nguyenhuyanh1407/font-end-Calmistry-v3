@@ -120,7 +120,7 @@ const Home = () => {
       subOptions: [
         { title: "Blog chữa lành", icon: <Book />, action: () => navigate("/blog") },
         { title: "Viết nhật kí", icon: <PencilSquare />, action: () => navigate("/journal") },
-        { title: "Điểm chất lượng giấc ngủ", icon: <EmojiExpressionless />, action: () => navigate("/sleepManagement") }
+        { title: "Điểm chất lượng giấc ngủ", icon: <EmojiExpressionless />, action: () => window.open("https://www.calmistry.blog/sleepManagement", "_blank") }
       ]
     },
     {

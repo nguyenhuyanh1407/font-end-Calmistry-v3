@@ -53,7 +53,7 @@ const UserDashboard = () => {
         const fuiedsRes = await fuiedsService.getTodayScore();
         if (fuiedsRes.code === 1000) setFuiedsScore(fuiedsRes.result);
 
-        const historyRes = await fuiedsService.getHistory(7);
+        const historyRes = await fuiedsService.getHistory(30);
         if (historyRes.code === 1000) setFuiedsHistory(historyRes.result);
       } catch (error) {
         console.log('FUIEDS data fetch error');
@@ -233,7 +233,7 @@ const UserDashboard = () => {
                       <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" style={{ backgroundColor: brandGreen }} onClick={() => navigate('/fuieds-quiz')}>
                         <Sparkles size={18} className="me-2" /> Tính điểm FUIEDS Score
                       </button>
-                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" onClick={() => navigate('/sleepManagement')}>
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')}>
                         <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
                       </button>
                     </div>
@@ -545,14 +545,16 @@ const UserDashboard = () => {
                 <div className="sleep-stats-container">
                   <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
                     {sleepStats.sessions.slice(0, 7).reverse().map((session, idx) => {
-                      const height = (session.finalScore100 / 100) * 100;
+                      const scoreValue = session.finalScore100 || 0;
+                      // Use a safe height calculation: 70% of 150px = 105px max height for bars
+                      const barHeight = Math.max(2, (scoreValue / 100) * 105);
                       const date = new Date(session.recordDate).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' });
                       return (
-                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                          <span className="mb-1" style={{ fontSize: '9px', fontWeight: 'bold' }}>{Math.round(session.finalScore100)}</span>
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end' }}>
+                          <span className="mb-1" style={{ fontSize: '9px', fontWeight: 'bold', color: brandGreen }}>{Math.round(scoreValue)}</span>
                           <motion.div
                             initial={{ height: 0 }}
-                            animate={{ height: `${(session.finalScore100 / 100) * 100}%` }}
+                            animate={{ height: `${barHeight}px` }}
                             style={{ width: '20px', backgroundColor: brandGreen, borderRadius: '4px 4px 0 0', opacity: 0.8 }}
                           />
                           <span className="mt-2 text-muted" style={{ fontSize: '8px' }}>{date}</span>
@@ -565,7 +567,7 @@ const UserDashboard = () => {
                       <div className="small text-muted">Điểm trung bình</div>
                       <div className="fw-bold fs-5 text-success">{Math.round(sleepStats.averageScore || 0)}/100</div>
                       <div 
-                        onClick={() => navigate('/sleepManagement')} 
+                        onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')} 
                         className="small text-primary mt-1" 
                         style={{ cursor: 'pointer', textDecoration: 'underline', fontSize: '12px' }}
                       >
@@ -578,7 +580,7 @@ const UserDashboard = () => {
               ) : (
                 <div className="text-center py-4">
                   <p className="small text-muted mb-3">Chưa có dữ liệu giấc ngủ 7 ngày qua.</p>
-                  <button onClick={() => navigate('/sleepManagement')} className="btn btn-sm btn-outline-success rounded-pill px-3">Bắt đầu theo dõi</button>
+                  <button onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')} className="btn btn-sm btn-outline-success rounded-pill px-3">Bắt đầu theo dõi</button>
                 </div>
               )}
             </div>
@@ -594,16 +596,20 @@ const UserDashboard = () => {
                 <div className="fuieds-stats-container">
                   <div className="d-flex justify-content-around align-items-end mb-4" style={{ height: '150px', borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
                     {/* Only show 10 sample points to avoid clutter, or a scrollable view */}
-                    {fuiedsHistory.slice(0, 10).reverse().map((entry, idx) => {
-                      const height = (entry.smoothedScore / 100) * 100;
+                    {fuiedsHistory.slice(0, 7).reverse().map((entry, idx) => {
+                      const scoreValue = entry.smoothedScore || 0;
+                      const barHeight = Math.max(2, (scoreValue / 100) * 105);
+                      const date = new Date(entry.date).toLocaleDateString('vi-VN', { day: 'numeric', month: 'numeric' });
                       return (
-                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+                        <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end' }}>
+                          <span className="mb-1" style={{ fontSize: '9px', fontWeight: 'bold', color: lightGreen }}>{Math.round(scoreValue)}</span>
                           <motion.div
                             initial={{ height: 0 }}
-                            animate={{ height: `${height}%` }}
+                            animate={{ height: `${barHeight}px` }}
                             style={{ width: '12px', backgroundColor: lightGreen, borderRadius: '10px', opacity: 0.6 }}
                             whileHover={{ opacity: 1, scaleY: 1.1 }}
                           />
+                          <span className="mt-2 text-muted" style={{ fontSize: '8px' }}>{date}</span>
                         </div>
                       );
                     })}
