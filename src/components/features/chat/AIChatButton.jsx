@@ -22,12 +22,13 @@ export default function AIChatWidget() {
   const journalFabSize = isMobile ? 55 : 65;
   const gapBetweenButtons = isMobile ? 25 : 20;
   const brandLightGreen = "#8ec339";
+  const brandDarkGreen = "#75a32d";
 
   // --- STATES ---
   const [chatHistory, setChatHistory] = useState([]);
   const [dimensions, setDimensions] = useState({
-    width: isMobile ? Math.min(300, window.innerWidth - 30) : 330,
-    height: isMobile ? 420 : 480
+    width: isMobile ? Math.min(300, window.innerWidth - 30) : 340,
+    height: isMobile ? 450 : 500
   });
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -56,7 +57,10 @@ export default function AIChatWidget() {
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatBodyRef.current) {
-      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+      chatBodyRef.current.scrollTo({
+        top: chatBodyRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   }, [chatHistory, isTyping]);
 
@@ -199,9 +203,10 @@ export default function AIChatWidget() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9, y: 30, filter: "blur(10px)" }}
+            animate={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, scale: 0.9, y: 30, filter: "blur(10px)" }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
             style={{
               ...chatWindow,
               width: `${dimensions.width}px`,
@@ -210,6 +215,25 @@ export default function AIChatWidget() {
               top: position.y > window.innerHeight / 2 ? position.y - (dimensions.height + 20) : position.y + 75,
             }}
           >
+            {/* Custom scrollbar styles */}
+            <style>{`
+              #chat-body-scroll::-webkit-scrollbar { width: 5px; }
+              #chat-body-scroll::-webkit-scrollbar-track { background: transparent; }
+              #chat-body-scroll::-webkit-scrollbar-thumb { background: rgba(142, 195, 57, 0.2); border-radius: 10px; }
+              #chat-body-scroll::-webkit-scrollbar-thumb:hover { background: rgba(142, 195, 57, 0.4); }
+              .typing-dots { display: inline-flex; gap: 3px; }
+              .typing-dots span {
+                width: 5px; height: 5px; background: #8ec339; border-radius: 50%;
+                animation: typing 1.4s infinite ease-in-out;
+              }
+              .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+              .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+              @keyframes typing {
+                0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+                40% { transform: scale(1.2); opacity: 1; }
+              }
+            `}</style>
+
             {/* Resize Handle */}
             <div
               onMouseDown={handleResizeStart}
@@ -226,86 +250,143 @@ export default function AIChatWidget() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ccc'
+                color: '#ccc',
+                opacity: 0.5
               }}
             >
               <i className="bi bi-arrows-angle-expand" style={{ fontSize: '10px', transform: 'rotate(90deg)' }}></i>
             </div>
 
             {/* Header */}
-            <div style={{ ...chatHeader, backgroundColor: brandLightGreen }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={avatarCircle}><i className="bi bi-robot"></i></div>
+            <div style={{ ...chatHeader, background: `linear-gradient(135deg, ${brandLightGreen}, ${brandDarkGreen})` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={avatarCircle}>
+                  <motion.i 
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                    className="bi bi-robot"
+                  ></motion.i>
+                </div>
                 <div>
-                  <div style={{ fontWeight: "800", fontSize: "14px" }}>Calmistry AI</div>
-                  <div style={{ fontSize: "10px", opacity: 0.8 }}>Đang trực tuyến</div>
+                  <div style={{ fontWeight: "800", fontSize: "15px", letterSpacing: "0.3px" }}>Calmistry AI</div>
+                  <div style={{ fontSize: "11px", opacity: 0.9, display: "flex", alignItems: "center", gap: "5px" }}>
+                    <span style={{ width: "6px", height: "6px", backgroundColor: "#fff", borderRadius: "50%", boxShadow: "0 0 5px #fff" }}></span>
+                    Đang trực tuyến
+                  </div>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} style={closeBtn}><i className="bi bi-x-lg"></i></button>
+              <motion.button 
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsOpen(false)} 
+                style={closeBtn}
+              >
+                <i className="bi bi-x-lg"></i>
+              </motion.button>
             </div>
 
             {/* Body */}
-            <div ref={chatBodyRef} style={chatBody}>
+            <div id="chat-body-scroll" ref={chatBodyRef} style={chatBody}>
               {loading && (
-                <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
-                  Đang tải lịch sử...
+                <div style={{ textAlign: 'center', padding: '40px 20px', color: '#888', fontStyle: 'italic', fontSize: '13px' }}>
+                  <motion.div
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    Đang tải lịch sử trò chuyện...
+                  </motion.div>
                 </div>
               )}
 
-              {!loading && chatHistory.map((msg, index) => (
-                <div key={index} style={{ textAlign: msg.role === "user" ? "right" : "left", marginBottom: "15px" }}>
-                  <div style={{
-                    ...messageBubble,
-                    backgroundColor: msg.role === "user" ? brandLightGreen : "#f0f4f0",
-                    color: msg.role === "user" ? "#fff" : "#333",
-                    borderRadius: msg.role === "user" ? "18px 18px 2px 18px" : "18px 18px 18px 2px",
-                  }}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
+              <AnimatePresence mode="popLayout">
+                {!loading && chatHistory.map((msg, index) => (
+                  <motion.div 
+                    key={index}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ textAlign: msg.role === "user" ? "right" : "left", marginBottom: "12px" }}
+                  >
+                    <div style={{
+                      ...messageBubble,
+                      background: msg.role === "user" 
+                        ? `linear-gradient(135deg, ${brandLightGreen}, ${brandDarkGreen})` 
+                        : "#ffffff",
+                      color: msg.role === "user" ? "#ffffff" : "#324d3e",
+                      borderRadius: msg.role === "user" ? "18px 18px 4px 18px" : "4px 18px 18px 18px",
+                      boxShadow: msg.role === "user" 
+                        ? "0 4px 12px rgba(142, 195, 57, 0.2)" 
+                        : "0 4px 12px rgba(0,0,0,0.03)",
+                      border: msg.role === "user" ? "none" : "1px solid #f0f3f0"
+                    }}>
+                      {msg.text}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
 
               {isTyping && (
-                <div style={{ textAlign: "left", marginBottom: "15px" }}>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={{ textAlign: "left", marginBottom: "15px" }}
+                >
                   <div style={{
                     ...messageBubble,
-                    backgroundColor: "#f0f4f0",
-                    color: "#333",
-                    borderRadius: "18px 18px 18px 2px",
+                    backgroundColor: "#ffffff",
+                    borderRadius: "4px 18px 18px 18px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+                    border: "1px solid #f0f3f0",
+                    padding: "12px 18px"
                   }}>
-                    <span className="typing-dots">●●●</span>
+                    <div className="typing-dots">
+                      <span></span><span></span><span></span>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {error && (
-                <div style={{ padding: '10px', backgroundColor: '#fff3cd', borderRadius: '8px', fontSize: '12px', color: '#856404', marginBottom: '10px' }}>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ padding: '12px', backgroundColor: '#fff5f5', border: '1px solid #ffdada', borderRadius: '12px', fontSize: '12px', color: '#e53e3e', marginBottom: '10px', textAlign: 'center' }}
+                >
+                  <i className="bi bi-exclamation-circle-fill" style={{ marginRight: '6px' }}></i>
                   {error}
-                </div>
+                </motion.div>
               )}
             </div>
 
             {/* Footer */}
             <div style={chatFooter}>
-              <input
-                style={chatInput}
-                placeholder="Nhập tin nhắn..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && !isTyping && handleSend()}
-                disabled={isTyping}
-              />
-              <button
-                onClick={handleSend}
-                disabled={isTyping || !message.trim()}
-                style={{
-                  ...sendBtn,
-                  backgroundColor: (isTyping || !message.trim()) ? '#ccc' : brandLightGreen,
-                  cursor: (isTyping || !message.trim()) ? 'not-allowed' : 'pointer'
-                }}
-              >
-                <i className="bi bi-send-fill"></i>
-              </button>
+              <div style={inputWrapper}>
+                <input
+                  style={chatInput}
+                  placeholder="Hỏi Calmistry bất cứ điều gì..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && !isTyping && handleSend()}
+                  disabled={isTyping}
+                />
+                <motion.button
+                  whileHover={!isTyping && message.trim() ? { scale: 1.1 } : {}}
+                  whileTap={!isTyping && message.trim() ? { scale: 0.9 } : {}}
+                  onClick={handleSend}
+                  disabled={isTyping || !message.trim()}
+                  style={{
+                    ...sendBtn,
+                    background: (isTyping || !message.trim()) 
+                      ? '#f0f3f0' 
+                      : `linear-gradient(135deg, ${brandLightGreen}, ${brandDarkGreen})`,
+                    color: (isTyping || !message.trim()) ? '#999' : '#fff',
+                    cursor: (isTyping || !message.trim()) ? 'not-allowed' : 'pointer',
+                    boxShadow: (isTyping || !message.trim()) ? 'none' : '0 4px 10px rgba(142, 195, 57, 0.3)'
+                  }}
+                >
+                  <i className="bi bi-send-fill" style={{ fontSize: '16px' }}></i>
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -323,24 +404,46 @@ export default function AIChatWidget() {
       >
         {!isOpen && (
           <motion.div
-            style={{ ...pulse, backgroundColor: brandLightGreen }}
-            animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            style={{ ...pulse, background: `linear-gradient(135deg, ${brandLightGreen}, ${brandDarkGreen})` }}
+            animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0, 0.3] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           />
         )}
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(142, 195, 57, 0.4)" }}
+          whileTap={{ scale: 0.95 }}
           className="ai-chat-fab"
           onClick={() => setIsOpen(!isOpen)}
           style={{
             ...fabButtonStyle,
-            backgroundColor: isOpen ? "#ffffff" : brandLightGreen,
+            background: isOpen ? "#ffffff" : `linear-gradient(135deg, ${brandLightGreen}, ${brandDarkGreen})`,
             color: isOpen ? brandLightGreen : "#ffffff",
             border: isOpen ? `2px solid ${brandLightGreen}` : "none",
           }}
         >
-          <i className={isOpen ? "bi bi-chevron-down" : "bi bi-chat-dots-fill"} style={{ fontSize: "24px" }}></i>
-        </button>
+          <AnimatePresence mode="wait">
+            {isOpen ? (
+              <motion.i 
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                className="bi bi-chevron-down" 
+                style={{ fontSize: "24px" }}
+              ></motion.i>
+            ) : (
+              <motion.i 
+                key="open"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                className="bi bi-chat-dots-fill" 
+                style={{ fontSize: "26px" }}
+              ></motion.i>
+            )}
+          </AnimatePresence>
+        </motion.button>
       </motion.div>
     </div>
   );
@@ -349,14 +452,49 @@ export default function AIChatWidget() {
 // --- STYLES ĐẦY ĐỦ ---
 const fixedContainer = { position: "fixed", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10000 };
 const fabWrapper = { position: "absolute", width: "60px", height: "60px", pointerEvents: "auto" };
-const fabButtonStyle = { width: "60px", height: "60px", borderRadius: "50%", boxShadow: "0 8px 25px rgba(142, 195, 57, 0.3)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 2 };
+const fabButtonStyle = { width: "60px", height: "60px", borderRadius: "50%", boxShadow: "0 8px 30px rgba(142, 195, 57, 0.3)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 2, transition: 'background 0.3s, color 0.3s' };
 const pulse = { position: "absolute", width: "60px", height: "60px", borderRadius: "50%", zIndex: 1, top: 0, left: 0 };
-const chatWindow = { position: "absolute", backgroundColor: "#fff", borderRadius: "24px", boxShadow: "0 15px 40px rgba(0,0,0,0.15)", display: "flex", flexDirection: "column", overflow: "hidden", pointerEvents: "auto", border: "1px solid #eef2ef", maxWidth: 'calc(100vw - 20px)', maxHeight: 'calc(100vh - 120px)' };
-const chatHeader = { padding: "15px 20px", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" };
-const avatarCircle = { width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" };
-const closeBtn = { border: "none", background: "none", color: "#fff", cursor: "pointer", fontSize: "18px" };
-const chatBody = { flex: 1, padding: "20px", overflowY: "auto", backgroundColor: "#f9fbf9" };
-const messageBubble = { padding: "10px 15px", fontSize: "13px", lineHeight: "1.5", display: "inline-block", fontWeight: "500", maxWidth: "80%" };
-const chatFooter = { padding: "15px", borderTop: "1px solid #f0f3f0", display: "flex", gap: "10px", backgroundColor: "#fff" };
-const chatInput = { flex: 1, border: "1px solid #eef2ef", borderRadius: "12px", padding: "8px 15px", fontSize: "13px", outline: "none", backgroundColor: "#f4f7f5", color: "#333" };
-const sendBtn = { width: "38px", height: "38px", borderRadius: "10px", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" };
+
+const chatWindow = { 
+  position: "absolute", 
+  backgroundColor: "rgba(255, 255, 255, 0.95)", 
+  backdropFilter: "blur(10px)",
+  borderRadius: "28px", 
+  boxShadow: "0 20px 50px rgba(0,0,0,0.12)", 
+  display: "flex", 
+  flexDirection: "column", 
+  overflow: "hidden", 
+  pointerEvents: "auto", 
+  border: "1px solid rgba(255, 255, 255, 0.7)", 
+  maxWidth: 'calc(100vw - 20px)', 
+  maxHeight: 'calc(100vh - 120px)',
+  fontFamily: "'Be Vietnam Pro', sans-serif"
+};
+
+const chatHeader = { 
+  padding: "18px 22px", 
+  color: "#fff", 
+  display: "flex", 
+  justifyContent: "space-between", 
+  alignItems: "center",
+  boxShadow: "0 4px 15px rgba(0,0,0,0.05)"
+};
+
+const avatarCircle = { 
+  width: "36px", 
+  height: "36px", 
+  borderRadius: "12px", 
+  backgroundColor: "rgba(255,255,255,0.2)", 
+  display: "flex", 
+  alignItems: "center", 
+  justifyContent: "center", 
+  fontSize: "20px" 
+};
+
+const closeBtn = { border: "none", background: "none", color: "#fff", cursor: "pointer", fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center", padding: "5px" };
+const chatBody = { flex: 1, padding: "20px", overflowY: "auto", backgroundColor: "transparent", display: "flex", flexDirection: "column" };
+const messageBubble = { padding: "12px 18px", fontSize: "14px", lineHeight: "1.6", display: "inline-block", fontWeight: "500", maxWidth: "85%", transition: 'all 0.2s ease', letterSpacing: "-0.01em" };
+const chatFooter = { padding: "15px 20px 20px", backgroundColor: "transparent" };
+const inputWrapper = { display: "flex", alignItems: "center", gap: "10px", backgroundColor: "#fff", padding: "6px", borderRadius: "20px", boxShadow: "0 4px 15px rgba(0,0,0,0.04)", border: "1px solid #f0f3f0" };
+const chatInput = { flex: 1, border: "none", padding: "10px 15px", fontSize: "14px", outline: "none", backgroundColor: "transparent", color: "#324d3e", fontFamily: "'Be Vietnam Pro', sans-serif" };
+const sendBtn = { width: "40px", height: "40px", borderRadius: "50%", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: 'all 0.3s ease' };
