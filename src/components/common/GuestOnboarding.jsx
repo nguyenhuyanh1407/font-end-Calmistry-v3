@@ -143,11 +143,10 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
   useEffect(() => {
     if (!targetRect) return;
 
-    const step = steps[currentStep];
     const isMobile = window.innerWidth <= 576;
-    const tooltipWidth = isMobile ? window.innerWidth - 40 : 400;
+    const tooltipWidth = isMobile ? window.innerWidth - 30 : 400;
     const tooltipHeight = 280; // Estimated max height
-    const margin = 20;
+    const margin = 15;
     const placement = step.placement || 'bottom';
 
     let top, left, pClass = placement;
@@ -157,14 +156,30 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
       left = (window.innerWidth - tooltipWidth) / 2;
       pClass = 'center';
     } else if (isMobile) {
-      // Force bottom or top placement on mobile to avoid side-clipping
-      left = 20;
+      // Mobile positioning: prefer bottom, then top, then center
+      left = (window.innerWidth - tooltipWidth) / 2;
+      
+      // Try bottom first
       top = targetRect.viewportTop + targetRect.height + margin;
       pClass = 'bottom';
       
-      if (top + tooltipHeight > window.innerHeight - 20) {
+      // If bottom fails, try top
+      if (top + tooltipHeight > window.innerHeight - 10) {
         top = targetRect.viewportTop - tooltipHeight - margin;
         pClass = 'top';
+      }
+      
+      // If top also fails (off-screen top), fallback to center or stick to viewport bounds
+      if (top < 10) {
+        if (targetRect.viewportTop + targetRect.height / 2 > window.innerHeight / 2) {
+          // Target is mostly in bottom half, put tooltip at top of viewport
+          top = 10;
+          pClass = 'top';
+        } else {
+          // Target is mostly in top half, put tooltip at bottom of viewport
+          top = window.innerHeight - tooltipHeight - 10;
+          pClass = 'bottom';
+        }
       }
     } else if (placement === 'top') {
       top = targetRect.viewportTop - tooltipHeight - margin;
@@ -186,7 +201,6 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
         pClass = 'right';
       }
     } else {
-      // Default: Bottom
       top = targetRect.viewportTop + targetRect.height + margin;
       left = Math.min(window.innerWidth - tooltipWidth - 20, Math.max(20, targetRect.viewportLeft + targetRect.width / 2 - tooltipWidth / 2));
       
@@ -196,7 +210,11 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
       }
     }
 
-    setCoords({ top, left });
+    // FINAL SAFETY CLAMP
+    setCoords({ 
+      top: Math.max(10, Math.min(window.innerHeight - 100, top)), 
+      left: Math.max(10, left) 
+    });
     setPlacementClass(pClass);
   }, [targetRect, currentStep, steps]);
 
