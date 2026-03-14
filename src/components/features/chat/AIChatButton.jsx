@@ -9,6 +9,7 @@ export default function AIChatWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
   const controls = useAnimation();
   const location = useLocation();
   const chatBodyRef = useRef(null);
