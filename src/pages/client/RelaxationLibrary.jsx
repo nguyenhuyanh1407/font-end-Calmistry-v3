@@ -230,7 +230,7 @@ const WorryShredder = () => {
                                         color: '#555',
                                         fontSize: '16px',
                                         resize: 'none',
-                                        fontFamily: '"Comic Sans MS", "Chalkboard SE", sans-serif',
+                                        fontFamily: "'Be Vietnam Pro', sans-serif",
                                         backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #eec 31px, #eec 32px)',
                                         lineHeight: '32px',
                                         paddingTop: '32px'

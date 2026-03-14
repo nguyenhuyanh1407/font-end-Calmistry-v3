@@ -484,7 +484,7 @@ const FuiedsQuiz = () => {
                 .cursor-pointer { cursor: pointer; }
                 .mood-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(50, 77, 62, 0.4); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; }
                 .mood-card { background: white; width: 95%; max-width: 500px; border-radius: 40px; position: relative; max-height: 90vh; overflow-y: auto; }
-                .timer-display-wrapper { font-family: 'Helvetica', sans-serif; color: ${brandGreen}; }
+                .timer-display-wrapper { font-family: 'Be Vietnam Pro', sans-serif; color: ${brandGreen}; }
                 .timer-number { font-size: 3rem; font-weight: 900; }
                 .breathe-circle { width: 100px; height: 100px; background: rgba(116, 198, 85, 0.2); border-radius: 50%; margin: 0 auto; animation: breathe 14s infinite ease-in-out; }
                 @keyframes breathe { 
