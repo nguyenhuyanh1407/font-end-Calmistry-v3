@@ -144,8 +144,9 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
     if (!targetRect) return;
 
     const step = steps[currentStep];
-    const tooltipWidth = 400;
-    const tooltipHeight = 280;
+    const isMobile = window.innerWidth <= 576;
+    const tooltipWidth = isMobile ? window.innerWidth - 40 : 400;
+    const tooltipHeight = 280; // Estimated max height
     const margin = 20;
     const placement = step.placement || 'bottom';
 
@@ -155,15 +156,23 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
       top = (window.innerHeight - tooltipHeight) / 2;
       left = (window.innerWidth - tooltipWidth) / 2;
       pClass = 'center';
+    } else if (isMobile) {
+      // Force bottom or top placement on mobile to avoid side-clipping
+      left = 20;
+      top = targetRect.viewportTop + targetRect.height + margin;
+      pClass = 'bottom';
+      
+      if (top + tooltipHeight > window.innerHeight - 20) {
+        top = targetRect.viewportTop - tooltipHeight - margin;
+        pClass = 'top';
+      }
     } else if (placement === 'top') {
       top = targetRect.viewportTop - tooltipHeight - margin;
       left = Math.min(window.innerWidth - tooltipWidth - 20, Math.max(20, targetRect.viewportLeft + targetRect.width / 2 - tooltipWidth / 2));
     } else if (placement === 'right') {
       top = targetRect.viewportTop + targetRect.height / 2 - tooltipHeight / 2;
       left = targetRect.viewportLeft + targetRect.width + margin;
-      // Safety clamp for vertical
       top = Math.min(window.innerHeight - tooltipHeight - 10, Math.max(10, top));
-      // Flip if right doesn't fit
       if (left + tooltipWidth > window.innerWidth - 10) {
         left = targetRect.viewportLeft - tooltipWidth - margin;
         pClass = 'left';
@@ -172,7 +181,6 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
       top = targetRect.viewportTop + targetRect.height / 2 - tooltipHeight / 2;
       left = targetRect.viewportLeft - tooltipWidth - margin;
       top = Math.min(window.innerHeight - tooltipHeight - 10, Math.max(10, top));
-      // Flip if left doesn't fit
       if (left < 10) {
         left = targetRect.viewportLeft + targetRect.width + margin;
         pClass = 'right';
@@ -182,7 +190,6 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
       top = targetRect.viewportTop + targetRect.height + margin;
       left = Math.min(window.innerWidth - tooltipWidth - 20, Math.max(20, targetRect.viewportLeft + targetRect.width / 2 - tooltipWidth / 2));
       
-      // Auto-flip if bottom doesn't fit and it wasn't strictly forced
       if (placement !== 'bottom' && top + tooltipHeight > window.innerHeight - 20) {
         top = targetRect.viewportTop - tooltipHeight - margin;
         pClass = 'top';
@@ -240,7 +247,7 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
           <div className="tooltip-arrow" style={{
             display: placementClass === 'center' ? 'none' : 'block',
             left: (placementClass === 'top' || placementClass === 'bottom') 
-              ? Math.max(10, Math.min(370, (targetRect?.viewportLeft || 0) + (targetRect?.width || 0) / 2 - coords.left - 12)) 
+              ? Math.max(10, Math.min((window.innerWidth <= 576 ? window.innerWidth - 60 : 370), (targetRect?.viewportLeft || 0) + (targetRect?.width || 0) / 2 - coords.left - 12)) 
               : 'auto',
             top: (placementClass === 'left' || placementClass === 'right')
               ? Math.max(10, Math.min(250, (targetRect?.viewportTop || 0) + (targetRect?.height || 0) / 2 - coords.top - 12))

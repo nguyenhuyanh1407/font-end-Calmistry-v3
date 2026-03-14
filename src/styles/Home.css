@@ -771,11 +771,13 @@ h4,
 .onboarding-tooltip {
   position: absolute;
   width: 400px;
+  max-width: calc(100vw - 40px);
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   z-index: 100000;
   pointer-events: auto;
+  transition: top 0.3s ease, left 0.3s ease;
 }
 
 .tooltip-arrow {
@@ -882,7 +884,6 @@ h4,
 
 @media (max-width: 576px) {
   .onboarding-tooltip {
-    width: calc(100vw - 40px);
     left: 20px !important;
   }
 }
