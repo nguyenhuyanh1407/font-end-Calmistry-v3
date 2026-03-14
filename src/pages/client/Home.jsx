@@ -92,20 +92,23 @@ const Home = () => {
 
   const handleUserTourStepChange = (stepIndex) => {
     // Trigger opening/closing user menu based on step
+    // The user-profile-target is in MainLayout.jsx
     setTimeout(() => {
       const toggleBtn = document.querySelector('.user-profile-target');
+      const isMenuOpen = document.querySelector('.user-menu-list-target');
+      
       if (stepIndex >= 1) {
         // Should be open
-        if (toggleBtn && toggleBtn.getAttribute('aria-expanded') === 'false') {
+        if (toggleBtn && !isMenuOpen) {
           toggleBtn.click();
         }
       } else {
         // Step 0: Should be closed
-        if (toggleBtn && toggleBtn.getAttribute('aria-expanded') === 'true') {
+        if (toggleBtn && isMenuOpen) {
           toggleBtn.click();
         }
       }
-    }, 50);
+    }, 100);
   };
 
 
