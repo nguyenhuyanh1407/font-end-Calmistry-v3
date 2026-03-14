@@ -684,8 +684,8 @@
 }
 
 :root {
-  --font-heading: 'Be Vietnam Pro', sans-serif;
-  --font-body: 'Lora', serif;
+  --font-heading: 'Lora', serif;
+  --font-body: 'Be Vietnam Pro', sans-serif;
 }
 
 body,
@@ -730,8 +730,10 @@ h4,
   cursor: default;
   border-radius: 12px;
   padding: 15px;
-  margin: -15px; /* Offset padding to keep layout stable */
-  margin-bottom: 5px; /* Adjust for margin-bottom in JSX */
+  margin: -15px;
+  /* Offset padding to keep layout stable */
+  margin-bottom: 5px;
+  /* Adjust for margin-bottom in JSX */
 }
 
 .brand-statement-item:hover {
