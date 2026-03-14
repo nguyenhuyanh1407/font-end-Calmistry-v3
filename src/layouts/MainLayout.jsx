@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -18,6 +19,8 @@ const MainLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const sectionAboveColor = '#f8f9fa';
 
   const brandGreen = '#324d3e';
@@ -29,6 +32,17 @@ const MainLayout = () => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Close mobile menu when route changes
@@ -141,11 +155,10 @@ const MainLayout = () => {
                 <button
                   className="btn rounded-pill px-4 me-2 fw-medium login-target"
                   style={{
-                    border: `1px solid ${isScrolled ? brandGreen : 'rgba(255, 255, 255, 0.4)'}`,
+                    border: `1px solid ${isScrolled ? brandGreen : '#ffffff'}`,
                     color: isScrolled ? brandGreen : '#ffffff',
-                    backgroundColor: isScrolled ? 'transparent' : 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: isScrolled ? 'none' : 'blur(10px)',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    backgroundColor: 'transparent',
+                    transition: 'all 0.3s',
                   }}
                   onClick={() => {
                     analytics.logEvent('Authentication', 'click', 'login_click');
@@ -157,128 +170,118 @@ const MainLayout = () => {
 
                 <button
                   onClick={handleGetStarted}
-                  className="btn rounded-pill px-4 fw-bold shadow-sm get-started-target"
+                  className="btn rounded-pill px-4 fw-bold get-started-target"
                   style={{
-                    background: isScrolled 
-                      ? brandGreen 
-                      : `linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%)`,
+                    backgroundColor: isScrolled ? brandGreen : '#e8f5e9',
                     color: isScrolled ? '#ffffff' : brandGreen,
                     border: 'none',
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: isScrolled ? '0 4px 15px rgba(50, 77, 62, 0.2)' : '0 4px 15px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.3s',
                   }}
                 >
                   Get started
                 </button>
               </>
             ) : (
-              <div className="dropdown">
+              <div className="position-relative" ref={dropdownRef}>
                 <button
-                  className="btn d-flex align-items-center dropdown-toggle border-0 user-profile-target"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
+                  className="btn d-flex align-items-center border-0 user-profile-target shadow-sm"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   style={{
-                    backgroundColor: isScrolled ? 'rgba(50, 77, 62, 0.05)' : 'rgba(255, 255, 255, 0.1)',
+                    backgroundColor: isScrolled ? 'rgba(50, 77, 62, 0.08)' : 'rgba(255, 255, 255, 0.15)',
                     color: isScrolled ? brandGreen : '#ffffff',
-                    fontWeight: 500,
+                    fontWeight: 600,
                     borderRadius: '50px',
-                    padding: '6px 16px'
+                    padding: '8px 18px',
+                    backdropFilter: isScrolled ? 'none' : 'blur(10px)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: `1px solid ${isScrolled ? 'rgba(50, 77, 62, 0.1)' : 'rgba(255, 255, 255, 0.2)'}`
                   }}
                 >
                   <div
-                    className="rounded-circle d-flex align-items-center justify-content-center me-2"
+                    className="rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm"
                     style={{
-                      width: '30px', height: '30px',
-                      backgroundColor: isScrolled ? brandGreen : '#ffffff',
+                      width: '32px', height: '32px',
+                      background: isScrolled ? `linear-gradient(135deg, ${brandGreen}, ${lightGreen})` : '#ffffff',
                       color: isScrolled ? '#ffffff' : brandGreen,
-                      fontSize: '0.9rem'
+                      fontSize: '1rem'
                     }}
                   >
                     <i className="bi bi-person-fill"></i>
                   </div>
-                  <span className="me-1">
+                  <span className="me-2 d-none d-sm-inline">
                     {currentUser.fullName || currentUser.name || 'Account'}
                   </span>
+                  <motion.i 
+                    animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="bi bi-chevron-down small opacity-75"
+                  ></motion.i>
                 </button>
 
-                <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-2 user-menu-list-target" style={{ minWidth: '260px', borderRadius: '15px' }}>
-                  <li className="px-3 py-3 mb-2 border-bottom bg-light rounded-top-4">
-                    <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>
-                      Xin chào, {currentUser.fullName || currentUser.name}!
-                    </div>
-                    <div className="text-muted small text-truncate">
-                      {currentUser.email}
-                    </div>
-                  </li>
-
-                  <li>
-                    <button className="dropdown-item user-dashboard-target" style={dropdownItemStyle} onClick={() => navigate('/userDashboard')}>
-                      <i className="bi bi-grid-1x2 text-primary"></i>
-                      Dashboard
-                    </button>
-                  </li>
-
-                  <li>
-                    <button className="dropdown-item user-workshops-target" style={dropdownItemStyle} onClick={() => navigate('/workshops')}>
-                      <i className="bi bi-calendar-event text-success"></i>
-                      Tham gia Workshop
-                    </button>
-                  </li>
-
-                  <li>
-                    <button className="dropdown-item user-exercises-target" style={dropdownItemStyle} onClick={() => navigate('/relaxation')}>
-                      <i className="bi bi-collection-play text-warning"></i>
-                      Kho bài tập thư giãn
-                    </button>
-                  </li>
-
-                  <li>
-                    <button className="dropdown-item user-aichat-target" style={dropdownItemStyle} onClick={() => navigate('/ai-chat')}>
-                      <i className="bi bi-robot text-info"></i>
-                      Trò chuyện AI
-                    </button>
-                  </li>
-
-                  {currentUser.roles && currentUser.roles.includes('ADMIN') && (
-                    <li>
-                      <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/admin/workshops')}>
-                        <i className="bi bi-calendar-plus text-warning"></i>
-                        Quản lý Workshop
-                      </button>
-                    </li>
-                  )}
-
-                  {currentUser.roles && currentUser.roles.includes('ADMIN') && (
-                    <li>
-                      <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/admin/accounts')}>
-                        <i className="bi bi-shield-lock text-danger"></i>
-                        Manager Account
-                      </button>
-                    </li>
-                  )}
-
-                  {currentUser.roles && currentUser.roles.includes('ADMIN') && (
-                    <li>
-                      <button className="dropdown-item" style={dropdownItemStyle} onClick={() => navigate('/admin/number-users')}>
-                        <i className="bi bi-people-fill text-primary"></i>
-                        Manager number user
-                      </button>
-                    </li>
-                  )}
-
-                  <li><hr className="dropdown-divider mx-2" /></li>
-
-                  <li>
-                    <button
-                      className="dropdown-item text-danger fw-medium"
-                      style={dropdownItemStyle}
-                      onClick={handleLogout}
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20, scale: 0.95, filter: 'blur(10px)' }}
+                      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                      exit={{ opacity: 0, y: 15, scale: 0.95, filter: 'blur(10px)' }}
+                      transition={{ duration: 0.3, cubicBezier: [0.4, 0, 0.2, 1] }}
+                      className="user-menu-list-target shadow-lg border-0 p-2"
+                      style={{
+                        position: 'absolute',
+                        top: '120%',
+                        right: 0,
+                        minWidth: '280px',
+                        borderRadius: '24px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px)',
+                        zIndex: 1200,
+                        border: '1px solid rgba(255, 255, 255, 0.5)',
+                        transformOrigin: 'top right'
+                      }}
                     >
-                      <i className="bi bi-box-arrow-right"></i>
-                      Đăng xuất
-                    </button>
-                  </li>
-                </ul>
+                      <div className="px-3 py-4 mb-2 rounded-4 overflow-hidden position-relative" style={{ background: `linear-gradient(135deg, ${brandGreen} 0%, ${lightGreen} 100%)` }}>
+                        <div className="position-relative z-1">
+                          <div className="fw-bold text-white text-truncate" style={{ fontSize: '1.1rem', letterSpacing: '-0.2px' }}>
+                            Xin chào, {currentUser.fullName || currentUser.name.split(' ').pop()}!
+                          </div>
+                          <div className="text-white small opacity-75 text-truncate">
+                            {currentUser.email}
+                          </div>
+                        </div>
+                        {/* Decorative circles */}
+                        <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', zIndex: 0 }}></div>
+                        <div style={{ position: 'absolute', bottom: '-40px', left: '-10px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', zIndex: 0 }}></div>
+                      </div>
+
+                      <div className="d-flex flex-column gap-1">
+                        <MenuLink icon="bi-grid-1x2" color="#4361ee" label="Dashboard" onClick={() => { setIsDropdownOpen(false); navigate('/userDashboard'); }} />
+                        <MenuLink icon="bi-calendar-event" color="#2ec4b6" label="Tham gia Workshop" onClick={() => { setIsDropdownOpen(false); navigate('/workshops'); }} />
+                        <MenuLink icon="bi-collection-play" color="#ff9f1c" label="Kho bài tập thư giãn" onClick={() => { setIsDropdownOpen(false); navigate('/relaxation'); }} />
+                        <MenuLink icon="bi-robot" color="#219ebc" label="Trò chuyện AI" onClick={() => { setIsDropdownOpen(false); navigate('/ai-chat'); }} />
+
+                        {currentUser.roles && currentUser.roles.includes('ADMIN') && (
+                          <>
+                            <div className="px-3 py-2 small fw-bold text-muted text-uppercase mb-1" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Quản lý hệ thống</div>
+                            <MenuLink icon="bi-calendar-plus" color="#e63946" label="Quản lý Workshop" onClick={() => { setIsDropdownOpen(false); navigate('/admin/workshops'); }} />
+                            <MenuLink icon="bi-shield-lock" color="#1d3557" label="Manager Account" onClick={() => { setIsDropdownOpen(false); navigate('/admin/accounts'); }} />
+                            <MenuLink icon="bi-people-fill" color="#457b9d" label="Manager Number Users" onClick={() => { setIsDropdownOpen(false); navigate('/admin/number-users'); }} />
+                          </>
+                        )}
+
+                        <div className="my-2 border-top opacity-10 mx-2"></div>
+
+                        <button
+                          className="btn d-flex align-items-center gap-3 px-3 py-2 text-danger fw-semibold w-100 rounded-3 logout-btn-hover"
+                          style={{ transition: 'all 0.2s ease', backgroundColor: 'transparent', border: 'none' }}
+                          onClick={handleLogout}
+                        >
+                          <i className="bi bi-box-arrow-right fs-5"></i>
+                          <span>Đăng xuất</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
@@ -614,16 +617,24 @@ const MainLayout = () => {
         }
 
         .login-target:hover {
-          background-color: ${isScrolled ? brandGreen : '#ffffff'} !important;
-          color: ${isScrolled ? '#ffffff' : brandGreen} !important;
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+          background-color: #ffffff !important;
+          color: ${brandGreen} !important;
         }
 
         .get-started-target:hover {
-          transform: translateY(-2px) scale(1.05);
-          box-shadow: 0 8px 25px ${isScrolled ? 'rgba(50, 77, 62, 0.3)' : 'rgba(255, 255, 255, 0.2)'} !important;
-          filter: brightness(1.1);
+          transform: scale(1.05);
+          box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .user-menu-item-hover:hover {
+          background-color: rgba(142, 195, 57, 0.08) !important;
+          transform: translateX(6px);
+          color: ${brandGreen} !important;
+        }
+
+        .logout-btn-hover:hover {
+          background-color: #fff5f5 !important;
+          transform: scale(1.02);
         }
 
         .dropdown-toggle::after {
@@ -851,6 +862,19 @@ const MainLayout = () => {
     </div>
   );
 };
+
+const MenuLink = ({ icon, label, onClick, color }) => (
+  <button
+    className="btn d-flex align-items-center gap-3 px-3 py-2 w-100 rounded-3 user-menu-item-hover"
+    style={{ transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', backgroundColor: 'transparent', border: 'none', textAlign: 'left' }}
+    onClick={onClick}
+  >
+    <div className="d-flex align-items-center justify-content-center rounded-3 shadow-sm" style={{ width: '32px', height: '32px', backgroundColor: `${color}15`, color: color }}>
+      <i className={`bi ${icon} fs-5`}></i>
+    </div>
+    <span className="fw-medium text-dark" style={{ fontSize: '0.9rem' }}>{label}</span>
+  </button>
+);
 
 export default MainLayout;
 
