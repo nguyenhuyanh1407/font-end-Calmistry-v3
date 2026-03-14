@@ -306,7 +306,7 @@ const Home = () => {
               onClick={() => {
                 navigate('/fuieds-quiz');
               }}
-              style={{ cursor: 'pointer', fontFamily: "'Be Vietnam Pro', sans-serif", letterSpacing: '0.5px' }}
+              style={{ cursor: 'pointer', fontFamily: "'Lora', serif", letterSpacing: '0.5px', fontWeight: '400 !important' }}
             >
 
               Hãy để chúng tôi giúp bạn tìm ra phương pháp chữa lành phù hợp với bản thân mình!

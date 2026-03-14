@@ -685,7 +685,7 @@
 
 :root {
   --font-heading: 'Lora', serif;
-  --font-body: 'Rubik', sans-serif;
+  --font-body: 'Be Vietnam Pro', sans-serif;
 }
 
 body,
@@ -714,7 +714,7 @@ h4,
   padding: 16px 40px;
   border-radius: 50px;
   font-weight: 600;
-  font-family: 'Rubik', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   transition: all 0.3s ease;
   box-shadow: 0 10px 20px rgba(50, 77, 62, 0.15);
 }
@@ -861,7 +861,7 @@ h4,
   font-weight: 700;
   font-size: 0.95rem;
   transition: background 0.2s;
-  font-family: 'Rubik', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 .btn-tour-primary:hover {
@@ -877,7 +877,7 @@ h4,
   font-weight: 600;
   font-size: 0.95rem;
   transition: background 0.2s;
-  font-family: 'Rubik', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 .btn-tour-secondary:hover {

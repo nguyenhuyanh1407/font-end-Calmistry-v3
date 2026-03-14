@@ -16,9 +16,9 @@ const StatsSection = ({ stats, statsBg }) => {
                     <line x1="50" y1="20" x2="50" y2="0" stroke="#397a4a" strokeWidth="3" />
                   </svg>
                 </div>
-                <h2 className="display-4 mb-4" style={{ fontWeight: '400', lineHeight: '1.2', letterSpacing: '-1px', fontFamily: "var(--font-heading)" }}>
+                <h2 className="display-4 mb-4" style={{ fontWeight: '400 !important', lineHeight: '1.2', letterSpacing: '-1px', fontFamily: "var(--font-heading)" }}>
                   Chăm sóc sức khỏe tinh thần <br /> Mọi lúc, mọi nơi. <br />
-                  <span style={{ color: '#397a4a', fontWeight: '500' }}>100% online.</span>
+                  <span style={{ color: '#397a4a', fontWeight: '400 !important' }}>100% online.</span>
                 </h2>
               </div>
             </FadeInUp>
@@ -38,7 +38,7 @@ const StatsSection = ({ stats, statsBg }) => {
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
                       </div>
-                      <p className="fs-4 mb-0 fw-medium" style={{ color: '#324d3e', lineHeight: '1.4', fontFamily: "var(--font-body)" }}>
+                      <p className="fs-4 mb-0" style={{ color: '#324d3e', lineHeight: '1.4', fontWeight: '400 !important', fontFamily: "var(--font-heading)" }}>
                         {item.label || item}
                       </p>
                     </div>
