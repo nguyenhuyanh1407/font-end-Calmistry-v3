@@ -3,12 +3,7 @@ import chatService from "../../services/chatService";
 import userService from "../../services/userService";
 import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-    Send, Users, MessageCircle, Sparkles,
-    Ghost, Cloud, Moon, Star, Sun, Info, Heart,
-    LogOut, ChevronRight, Hash, Compass, Flower2,
-    Image as ImageIcon, Link as LinkIcon, Plus, X, Camera
-} from "lucide-react";
+// Lucide icons replaced with Bootstrap Icons
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const SanctuaryRoom = ({ room, active, onClick, icon }) => (
@@ -30,7 +25,7 @@ const SanctuaryRoom = ({ room, active, onClick, icon }) => (
                 <h6 className={`mb-0 fw-bold ${active ? 'text-success' : 'text-dark'}`}>{room.name}</h6>
                 <small className="text-muted text-truncate d-block">{room.description}</small>
             </div>
-            {active && <ChevronRight size={16} className="text-success" />}
+            {active && <i className="bi bi-chevron-right text-success" style={{ fontSize: '16px' }} />}
         </div>
     </motion.div>
 );
@@ -413,7 +408,8 @@ const GroupChat = () => {
         <div style={{
             background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)',
             paddingTop: '80px', // Standard padding for fixed navbar
-            paddingBottom: '40px'
+            paddingBottom: '40px',
+            fontFamily: "'Lora', serif"
         }}>
             <div className="container-xl">
                 <div className="row g-4" style={{ height: '750px', maxHeight: 'calc(100vh - 180px)' }}>
@@ -423,7 +419,7 @@ const GroupChat = () => {
                         <div className="card border-0 shadow-sm rounded-5 h-100 p-4 bg-white bg-opacity-80 backdrop-blur">
                             <div className="d-flex align-items-center justify-content-between mb-4">
                                 <h5 className="fw-900 mb-0 d-flex align-items-center gap-2" style={{ color: brandGreen }}>
-                                    <Compass size={22} />
+                                    <i className="bi bi-compass" style={{ fontSize: '22px' }} />
                                     VÙNG YÊN
                                 </h5>
                                 {isAdmin && (
@@ -431,9 +427,10 @@ const GroupChat = () => {
                                         whileHover={{ scale: 1.1 }}
                                         whileTap={{ scale: 0.9 }}
                                         onClick={() => setShowCreateRoom(true)}
-                                        className="btn btn-success btn-sm rounded-circle p-1"
+                                        className="btn btn-success btn-sm rounded-circle p-1 d-flex align-items-center justify-content-center"
+                                        style={{ width: '28px', height: '28px' }}
                                     >
-                                        <Plus size={18} />
+                                        <i className="bi bi-plus-lg" style={{ fontSize: '18px' }} />
                                     </motion.button>
                                 )}
                                 <div className={`badge rounded-pill ${isConnected ? 'bg-success' : 'bg-danger'} bg-opacity-10 text-${isConnected ? 'success' : 'danger'} small`}>
@@ -456,7 +453,7 @@ const GroupChat = () => {
                             <div className="mt-4 pt-4 border-top">
                                 <div className="p-3 rounded-4 bg-light border border-white">
                                     <h6 className="fw-bold mb-2 small d-flex align-items-center gap-2">
-                                        <Info size={14} className="text-success" />
+                                        <i className="bi bi-info-circle text-success" style={{ fontSize: '14px' }} />
                                         Lời nhắc từ Sanctuary
                                     </h6>
                                     <p className="small text-muted mb-0 italic">
@@ -490,8 +487,8 @@ const GroupChat = () => {
                             {/* Chat Header */}
                             <div className="p-4 border-bottom d-flex align-items-center justify-content-between bg-white bg-opacity-90 backdrop-blur sticky-top">
                                 <div className="d-flex align-items-center gap-3">
-                                    <div className="d-lg-none btn btn-light rounded-circle p-2" onClick={() => { }}>
-                                        <Compass size={20} />
+                                    <div className="d-lg-none btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" onClick={() => { }}>
+                                        <i className="bi bi-compass" style={{ fontSize: '20px' }} />
                                     </div>
                                     <div className="fs-1">{getRoomIcon(selectedRoom?.name)}</div>
                                     <div>
@@ -506,7 +503,7 @@ const GroupChat = () => {
                                         onClick={sendHealingVibes}
                                         className="btn btn-warning btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2 text-dark"
                                     >
-                                        <Sparkles size={16} />
+                                        <i className="bi bi-stars" style={{ fontSize: '16px' }} />
                                         <span className="d-none d-md-inline">Gửi năng lượng</span>
                                     </motion.button>
 
@@ -520,7 +517,7 @@ const GroupChat = () => {
                                             }}
                                             className="btn btn-outline-success btn-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2"
                                         >
-                                            <Users size={16} />
+                                            <i className="bi bi-people-fill" style={{ fontSize: '16px' }} />
                                             <span className="d-none d-md-inline">Thành viên</span>
                                         </motion.button>
                                     )}
@@ -555,9 +552,9 @@ const GroupChat = () => {
                                         <div className="text-center py-4 mb-3 position-sticky top-0" style={{ zIndex: 5 }}>
                                             <div className="bg-white bg-opacity-90 backdrop-blur rounded-4 p-3 d-inline-block shadow-sm border border-success border-opacity-25" style={{ maxWidth: '80%' }}>
                                                 <div className="d-flex align-items-center justify-content-center gap-2 mb-2">
-                                                    <Sparkles size={16} className="text-warning" />
+                                                    <i className="bi bi-stars text-warning" style={{ fontSize: '16px' }} />
                                                     <span className="fw-bold text-success small text-uppercase tracking-wider">Châm ngôn hôm nay</span>
-                                                    <Sparkles size={16} className="text-warning" />
+                                                    <i className="bi bi-stars text-warning" style={{ fontSize: '16px' }} />
                                                 </div>
                                                 <h6 className="fw-bold mb-1" style={{ color: brandGreen }}>"{getRoomPrompt(selectedRoom?.name)}"</h6>
                                                 <p className="text-muted small mb-0 mt-2 italic">Hãy cùng chia sẻ những năng lượng chữa lành vào vùng yên này nhé.</p>
@@ -638,7 +635,7 @@ const GroupChat = () => {
                                                     className="position-absolute top-0 end-0 btn btn-danger btn-xs rounded-circle p-0"
                                                     style={{ width: '20px', height: '20px', marginTop: '-10px', marginRight: '-10px' }}
                                                 >
-                                                    <X size={12} />
+                                                    <i className="bi bi-x-lg" style={{ fontSize: '12px' }} />
                                                 </button>
                                             </div>
                                         )}
@@ -666,7 +663,7 @@ const GroupChat = () => {
                                         className="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
                                         style={{ width: '56px', height: '56px' }}
                                     >
-                                        <Camera size={22} className="text-muted" />
+                                        <i className="bi bi-camera text-muted" style={{ fontSize: '22px' }} />
                                     </motion.button>
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
@@ -676,7 +673,7 @@ const GroupChat = () => {
                                         disabled={!isConnected || (!newMessage.trim() && !selectedImage) || !selectedRoom}
                                         style={{ width: '56px', height: '56px', backgroundColor: brandGreen }}
                                     >
-                                        <Send size={22} className="ms-1" />
+                                        <i className="bi bi-send-fill ms-1" style={{ fontSize: '22px' }} />
                                     </motion.button>
                                 </form>
                             </div>
@@ -706,7 +703,7 @@ const GroupChat = () => {
                             <div className="d-flex justify-content-between align-items-center mb-4">
                                 <h5 className="fw-900 mb-0">Tạo Sanctuary Mới</h5>
                                 <button className="btn btn-light rounded-circle p-1" onClick={() => setShowCreateRoom(false)}>
-                                    <X size={20} />
+                                    <i className="bi bi-x-lg" style={{ fontSize: '20px' }} />
                                 </button>
                             </div>
                             <form onSubmit={handleCreateRoom}>
@@ -761,13 +758,13 @@ const GroupChat = () => {
                             <div className="d-flex justify-content-between align-items-center mb-4">
                                 <h5 className="fw-900 mb-0">Quản lý Thành viên #{selectedRoom?.name}</h5>
                                 <button className="btn btn-light rounded-circle p-1" onClick={() => setShowMembersModal(false)}>
-                                    <X size={20} />
+                                    <i className="bi bi-x-lg" style={{ fontSize: '20px' }} />
                                 </button>
                             </div>
 
                             <div className="mb-4">
                                 <div className="input-group rounded-pill bg-light border-0 px-3 py-1">
-                                    <span className="input-group-text bg-transparent border-0 text-muted"><Users size={18} /></span>
+                                    <span className="input-group-text bg-transparent border-0 text-muted"><i className="bi bi-people-fill" style={{ fontSize: '18px' }} /></span>
                                     <input
                                         type="text"
                                         className="form-control bg-transparent border-0 shadow-none"
