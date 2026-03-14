@@ -141,10 +141,11 @@ const MainLayout = () => {
                 <button
                   className="btn rounded-pill px-4 me-2 fw-medium login-target"
                   style={{
-                    border: `1px solid ${isScrolled ? brandGreen : '#ffffff'}`,
+                    border: `1px solid ${isScrolled ? brandGreen : 'rgba(255, 255, 255, 0.4)'}`,
                     color: isScrolled ? brandGreen : '#ffffff',
-                    backgroundColor: 'transparent',
-                    transition: 'all 0.3s',
+                    backgroundColor: isScrolled ? 'transparent' : 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: isScrolled ? 'none' : 'blur(10px)',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                   onClick={() => {
                     analytics.logEvent('Authentication', 'click', 'login_click');
@@ -156,12 +157,15 @@ const MainLayout = () => {
 
                 <button
                   onClick={handleGetStarted}
-                  className="btn rounded-pill px-4 fw-bold"
+                  className="btn rounded-pill px-4 fw-bold shadow-sm get-started-target"
                   style={{
-                    backgroundColor: isScrolled ? brandGreen : '#e8f5e9',
+                    background: isScrolled 
+                      ? brandGreen 
+                      : `linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%)`,
                     color: isScrolled ? '#ffffff' : brandGreen,
                     border: 'none',
-                    transition: 'all 0.3s',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: isScrolled ? '0 4px 15px rgba(50, 77, 62, 0.2)' : '0 4px 15px rgba(0, 0, 0, 0.1)',
                   }}
                 >
                   Get started
@@ -607,6 +611,19 @@ const MainLayout = () => {
         .dropdown-item.text-danger:hover {
           background-color: #fff5f5 !important;
           color: #dc3545 !important;
+        }
+
+        .login-target:hover {
+          background-color: ${isScrolled ? brandGreen : '#ffffff'} !important;
+          color: ${isScrolled ? '#ffffff' : brandGreen} !important;
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .get-started-target:hover {
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 8px 25px ${isScrolled ? 'rgba(50, 77, 62, 0.3)' : 'rgba(255, 255, 255, 0.2)'} !important;
+          filter: brightness(1.1);
         }
 
         .dropdown-toggle::after {
