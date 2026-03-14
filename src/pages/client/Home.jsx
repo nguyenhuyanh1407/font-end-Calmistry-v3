@@ -297,8 +297,8 @@ const Home = () => {
       <div style={{ backgroundColor: brandGreen, overflowX: 'hidden' }}>
         <section className="container py-5 text-white" style={{ position: 'relative', zIndex: 1 }}>
           <header className="text-center mb-5" style={{ paddingTop: '80px' }}>
-            <h1 className="display-3 fw-normal mb-3">
-              Mọi người đều xứng đáng được hạnh phúc.
+            <h1 className="display-4 fw-normal mb-3">
+              Mọi người đều xứng đáng được hạnh phúc
             </h1>
             {/* THÊM CLASS ĐÚNG TARGET */}
             <p
