@@ -494,7 +494,7 @@ const avatarCircle = {
 
 const closeBtn = { border: "none", background: "none", color: "#fff", cursor: "pointer", fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center", padding: "5px" };
 const chatBody = { flex: 1, padding: "20px", overflowY: "auto", backgroundColor: "transparent", display: "flex", flexDirection: "column" };
-const messageBubble = { padding: "12px 18px", fontSize: "14px", lineHeight: "1.6", display: "inline-block", fontWeight: "500", maxWidth: "85%", transition: 'all 0.2s ease', letterSpacing: "-0.01em" };
+const messageBubble = { padding: "12px 18px", fontSize: "14px", lineHeight: "1.6", display: "inline-block", fontWeight: "500", maxWidth: "85%", transition: 'all 0.2s ease', letterSpacing: "-0.01em", fontFamily: "'Be Vietnam Pro', sans-serif" };
 const chatFooter = { padding: "15px 20px 20px", backgroundColor: "transparent" };
 const inputWrapper = { display: "flex", alignItems: "center", gap: "10px", backgroundColor: "#fff", padding: "6px", borderRadius: "20px", boxShadow: "0 4px 15px rgba(0,0,0,0.04)", border: "1px solid #f0f3f0" };
 const chatInput = { flex: 1, border: "none", padding: "10px 15px", fontSize: "14px", outline: "none", backgroundColor: "transparent", color: "#324d3e", fontFamily: "'Be Vietnam Pro', sans-serif" };

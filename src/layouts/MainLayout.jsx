@@ -424,7 +424,7 @@ const MainLayout = () => {
         marginTop: 'auto',
         fontFamily: "'Rubik', sans-serif"
       }}>
-        <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Rubik:wght@400;500;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
         <div style={{ lineHeight: 0, width: '100%', backgroundColor: softBg, overflow: 'hidden' }}>
           <svg viewBox="0 0 1440 120" preserveAspectRatio="none" style={{ width: '100%', height: '100px', display: 'block', transform: 'scale(1.02)' }}>
