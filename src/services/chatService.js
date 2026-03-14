@@ -3,7 +3,7 @@ import { Stomp } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
 import api from './api';
 
-const WS_URL = 'http://localhost:8080/calmistry/ws';
+const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/calmistry/ws';
 
 class ChatService {
     constructor() {
