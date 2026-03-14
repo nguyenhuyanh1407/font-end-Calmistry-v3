@@ -188,11 +188,28 @@ const GroupChat = () => {
                     // Then subscribe for new ones
                     subscriptionRef.current = chatService.subscribeToRoom(selectedRoom.id, (payload) => {
                         const message = JSON.parse(payload.body);
+                        
                         if (message.messageType === 'SYSTEM' && message.messageText === 'HEALING_VIBES') {
                             triggerParticles();
                             playSound("healing");
                         } else {
-                            setMessages(prev => [...prev, message]);
+                            setMessages(prev => {
+                                // Check for existing optimistic message (by temp ID or same content/user/time)
+                                const isDuplicate = prev.some(msg => 
+                                    (msg.id === message.id) || 
+                                    (msg.tempId && msg.messageText === message.messageText && msg.sender?.id === message.sender?.id)
+                                );
+                                
+                                if (isDuplicate) {
+                                    // Update temp message with real server data if needed
+                                    return prev.map(msg => 
+                                        (msg.tempId && msg.messageText === message.messageText && msg.sender?.id === message.sender?.id)
+                                        ? message : msg
+                                    );
+                                }
+                                
+                                return [...prev, message];
+                            });
                             scrollToBottom();
                             if (message.sender?.id !== currentUser?.id) {
                                 playSound("message");
@@ -270,8 +287,14 @@ const GroupChat = () => {
             mediaUrl: selectedImage,
             messageType: selectedImage ? 'IMAGE' : 'TEXT',
             isAnonymous: isAnon,
-            room: { id: selectedRoom.id }
+            room: { id: selectedRoom.id },
+            createdAt: new Date().toISOString(),
+            tempId: Date.now() // For optimistic update tracking
         };
+
+        // Optimistic update: show message immediately
+        setMessages(prev => [...prev, messagePayload]);
+        scrollToBottom();
 
         chatService.sendMessage(messagePayload);
         setNewMessage("");

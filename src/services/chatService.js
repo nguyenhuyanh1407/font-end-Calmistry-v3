@@ -1,5 +1,5 @@
+import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { Stomp } from '@stomp/stompjs';
 import { toast } from 'react-toastify';
 import api from './api';
 
@@ -7,58 +7,86 @@ const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/calmistry/w
 
 class ChatService {
     constructor() {
-        this.stompClient = null;
+        this.client = null;
+        this.onConnected = null;
+        this.onDisconnected = null;
+        this.subscriptions = new Map();
     }
 
     connect(onConnectedCallback, onErrorCallback) {
-        // Prevent duplicate connections
-        if (this.stompClient && this.stompClient.connected) {
-            console.log('Already connected to chat');
+        if (this.client && this.client.active) {
             if (onConnectedCallback) onConnectedCallback();
             return;
         }
 
-        const socket = new SockJS(WS_URL);
-        this.stompClient = Stomp.over(socket);
-        this.stompClient.debug = () => { };
+        this.onConnected = onConnectedCallback;
 
-        this.stompClient.connect({},
-            () => {
-                if (onConnectedCallback) onConnectedCallback();
+        this.client = new Client({
+            webSocketFactory: () => new SockJS(WS_URL),
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+            debug: (str) => {
+                console.log('STOMP: ' + str);
             },
-            (error) => {
-                console.error('WebSocket connection error:', error);
-                if (onErrorCallback) onErrorCallback(error);
-                toast.error("Lost connection to chat server.");
+            onConnect: (frame) => {
+                console.log('Connected to STOMP');
+                if (this.onConnected) this.onConnected();
+            },
+            onStompError: (frame) => {
+                console.error('STOMP error', frame.headers['message']);
+                if (onErrorCallback) onErrorCallback(frame);
+                toast.error("Lỗi kết nối máy chủ chat.");
+            },
+            onWebSocketClose: () => {
+                console.log('WebSocket closed');
+                if (this.onDisconnected) this.onDisconnected();
             }
-        );
+        });
+
+        this.client.activate();
     }
 
     subscribeToRoom(roomId, onMessageReceived) {
-        if (this.stompClient && this.stompClient.connected) {
-            return this.stompClient.subscribe(`/topic/room.${roomId}`, onMessageReceived);
+        if (!this.client || !this.client.connected) {
+            console.warn('STOMP client not connected, cannot subscribe');
+            return null;
         }
-        return null;
+
+        const topic = `/topic/room.${roomId}`;
+        const subscription = this.client.subscribe(topic, (message) => {
+            if (onMessageReceived) {
+                onMessageReceived(message);
+            }
+        });
+
+        this.subscriptions.set(topic, subscription);
+        return subscription;
     }
 
     unsubscribe(subscription) {
-        if (subscription) {
+        if (subscription && typeof subscription.unsubscribe === 'function') {
             subscription.unsubscribe();
         }
     }
 
     disconnect() {
-        if (this.stompClient !== null) {
-            this.stompClient.disconnect();
+        if (this.client) {
+            this.client.deactivate();
+            this.client = null;
         }
-        console.log("Disconnected");
+        this.subscriptions.clear();
+        console.log("Disconnected from chat");
     }
 
     sendMessage(message) {
-        if (this.stompClient && this.stompClient.connected) {
-            this.stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(message));
+        if (this.client && this.client.connected) {
+            this.client.publish({
+                destination: "/app/chat.sendMessage",
+                body: JSON.stringify(message)
+            });
         } else {
-            toast.error("Not connected to chat.");
+            toast.error("Chưa kết nối đến máy chủ chat.");
         }
     }
 
@@ -83,4 +111,5 @@ class ChatService {
     }
 }
 
-export default new ChatService();
+const chatServiceInstance = new ChatService();
+export default chatServiceInstance;
