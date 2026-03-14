@@ -25,10 +25,9 @@ export default function AIChatWidget() {
   const brandDarkGreen = "#75a32d";
 
   // --- STATES ---
-  const [chatHistory, setChatHistory] = useState([]);
   const [dimensions, setDimensions] = useState({
-    width: isMobile ? Math.min(300, window.innerWidth - 30) : 340,
-    height: isMobile ? 450 : 500
+    width: isMobile ? Math.min(350, window.innerWidth - 30) : 340,
+    height: isMobile ? Math.min(550, window.innerHeight - 150) : 500
   });
   const [isResizing, setIsResizing] = useState(false);
   const resizeStartPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -209,10 +208,10 @@ export default function AIChatWidget() {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             style={{
               ...chatWindow,
-              width: `${dimensions.width}px`,
-              height: `${dimensions.height}px`,
-              left: position.x > window.innerWidth / 2 ? position.x - (dimensions.width - 50) : position.x,
-              top: position.y > window.innerHeight / 2 ? position.y - (dimensions.height + 20) : position.y + 75,
+              width: isMobile ? 'calc(100vw - 30px)' : `${dimensions.width}px`,
+              height: isMobile ? 'calc(80vh - 100px)' : `${dimensions.height}px`,
+              left: isMobile ? '15px' : (position.x > window.innerWidth / 2 ? position.x - (dimensions.width - 50) : position.x),
+              top: isMobile ? '80px' : (position.y > window.innerHeight / 2 ? position.y - (dimensions.height + 20) : position.y + 75),
             }}
           >
             {/* Custom scrollbar styles */}
@@ -234,28 +233,29 @@ export default function AIChatWidget() {
               }
             `}</style>
 
-            {/* Resize Handle */}
-            <div
-              onMouseDown={handleResizeStart}
-              style={{
-                position: 'absolute',
-                top: position.y > window.innerHeight / 2 ? 0 : 'auto',
-                bottom: position.y > window.innerHeight / 2 ? 'auto' : 0,
-                left: position.x > window.innerWidth / 2 ? 0 : 'auto',
-                right: position.x > window.innerWidth / 2 ? 'auto' : 0,
-                width: '15px',
-                height: '15px',
-                cursor: 'nwse-resize',
-                zIndex: 10,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#ccc',
-                opacity: 0.5
-              }}
-            >
-              <i className="bi bi-arrows-angle-expand" style={{ fontSize: '10px', transform: 'rotate(90deg)' }}></i>
-            </div>
+            {!isMobile && (
+              <div
+                onMouseDown={handleResizeStart}
+                style={{
+                  position: 'absolute',
+                  top: position.y > window.innerHeight / 2 ? 0 : 'auto',
+                  bottom: position.y > window.innerHeight / 2 ? 'auto' : 0,
+                  left: position.x > window.innerWidth / 2 ? 0 : 'auto',
+                  right: position.x > window.innerWidth / 2 ? 'auto' : 0,
+                  width: '15px',
+                  height: '15px',
+                  cursor: 'nwse-resize',
+                  zIndex: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ccc',
+                  opacity: 0.5
+                }}
+              >
+                <i className="bi bi-arrows-angle-expand" style={{ fontSize: '10px', transform: 'rotate(90deg)' }}></i>
+              </div>
+            )}
 
             {/* Header */}
             <div style={{ ...chatHeader, background: `linear-gradient(135deg, ${brandLightGreen}, ${brandDarkGreen})` }}>

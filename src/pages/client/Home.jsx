@@ -270,9 +270,9 @@ const Home = () => {
     >
       {/* 1. GUEST ONBOARDING */}
       {showGuestTour && (
-        <GuestOnboarding 
-          steps={guestTourSteps} 
-          onComplete={() => setShowGuestTour(false)} 
+        <GuestOnboarding
+          steps={guestTourSteps}
+          onComplete={() => setShowGuestTour(false)}
           onStepChange={handleOnboardingStepChange}
           onFinish={() => {
             setShowGuestTour(false);
@@ -282,9 +282,9 @@ const Home = () => {
         />
       )}      {/* 2. AUTHENTICATED USER TOUR */}
       {showUserTour && (
-        <GuestOnboarding 
-          steps={userTourSteps} 
-          onComplete={() => setShowUserTour(false)} 
+        <GuestOnboarding
+          steps={userTourSteps}
+          onComplete={() => setShowUserTour(false)}
           onStepChange={handleUserTourStepChange}
           onFinish={() => {
             setShowUserTour(false);

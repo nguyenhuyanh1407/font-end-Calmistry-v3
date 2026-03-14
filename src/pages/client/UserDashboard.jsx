@@ -10,6 +10,7 @@ import userService from '../../services/userService';
 import fileService from '../../services/fileService';
 import sleepService from '../../services/sleepService';
 import journalService from '../../services/journalService';
+import analytics from '../../utils/analytics';
 import { toast } from 'react-toastify';
 import {
   Smile, Meh, Frown, Sparkles,
@@ -353,10 +354,16 @@ const UserDashboard = () => {
                   </p>
 
                     <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
-                      <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center tour-btn-fuieds" style={{ backgroundColor: brandGreen }} onClick={() => navigate('/fuieds-quiz')}>
+                      <button className="btn btn-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center tour-btn-fuieds" style={{ backgroundColor: brandGreen }} onClick={() => {
+                        analytics.logEvent('Dashboard', 'click', 'calculate_fuieds_click');
+                        navigate('/fuieds-quiz');
+                      }}>
                         <Sparkles size={18} className="me-2" /> Tính điểm FUIEDS Score
                       </button>
-                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center tour-btn-sleep" onClick={() => window.open('https://www.calmistry.blog/sleepManagement', '_blank')}>
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center tour-btn-sleep" onClick={() => {
+                        analytics.logEvent('Dashboard', 'click', 'evaluate_sleep_click');
+                        window.open('https://www.calmistry.blog/sleepManagement', '_blank');
+                      }}>
                         <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
                       </button>
                     </div>

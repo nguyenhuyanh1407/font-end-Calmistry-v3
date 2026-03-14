@@ -5,6 +5,9 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from "./App";
 import "./index.css";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import analytics from "./utils/analytics";
+
+analytics.initGA();
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const queryClient = new QueryClient();

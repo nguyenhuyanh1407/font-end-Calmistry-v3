@@ -40,7 +40,7 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
     const rect = target.getBoundingClientRect();
     const tooltipHeight = 280;
     const margin = 20;
-    
+
     // Determine tooltip placement (logical duplicate of render logic)
     let isTop = step.placement === 'top';
     if (!isTop && step.placement !== 'bottom') {
@@ -51,16 +51,16 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
     }
 
     // Calculate the combined document-relative vertical bounds
-    const topArea = isTop 
-      ? rect.top + window.scrollY - tooltipHeight - margin 
+    const topArea = isTop
+      ? rect.top + window.scrollY - tooltipHeight - margin
       : rect.top + window.scrollY;
-    
-    const bottomArea = isTop 
-      ? rect.bottom + window.scrollY 
+
+    const bottomArea = isTop
+      ? rect.bottom + window.scrollY
       : rect.bottom + window.scrollY + tooltipHeight + margin;
 
     const totalHeight = bottomArea - topArea;
-    
+
     // Ideal scroll centers this combined block
     let idealScrollTop = topArea - (window.innerHeight / 2) + (totalHeight / 2);
 
@@ -158,17 +158,17 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
     } else if (isMobile) {
       // Mobile positioning: prefer bottom, then top, then center
       left = (window.innerWidth - tooltipWidth) / 2;
-      
+
       // Try bottom first
       top = targetRect.viewportTop + targetRect.height + margin;
       pClass = 'bottom';
-      
+
       // If bottom fails, try top
       if (top + tooltipHeight > window.innerHeight - 10) {
         top = targetRect.viewportTop - tooltipHeight - margin;
         pClass = 'top';
       }
-      
+
       // If top also fails (off-screen top), fallback to center or stick to viewport bounds
       if (top < 10) {
         if (targetRect.viewportTop + targetRect.height / 2 > window.innerHeight / 2) {
@@ -203,7 +203,7 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
     } else {
       top = targetRect.viewportTop + targetRect.height + margin;
       left = Math.min(window.innerWidth - tooltipWidth - 20, Math.max(20, targetRect.viewportLeft + targetRect.width / 2 - tooltipWidth / 2));
-      
+
       if (placement !== 'bottom' && top + tooltipHeight > window.innerHeight - 20) {
         top = targetRect.viewportTop - tooltipHeight - margin;
         pClass = 'top';
@@ -211,9 +211,9 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
     }
 
     // FINAL SAFETY CLAMP
-    setCoords({ 
-      top: Math.max(10, Math.min(window.innerHeight - 100, top)), 
-      left: Math.max(10, left) 
+    setCoords({
+      top: Math.max(10, Math.min(window.innerHeight - 100, top)),
+      left: Math.max(10, left)
     });
     setPlacementClass(pClass);
   }, [targetRect, currentStep, steps]);
@@ -241,11 +241,11 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
             )}
           </mask>
         </defs>
-        <rect 
-          width="100%" 
-          height="100%" 
-          fill="rgba(0, 0, 0, 0.75)" 
-          mask="url(#spotlight-mask)" 
+        <rect
+          width="100%"
+          height="100%"
+          fill="rgba(0, 0, 0, 0.75)"
+          mask="url(#spotlight-mask)"
           style={{ pointerEvents: 'auto' }}
         />
       </svg>
@@ -264,8 +264,8 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
         >
           <div className="tooltip-arrow" style={{
             display: placementClass === 'center' ? 'none' : 'block',
-            left: (placementClass === 'top' || placementClass === 'bottom') 
-              ? Math.max(10, Math.min((window.innerWidth <= 576 ? window.innerWidth - 60 : 370), (targetRect?.viewportLeft || 0) + (targetRect?.width || 0) / 2 - coords.left - 12)) 
+            left: (placementClass === 'top' || placementClass === 'bottom')
+              ? Math.max(10, Math.min((window.innerWidth <= 576 ? window.innerWidth - 60 : 370), (targetRect?.viewportLeft || 0) + (targetRect?.width || 0) / 2 - coords.left - 12))
               : 'auto',
             top: (placementClass === 'left' || placementClass === 'right')
               ? Math.max(10, Math.min(250, (targetRect?.viewportTop || 0) + (targetRect?.height || 0) / 2 - coords.top - 12))

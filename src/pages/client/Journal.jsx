@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import journalService from '../../services/journalService';
 import GuestOnboarding from '../../components/common/GuestOnboarding';
+import analytics from '../../utils/analytics';
 import '../../styles/Journal.css';
 
 const Journal = () => {
@@ -345,6 +346,7 @@ const Journal = () => {
           whileHover={{ scale: 1.1, rotate: 90 }} // HIỆU ỨNG XOAY 90 ĐỘ
           whileTap={{ scale: 0.9 }}
           onClick={() => {
+            analytics.logEvent('Journal', 'create', 'create_journal_click');
             setCurrentEntry({ id: null, title: '', content: '', mood: 'neutral', createdAt: new Date().toISOString() });
             setIsModalOpen(true);
             

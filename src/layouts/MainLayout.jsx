@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import logoCalmWhite from '../assets/logoCalmWhite.png';
 import authService from '../services/authService';
 import userService from '../services/userService';
+import analytics from '../utils/analytics';
 
 const MainLayout = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -59,6 +60,7 @@ const MainLayout = () => {
   });
 
   const handleGetStarted = () => {
+    analytics.logEvent('Authentication', 'click', 'register_click');
     setIsMobileMenuOpen(false);
     if (location.pathname === "/") {
       const el = document.getElementById("pricing-section");
@@ -144,7 +146,10 @@ const MainLayout = () => {
                     backgroundColor: 'transparent',
                     transition: 'all 0.3s',
                   }}
-                  onClick={() => navigate('/login')}
+                  onClick={() => {
+                    analytics.logEvent('Authentication', 'click', 'login_click');
+                    navigate('/login');
+                  }}
                 >
                   Log in
                 </button>
@@ -296,6 +301,7 @@ const MainLayout = () => {
               <button
                 className="mobile-btn mobile-btn-login"
                 onClick={() => {
+                  analytics.logEvent('Authentication', 'click', 'login_click');
                   setIsMobileMenuOpen(false);
                   navigate('/login');
                 }}
