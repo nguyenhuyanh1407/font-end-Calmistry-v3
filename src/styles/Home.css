@@ -684,8 +684,8 @@
 }
 
 :root {
-  --font-heading: 'Lora', serif;
-  --font-body: 'Be Vietnam Pro', sans-serif;
+  --font-heading: 'Be Vietnam Pro', sans-serif;
+  --font-body: 'Lora', serif;
 }
 
 body,

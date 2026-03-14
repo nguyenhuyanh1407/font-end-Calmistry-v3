@@ -1,5 +1,5 @@
 :root {
-  font-family: 'Be Vietnam Pro', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Lora', serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -11,6 +11,19 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base font for all text */
+body {
+  font-family: 'Lora', serif;
+}
+
+/* Preserve Be Vietnam Pro for bold elements as requested */
+b, strong, 
+h1, h2, h3, h4, h5, h6,
+.fw-bold, .fw-600, .fw-700, .fw-800, .fw-900, .fw-semibold,
+.fw-900, .fw-bolder {
+  font-family: 'Be Vietnam Pro', 'Rubik', sans-serif !important;
 }
 
 a {
@@ -30,9 +43,6 @@ html, body {
   overflow-x: hidden;
 }
 
-body {
-  font-family: 'Be Vietnam Pro', system-ui, Avenir, Helvetica, Arial, sans-serif;
-}
 
 
 h1 {

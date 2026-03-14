@@ -59,12 +59,16 @@ const GroupChat = () => {
     const softGreen = '#f0fdf4';
 
     const roomSpecs = {
-        "Trạm Dừng Chân": { icon: "🌿", prompt: "Hôm nay điều gì làm bạn nhẹ lòng?" },
-        "Góc Tâm Tình": { icon: "☕", prompt: "Có điều gì đang đè nặng tâm trí bạn không?" },
-        "Khu Vườn Biết Ơn": { icon: "🌸", prompt: "Ghi lại một điều bạn thấy trân trọng hôm nay..." }
+        "Community": { icon: "bi bi-chat-dots-fill", prompt: "Chào mừng bạn đến với cộng đồng Calmistry!" },
+        "Trạm Dừng Chân": { icon: "bi bi-leaf-fill", prompt: "Hôm nay điều gì làm bạn nhẹ lòng?" },
+        "Góc Tâm Tình": { icon: "bi bi-cup-hot-fill", prompt: "Có điều gì đang đè nặng tâm trí bạn không?" },
+        "Khu Vườn Biết Ơn": { icon: "bi bi-flower1", prompt: "Ghi lại một điều bạn thấy trân trọng hôm nay..." }
     };
 
-    const getRoomIcon = (name) => roomSpecs[name]?.icon || "💬";
+    const getRoomIcon = (name, fsClass = "") => {
+        const iconClass = roomSpecs[name]?.icon || "bi bi-chat-fill";
+        return <i className={`${iconClass} ${fsClass}`} />;
+    };
     const getRoomPrompt = (name) => roomSpecs[name]?.prompt || "Chia sẻ tâm tư của bạn...";
 
     const anonIcons = ["☁️", "🌙", "⭐", "🍃", "🍄", "🌊", "🦊", "🐢", "🐳", "🦉", "🍀", "🌸"];
@@ -443,7 +447,7 @@ const GroupChat = () => {
                                     <SanctuaryRoom
                                         key={room.id}
                                         room={room}
-                                        icon={getRoomIcon(room.name)}
+                                        icon={getRoomIcon(room.name, "fs-4")}
                                         active={selectedRoom?.id === room.id}
                                         onClick={() => setSelectedRoom(room)}
                                     />
@@ -490,7 +494,9 @@ const GroupChat = () => {
                                     <div className="d-lg-none btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" onClick={() => { }}>
                                         <i className="bi bi-compass" style={{ fontSize: '20px' }} />
                                     </div>
-                                    <div className="fs-1">{getRoomIcon(selectedRoom?.name)}</div>
+                                    <div className="fs-1 text-success bg-success bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ width: '80px', height: '80px' }}>
+                                        {getRoomIcon(selectedRoom?.name)}
+                                    </div>
                                     <div>
                                         <h4 className="fw-900 mb-0" style={{ color: brandGreen }}>#{selectedRoom?.name}</h4>
                                         <p className="text-muted mb-0 small">{selectedRoom?.description || "Cuộc trò chuyện cùng cộng đồng"}</p>
