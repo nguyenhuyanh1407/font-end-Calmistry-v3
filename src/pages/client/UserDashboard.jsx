@@ -96,6 +96,12 @@ const UserDashboard = () => {
       placement: 'bottom'
     },
     {
+      target: '.tour-btn-lucky-slot',
+      title: 'Lucky Slot 🎰',
+      content: 'Thử vận may mỗi ngày! Khi hoàn thành các nhiệm vụ (đăng nhập, viết nhật ký, chia sẻ câu chuyện...) bạn sẽ nhận lượt quay. Trúng thưởng có thể nhận voucher/động viên từ Calmistry.',
+      placement: 'bottom'
+    },
+    {
       target: '.tour-fuieds-card',
       title: 'Điểm FUIEDS hôm nay 💚',
       content: 'Sau khi hoàn thành bài đánh giá, điểm số và lời khuyên sẽ hiển thị tại đây. AI sẽ gợi ý hành động phù hợp với trạng thái của bạn.',
@@ -400,7 +406,7 @@ const UserDashboard = () => {
                       }}>
                         <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
                       </button>
-                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center btn-lucky-slot" onClick={() => {
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center btn-lucky-slot tour-btn-lucky-slot" onClick={() => {
                          analytics.logEvent('Dashboard', 'click', 'lucky_slot_click');
                          navigate('/lucky-slot');
                       }}>

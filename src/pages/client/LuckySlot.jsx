@@ -687,7 +687,8 @@ export default function LuckySlot() {
   ];
 
   return (
-    <div className="container py-4 lucky-slot-page">
+    <div className="lucky-slot-page">
+      <div className="container py-4">
       {/* Audio (background + spin SFX). Autoplay may be blocked until first user click. */}
       <audio ref={bgAudioRef} src={backgroundMusicSrc} loop playsInline />
       <audio ref={spinAudioRef} src={spinSfxSrc} loop playsInline />
@@ -887,6 +888,7 @@ export default function LuckySlot() {
           </motion.div>
         </div>
       )}
+      </div>
     </div>
   );
 }

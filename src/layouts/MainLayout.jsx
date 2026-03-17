@@ -363,10 +363,10 @@ const MainLayout = () => {
                       </div>
 
                       <div className="d-flex flex-column gap-1">
-                        <MenuLink icon="bi-grid-1x2" color="#4361ee" label="Dashboard" onClick={() => { setIsDropdownOpen(false); navigate('/userDashboard'); }} />
-                        <MenuLink icon="bi-calendar-event" color="#2ec4b6" label="Tham gia Workshop" onClick={() => { setIsDropdownOpen(false); navigate('/workshops'); }} />
-                        <MenuLink icon="bi-collection-play" color="#ff9f1c" label="Kho bài tập thư giãn" onClick={() => { setIsDropdownOpen(false); navigate('/relaxation'); }} />
-                        <MenuLink icon="bi-robot" color="#219ebc" label="Trò chuyện AI" onClick={() => { setIsDropdownOpen(false); navigate('/ai-chat'); }} />
+                        <MenuLink className="user-dashboard-target" icon="bi-grid-1x2" color="#4361ee" label="Dashboard" onClick={() => { setIsDropdownOpen(false); navigate('/userDashboard'); }} />
+                        <MenuLink className="user-workshops-target" icon="bi-calendar-event" color="#2ec4b6" label="Tham gia Workshop" onClick={() => { setIsDropdownOpen(false); navigate('/workshops'); }} />
+                        <MenuLink className="user-exercises-target" icon="bi-collection-play" color="#ff9f1c" label="Kho bài tập thư giãn" onClick={() => { setIsDropdownOpen(false); navigate('/relaxation'); }} />
+                        <MenuLink className="user-aichat-target" icon="bi-robot" color="#219ebc" label="Trò chuyện AI" onClick={() => { setIsDropdownOpen(false); navigate('/ai-chat'); }} />
 
                         {currentUser.roles && currentUser.roles.includes('ADMIN') && (
                           <>
@@ -972,9 +972,9 @@ const MainLayout = () => {
   );
 };
 
-const MenuLink = ({ icon, label, onClick, color }) => (
+const MenuLink = ({ icon, label, onClick, color, className = '' }) => (
   <button
-    className="btn d-flex align-items-center gap-3 px-3 py-2 w-100 rounded-3 user-menu-item-hover"
+    className={`btn d-flex align-items-center gap-3 px-3 py-2 w-100 rounded-3 user-menu-item-hover ${className}`}
     style={{ transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', backgroundColor: 'transparent', border: 'none', textAlign: 'left' }}
     onClick={onClick}
   >
