@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../../services/authService';
 import '../../styles/Login.css';
+import '../../styles/ForgotPassword.css';
 
 const OTP_LENGTH = 6;
 
@@ -110,144 +111,150 @@ const ForgotPassword = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="auth-wrapper"
-      style={{ background: '#fcf7f0', paddingTop: 110, paddingBottom: 50 }}
-    >
-      <div className="container" style={{ maxWidth: 520 }}>
-        <div
-          className="auth-card"
-          style={{
-            borderRadius: 22,
-            background: '#fff',
-            boxShadow: '0 18px 40px rgba(0,0,0,0.08)',
-            padding: 28
-          }}
-        >
-          <div className="d-flex align-items-center justify-content-between mb-3">
-            <div>
-              <h2 style={{ color: brandGreen, fontWeight: 900, marginBottom: 6 }}>Quên mật khẩu</h2>
-              <p className="text-muted" style={{ marginBottom: 0 }}>
-                Nhập email để nhận mã OTP, sau đó đặt lại mật khẩu.
-              </p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="forgotpw-page">
+      <div className="container forgotpw-container">
+        <div className="forgotpw-card">
+          <div className="forgotpw-aside">
+            <div className="forgotpw-brand">
+              <div className="forgotpw-brand-dot" />
+              <div>
+                <div className="forgotpw-brand-name">Calmistry</div>
+                <div className="forgotpw-brand-tag">Khôi phục truy cập tài khoản nhanh chóng</div>
+              </div>
             </div>
-            <button
-              className="btn btn-outline-secondary rounded-pill"
-              onClick={() => navigate('/login')}
-              type="button"
-            >
-              Quay lại
-            </button>
+
+            <div className="forgotpw-steps" aria-label="Tiến trình">
+              <div className={`forgotpw-step ${step === 1 ? 'active' : 'done'}`}>
+                <div className="forgotpw-step-dot">1</div>
+                <div className="forgotpw-step-text">
+                  <div className="forgotpw-step-title">Xác nhận email</div>
+                  <div className="forgotpw-step-sub">Nhận mã OTP</div>
+                </div>
+              </div>
+              <div className={`forgotpw-step ${step === 2 ? 'active' : ''}`}>
+                <div className="forgotpw-step-dot">2</div>
+                <div className="forgotpw-step-text">
+                  <div className="forgotpw-step-title">Đặt lại mật khẩu</div>
+                  <div className="forgotpw-step-sub">Nhập OTP + mật khẩu mới</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="forgotpw-aside-note">
+              Mẹo nhỏ: Nếu không thấy email OTP, hãy kiểm tra <b>Spam/Quảng cáo</b>.
+            </div>
           </div>
 
-          <div className="mb-3">
-            <label className="form-label fw-semibold">Email</label>
-            <input
-              className="form-control"
-              placeholder="example@gmail.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading || step === 2}
-            />
-          </div>
-
-          <AnimatePresence mode="wait">
-            {step === 1 ? (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+          <div className="forgotpw-form">
+            <div className="forgotpw-header">
+              <div>
+                <h2 className="forgotpw-title" style={{ color: brandGreen }}>
+                  Quên mật khẩu
+                </h2>
+                <p className="forgotpw-subtitle">Nhập email để nhận OTP, sau đó đặt lại mật khẩu.</p>
+              </div>
+              <button
+                className="forgotpw-back"
+                onClick={() => navigate('/login')}
+                type="button"
+                aria-label="Quay lại đăng nhập"
               >
-                <button
-                  className="btn w-100 rounded-pill fw-bold"
-                  style={{ background: brandGreen, color: '#fff', padding: '12px 16px' }}
-                  onClick={handleRequestOtp}
-                  disabled={loading}
-                  type="button"
+                Quay lại
+              </button>
+            </div>
+
+            <div className="forgotpw-field">
+              <label className="form-label fw-semibold">Email</label>
+              <input
+                className="form-control forgotpw-input"
+                placeholder="example@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading || step === 2}
+                autoComplete="email"
+              />
+            </div>
+
+            <AnimatePresence mode="wait">
+              {step === 1 ? (
+                <motion.div
+                  key="step1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                 >
-                  {loading ? 'Đang gửi OTP…' : 'Gửi OTP qua email'}
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-              >
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Mã OTP</label>
-                  <div className="d-flex gap-2" onPaste={handleOtpPaste}>
-                    {otp.map((val, idx) => (
+                  <button className="forgotpw-primary" onClick={handleRequestOtp} disabled={loading} type="button">
+                    {loading ? 'Đang gửi OTP…' : 'Gửi OTP qua email'}
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="step2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <div className="forgotpw-field">
+                    <label className="form-label fw-semibold">Mã OTP</label>
+                    <div className="forgotpw-otp" onPaste={handleOtpPaste}>
+                      {otp.map((val, idx) => (
+                        <input
+                          key={idx}
+                          ref={(el) => (otpRefs.current[idx] = el)}
+                          value={val}
+                          inputMode="numeric"
+                          className="forgotpw-otp-input"
+                          onChange={(e) => handleOtpChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                          disabled={loading}
+                          aria-label={`OTP ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="text-muted small mt-2">
+                      Không thấy email? Hãy kiểm tra Spam/Quảng cáo hoặc bấm “Gửi lại OTP”.
+                    </div>
+                  </div>
+
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <label className="form-label fw-semibold">Mật khẩu mới</label>
                       <input
-                        key={idx}
-                        ref={(el) => (otpRefs.current[idx] = el)}
-                        value={val}
-                        inputMode="numeric"
-                        className="form-control text-center"
-                        style={{ width: 52, height: 52, fontSize: 18, fontWeight: 800, borderRadius: 14 }}
-                        onChange={(e) => handleOtpChange(idx, e.target.value)}
-                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                        type="password"
+                        className="form-control forgotpw-input"
+                        placeholder="••••••••"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         disabled={loading}
+                        autoComplete="new-password"
                       />
-                    ))}
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-semibold">Xác nhận mật khẩu</label>
+                      <input
+                        type="password"
+                        className="form-control forgotpw-input"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={loading}
+                        autoComplete="new-password"
+                      />
+                    </div>
                   </div>
-                  <div className="text-muted small mt-2">
-                    Không thấy email? Hãy kiểm tra Spam/Quảng cáo hoặc bấm “Gửi lại OTP”.
-                  </div>
-                </div>
 
-                <div className="row g-2">
-                  <div className="col-12">
-                    <label className="form-label fw-semibold">Mật khẩu mới</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      placeholder="••••••••"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      disabled={loading}
-                    />
+                  <div className="forgotpw-actions">
+                    <button className="forgotpw-secondary" onClick={handleRequestOtp} disabled={loading} type="button">
+                      Gửi lại OTP
+                    </button>
+                    <button className="forgotpw-primary" onClick={handleResetPassword} disabled={loading} type="button">
+                      {loading ? 'Đang lưu…' : 'Đặt lại mật khẩu'}
+                    </button>
                   </div>
-                  <div className="col-12">
-                    <label className="form-label fw-semibold">Xác nhận mật khẩu</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
-                </div>
-
-                <div className="d-flex gap-2 mt-3">
-                  <button
-                    className="btn btn-outline-secondary rounded-pill fw-bold"
-                    style={{ padding: '12px 16px', flex: 1 }}
-                    onClick={handleRequestOtp}
-                    disabled={loading}
-                    type="button"
-                  >
-                    Gửi lại OTP
-                  </button>
-                  <button
-                    className="btn rounded-pill fw-bold"
-                    style={{ background: brandGreen, color: '#fff', padding: '12px 16px', flex: 1 }}
-                    onClick={handleResetPassword}
-                    disabled={loading}
-                    type="button"
-                  >
-                    {loading ? 'Đang lưu…' : 'Đặt lại mật khẩu'}
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -255,4 +262,3 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
-

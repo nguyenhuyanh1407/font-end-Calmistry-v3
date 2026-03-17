@@ -5,10 +5,13 @@ import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { FiVolume2, FiVolumeX } from 'react-icons/fi';
 import gamificationService from '../../services/gamificationService';
 import userService from '../../services/userService';
 import api from '../../services/api';
 import luckySlotMachine from '../../assets/luckyslotCalmistry.png';
+import backgroundMusicSrc from '../../assets/background.mp3';
+import spinSfxSrc from '../../assets/spin.mp3';
 import '../../styles/LuckySlot.css';
 
 const iconMap = ["banana", "seven", "cherry", "plum", "orange", "bell", "bar", "lemon", "melon"];
@@ -88,6 +91,28 @@ const roll = (reelEl, offset, targetIndex, iconHeight) => {
 export default function LuckySlot() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const bgAudioRef = useRef(null);
+  const spinAudioRef = useRef(null);
+  const [audioOn, setAudioOn] = useState(() => {
+    try {
+      return localStorage.getItem('luckySlot:audioOn') !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const [audioVolume, setAudioVolume] = useState(() => {
+    try {
+      const raw = localStorage.getItem('luckySlot:volume');
+      const n = raw === null ? 0.85 : Number(raw);
+      if (!Number.isFinite(n)) return 0.85;
+      return Math.max(0, Math.min(1, n));
+    } catch {
+      return 0.85;
+    }
+  });
+  const [volumeUiOpen, setVolumeUiOpen] = useState(false);
+  const volumeUiRef = useRef(null);
+  const [audioReady, setAudioReady] = useState(false);
 
   const token = api.getToken();
   const authKey = token ? token.slice(-16) : 'anon';
@@ -125,6 +150,138 @@ export default function LuckySlot() {
   const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:8080/calmistry/ws';
 
   const canSpin = useMemo(() => !spinning && spinBalance > 0, [spinning, spinBalance]);
+
+  const safePlay = async (audioEl) => {
+    if (!audioEl) return false;
+    try {
+      const p = audioEl.play();
+      if (p && typeof p.then === 'function') await p;
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const startBackgroundMusic = async () => {
+    const audioEl = bgAudioRef.current;
+    if (!audioOn || !audioEl) return;
+    audioEl.loop = true;
+    audioEl.volume = Math.max(0, Math.min(1, 0.22 * audioVolume));
+    if (audioEl.paused) await safePlay(audioEl);
+  };
+
+  const stopBackgroundMusic = () => {
+    const audioEl = bgAudioRef.current;
+    if (!audioEl) return;
+    audioEl.pause();
+    audioEl.currentTime = 0;
+  };
+
+  const startSpinSfx = async () => {
+    const audioEl = spinAudioRef.current;
+    if (!audioOn || !audioEl) return;
+    audioEl.loop = true;
+    audioEl.volume = Math.max(0, Math.min(1, 0.85 * audioVolume));
+    audioEl.currentTime = 0;
+    await safePlay(audioEl);
+  };
+
+  const stopSpinSfx = () => {
+    const audioEl = spinAudioRef.current;
+    if (!audioEl) return;
+    audioEl.pause();
+    audioEl.currentTime = 0;
+  };
+
+  useEffect(() => {
+    // Preload + best-effort autoplay; browsers may block until first user gesture.
+    const bg = bgAudioRef.current;
+    const sfx = spinAudioRef.current;
+
+    if (bg) {
+      bg.preload = 'auto';
+      bg.loop = true;
+      bg.volume = Math.max(0, Math.min(1, 0.22 * audioVolume));
+    }
+    if (sfx) {
+      sfx.preload = 'auto';
+      sfx.loop = true;
+      sfx.volume = Math.max(0, Math.min(1, 0.85 * audioVolume));
+    }
+
+    setAudioReady(true);
+    startBackgroundMusic();
+
+    return () => {
+      stopSpinSfx();
+      stopBackgroundMusic();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('luckySlot:audioOn', audioOn ? '1' : '0');
+    } catch { }
+
+    if (!audioReady) return;
+    if (audioOn) startBackgroundMusic();
+    else {
+      stopSpinSfx();
+      stopBackgroundMusic();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioOn, audioReady]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('luckySlot:volume', String(audioVolume));
+    } catch { }
+
+    const bg = bgAudioRef.current;
+    const sfx = spinAudioRef.current;
+    if (bg) bg.volume = Math.max(0, Math.min(1, 0.22 * audioVolume));
+    if (sfx) sfx.volume = Math.max(0, Math.min(1, 0.85 * audioVolume));
+  }, [audioVolume]);
+
+  useEffect(() => {
+    if (!volumeUiOpen) return;
+
+    const onDown = (e) => {
+      if (!volumeUiRef.current) return;
+      if (volumeUiRef.current.contains(e.target)) return;
+      setVolumeUiOpen(false);
+    };
+
+    window.addEventListener('mousedown', onDown);
+    return () => window.removeEventListener('mousedown', onDown);
+  }, [volumeUiOpen]);
+
+  const toggleMute = async () => {
+    const next = !audioOn;
+    setAudioOn(next);
+    if (!next) {
+      stopSpinSfx();
+      stopBackgroundMusic();
+    } else {
+      await startBackgroundMusic();
+    }
+  };
+
+  const handleVolumeChange = async (e) => {
+    const v = Math.max(0, Math.min(1, Number(e.target.value) / 100));
+    setAudioVolume(v);
+    if (v <= 0) {
+      if (audioOn) {
+        setAudioOn(false);
+        stopSpinSfx();
+        stopBackgroundMusic();
+      }
+      return;
+    }
+    if (!audioOn) setAudioOn(true);
+    await startBackgroundMusic();
+  };
 
   const openTaskInNewTab = (path) => {
     window.open(path, '_blank', 'noopener,noreferrer');
@@ -410,6 +567,8 @@ export default function LuckySlot() {
     if (spinning) return;
     setLeverPulled(true);
     if (spinBalance > 0) {
+      // Unlock audio (if autoplay was blocked) on the first user interaction.
+      startBackgroundMusic();
       // Start immediately; the lever animation continues while we wait for the server result.
       doSpin();
     } else {
@@ -431,6 +590,7 @@ export default function LuckySlot() {
     setFinalSymbols([null, null, null]);
     setDebugText('rolling...');
     startReelSpinVisual();
+    await startSpinSfx();
 
     try {
       const response = await gamificationService.spin();
@@ -443,6 +603,7 @@ export default function LuckySlot() {
         throw new Error('KhÃ´ng nháº­n Ä‘Æ°á»£c káº¿t quáº£ quay.');
       }
       stopReelSpinVisual();
+      stopSpinSfx();
       const isJackpot = result.jackpot;
       const symbols = (result?.symbols || []).map(mapBackendSymbolToReelSymbol);
 
@@ -466,6 +627,9 @@ export default function LuckySlot() {
           return roll(reelEl, i, targets[i], iconHeight);
         })
       );
+
+      // Stop spin SFX right when results land (after reels settle).
+      stopSpinSfx();
 
       indexesRef.current = [...targets];
       setDebugText(targets.map((i) => iconMap[i]).join(' - '));
@@ -504,6 +668,7 @@ export default function LuckySlot() {
       setSpinning(false);
     } catch (e) {
       stopReelSpinVisual();
+      stopSpinSfx();
       console.error('🎰 Spin Error:', e);
       // Hiển thị lỗi từ backend nếu có (VD: "Bạn đã hết lượt quay!")
       const errorMessage = e.response?.data?.message || e.message || 'Quay thất bại. Vui lòng thử lại.';
@@ -523,10 +688,45 @@ export default function LuckySlot() {
 
   return (
     <div className="container py-4 lucky-slot-page">
+      {/* Audio (background + spin SFX). Autoplay may be blocked until first user click. */}
+      <audio ref={bgAudioRef} src={backgroundMusicSrc} loop playsInline />
+      <audio ref={spinAudioRef} src={spinSfxSrc} loop playsInline />
       <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <button className="btn btn-dark rounded-pill" onClick={() => navigate('/userDashboard')}>
           Quay lại Dashboard
         </button>
+        <div className="slot-audio" ref={volumeUiRef}>
+          <button
+            type="button"
+            className="slot-audio-btn"
+            onClick={() => setVolumeUiOpen((v) => !v)}
+            aria-label="Âm thanh"
+            title="Âm thanh"
+          >
+            {!audioOn || audioVolume <= 0 ? <FiVolumeX /> : <FiVolume2 />}
+          </button>
+
+          {volumeUiOpen && (
+            <div className="slot-audio-pop" role="dialog" aria-label="Điều chỉnh âm lượng">
+              <div className="slot-audio-pop-row">
+                <div className="slot-audio-pop-title">Âm lượng</div>
+                <button type="button" className="slot-audio-mute" onClick={toggleMute}>
+                  {audioOn ? 'Tắt' : 'Bật'}
+                </button>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={Math.round(audioVolume * 100)}
+                onChange={handleVolumeChange}
+                className="slot-audio-range"
+                aria-label="Thanh âm lượng"
+              />
+              <div className="slot-audio-pop-hint">{Math.round(audioVolume * 100)}%</div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="row g-4 align-items-center">
