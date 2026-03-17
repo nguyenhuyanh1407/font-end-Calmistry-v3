@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [targetRect, setTargetRect] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
+  const lastGoodRectRef = useRef(null);
+  const lastGoodRectTsRef = useRef(0);
 
   const updateTargetRect = useCallback(() => {
     const step = steps[currentStep];
@@ -17,16 +19,37 @@ const GuestOnboarding = ({ steps, onComplete, onStepChange, onFinish }) => {
       const rect = target.getBoundingClientRect();
 
       // Store raw viewport coordinates to avoid sync issues with window.scrollY
-      setTargetRect({
+      // Guard: if element is transitioning into view and has 0-size, keep last spotlight briefly.
+      if (rect.width <= 1 || rect.height <= 1) {
+        const age = Date.now() - (lastGoodRectTsRef.current || 0);
+        if (lastGoodRectRef.current && age < 700) {
+          setTargetRect(lastGoodRectRef.current);
+        } else {
+          setTargetRect(null);
+        }
+        return;
+      }
+
+      const nextRect = {
         viewportTop: rect.top,
         viewportLeft: rect.left,
         width: rect.width,
         height: rect.height,
         // Document absolute top for cases where we need it
         absTop: rect.top + window.scrollY,
-      });
+      };
+
+      lastGoodRectRef.current = nextRect;
+      lastGoodRectTsRef.current = Date.now();
+      setTargetRect(nextRect);
     } else {
-      setTargetRect(null);
+      // When a target is temporarily missing (e.g., dropdown still opening), don't "black out" the page.
+      const age = Date.now() - (lastGoodRectTsRef.current || 0);
+      if (lastGoodRectRef.current && age < 700) {
+        setTargetRect(lastGoodRectRef.current);
+      } else {
+        setTargetRect(null);
+      }
     }
   }, [currentStep, steps]);
 

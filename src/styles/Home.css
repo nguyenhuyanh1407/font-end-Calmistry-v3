@@ -792,12 +792,21 @@ h4,
   max-width: calc(100vw - 30px);
   max-height: 80vh;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   z-index: 100000;
   pointer-events: auto;
   transition: top 0.3s ease, left 0.3s ease;
+}
+
+.onboarding-tooltip .tooltip-content {
+  overflow-x: hidden;
+}
+
+.onboarding-tooltip p {
+  overflow-wrap: anywhere;
 }
 
 .tooltip-arrow {
