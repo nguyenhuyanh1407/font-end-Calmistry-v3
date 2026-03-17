@@ -143,7 +143,7 @@ const authService = {
    */
   forgotPassword: async (email) => {
     try {
-      return await api.post('/auth/forgot-password', { email });
+      return await api.post('/auth/password/request-otp', { email });
     } catch (error) {
       throw error;
     }
@@ -152,10 +152,11 @@ const authService = {
   /**
    * Reset mật khẩu
    */
-  resetPassword: async (token, newPassword) => {
+  resetPassword: async (email, otp, newPassword) => {
     try {
-      return await api.post('/auth/reset-password', {
-        token,
+      return await api.post('/auth/password/reset', {
+        email,
+        otp,
         newPassword
       });
     } catch (error) {

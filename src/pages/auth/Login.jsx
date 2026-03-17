@@ -314,7 +314,16 @@ const AuthPages = () => {
                     />
                   )}
                   {currentPage === 'login' && (
-                    <div style={{ marginBottom: '24px' }} />
+                    <div className="d-flex justify-content-end" style={{ marginTop: '-10px', marginBottom: '18px' }}>
+                      <button
+                        type="button"
+                        className="btn btn-link p-0"
+                        style={{ fontSize: 13, textDecoration: 'none', color: brandGreen, fontWeight: 700 }}
+                        onClick={() => navigate('/forgot-password')}
+                      >
+                        Quên mật khẩu?
+                      </button>
+                    </div>
                   )}
 
                   {/* Error message display */}

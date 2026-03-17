@@ -35,6 +35,7 @@ import UserStatistics from "../pages/admin/UserStatistics";
 
 // Auth pages
 import Login from "../pages/auth/Login";
+import ForgotPassword from "../pages/auth/ForgotPassword";
 
 // AI Chat
 import AiPersonalizedChat from "../pages/client/AiPersonalizedChat";
@@ -174,6 +175,7 @@ function AppRoutes() {
           {/* AUTH */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Route>
 
           {/* 404 */}
