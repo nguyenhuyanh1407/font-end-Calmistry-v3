@@ -134,7 +134,7 @@ const Home = () => {
       img: blogImg,
       activeImg: blogImg1,
       subOptions: [
-        { title: "Đặt lý tham gia workshop", icon: <People />, action: () => navigate("/workshops") },
+        { title: "Đặt lịch tham gia workshop", icon: <People />, action: () => navigate("/workshops") },
         { title: "Nhóm chat chữa lành", icon: <ChatDots />, action: () => navigate("/group-chat") },
         { title: "Chia sẻ câu chuyện của bạn", icon: <Stars />, action: () => window.open("https://www.calmistry.blog/shareStories", "_blank") }
       ]

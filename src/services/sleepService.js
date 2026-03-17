@@ -4,6 +4,7 @@
  */
 
 import api from './api';
+import gamificationService from './gamificationService';
 
 const sleepService = {
     /**
@@ -14,6 +15,8 @@ const sleepService = {
     submitSleepQuiz: async (quizData) => {
         try {
             const response = await api.post('/sleep/submit', quizData);
+            gamificationService.optimisticAward('SLEEP_QUALITY_REVIEW');
+            gamificationService.refreshTodayAndBroadcast().catch(() => { });
             return response.result;
         } catch (error) {
             throw error;

@@ -1,4 +1,5 @@
 import api from './api';
+import gamificationService from './gamificationService';
 
 const storyService = {
     getStories: async (page = 0, size = 10) => {
@@ -15,6 +16,8 @@ const storyService = {
     createStory: async (content, isAnonymous) => {
         try {
             const response = await api.post('/stories', { content, isAnonymous });
+            gamificationService.optimisticAward('STORY_SHARE');
+            gamificationService.refreshTodayAndBroadcast().catch(() => { });
             return response.result;
         } catch (error) {
             throw error;

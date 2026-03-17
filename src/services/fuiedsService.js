@@ -1,4 +1,5 @@
 import api from './api';
+import gamificationService from './gamificationService';
 
 const fuiedsService = {
     /**
@@ -6,6 +7,8 @@ const fuiedsService = {
      */
     submitResponse: async (answers) => {
         const response = await api.post('/fuieds/submit', answers);
+        gamificationService.optimisticAward('FUIEDS_SCORE');
+        gamificationService.refreshTodayAndBroadcast().catch(() => { });
         return response;
     },
 

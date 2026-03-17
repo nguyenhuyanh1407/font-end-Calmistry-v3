@@ -4,6 +4,7 @@
  */
 
 import api from './api';
+import gamificationService from './gamificationService';
 
 const journalService = {
     /**
@@ -54,6 +55,8 @@ const journalService = {
     createJournal: async (data) => {
         try {
             const response = await api.post('/journals', data);
+            gamificationService.optimisticAward('JOURNAL_ENTRY');
+            gamificationService.refreshTodayAndBroadcast().catch(() => { });
             return response.result;
         } catch (error) {
             throw error;

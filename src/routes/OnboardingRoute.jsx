@@ -2,7 +2,6 @@ import { Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 import userService from '../services/userService';
-import authService from '../services/authService';
 
 /**
  * OnboardingRoute Component
@@ -10,20 +9,20 @@ import authService from '../services/authService';
  */
 const OnboardingRoute = ({ children }) => {
     const token = api.getToken();
-
-    // If no token, let them proceed (or redirect to login, depending on your auth flow)
-    // Assuming they need to be logged in to access onboarding
-    if (!token) {
-        return <Navigate to="/login" replace />;
-    }
+    const authKey = token ? token.slice(-16) : 'anon';
 
     const { data: currentUser, isLoading } = useQuery({
-        queryKey: ['me'],
+        queryKey: ['me', authKey],
         queryFn: userService.getMyInfo,
-        enabled: authService.isAuthenticated(),
+        enabled: !!token,
         staleTime: 5 * 60 * 1000,
         retry: false,
     });
+
+    // Must be logged in to access onboarding
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
 
     if (isLoading) {
         return (

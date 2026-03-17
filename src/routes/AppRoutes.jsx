@@ -20,6 +20,7 @@ import GroupChat from "../pages/client/GroupChat";
 import Checkout from "../pages/client/Checkout";
 import FuiedsQuiz from "../pages/client/FuiedsQuiz";
 import RelaxationLibrary from '../pages/client/RelaxationLibrary';
+import LuckySlot from "../pages/client/LuckySlot";
 
 // Author pages
 import AuthorDashboard from "../pages/author/AuthorDashboard";
@@ -90,6 +91,11 @@ function AppRoutes() {
             <Route path="/login" element={<Login />} />
             <Route path="/sleepManagement" element={<SleepManagement />} />
             <Route path="/userDashboard" element={<UserDashboard />} />
+            <Route path="/lucky-slot" element={
+              <PrivateRoute>
+                <LuckySlot />
+              </PrivateRoute>
+            } />
             <Route path="/authorDashboard" element={<AuthorDashboard />} />
             <Route path="/expertDashboard" element={<ExpertDashboardPro />} />
 

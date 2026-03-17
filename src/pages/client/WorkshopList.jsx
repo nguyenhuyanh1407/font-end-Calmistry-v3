@@ -7,6 +7,8 @@ import { Calendar, Users, User, MapPin, Clock, Star, Sparkles, ChevronRight } fr
 const WorkshopList = () => {
     const [workshops, setWorkshops] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [voucherCodes, setVoucherCodes] = useState({});
+    const [appliedDiscounts, setAppliedDiscounts] = useState({});
     const brandGreen = '#324d3e';
 
     useEffect(() => {
@@ -28,7 +30,8 @@ const WorkshopList = () => {
 
     const handleBook = async (workshopId) => {
         try {
-            const response = await workshopService.bookWorkshop(workshopId);
+            const code = voucherCodes[workshopId] || '';
+            const response = await workshopService.bookWorkshop(workshopId, code);
             if (response && response.code === 1000) {
                 if (response.result?.checkoutUrl) {
                     toast.info("Đang chuyển hướng sang trang thanh toán...");
@@ -43,6 +46,33 @@ const WorkshopList = () => {
         } catch (error) {
             toast.error(error.message || "Có lỗi xảy ra khi đặt workshop.");
         }
+    };
+
+    const handleApplyVoucher = async (workshopId) => {
+        const code = voucherCodes[workshopId];
+        if (!code || !code.trim()) {
+            toast.warning("Vui lòng nhập mã voucher.");
+            return;
+        }
+        try {
+            const response = await workshopService.validateVoucher(code.trim());
+            if (response && response.result && response.result.valid) {
+                setAppliedDiscounts(prev => ({ ...prev, [workshopId]: response.result }));
+                toast.success(`🎉 Đã áp dụng ${response.result.title}!`);
+            } else {
+                toast.error(response?.message || "Mã Voucher không hợp lệ.");
+            }
+        } catch (error) {
+            toast.error(error.message || "Mã không hợp lệ hoặc đã dùng.");
+        }
+    };
+
+    const calculateDiscountedPrice = (price, discount) => {
+        if (!discount) return price;
+        if (discount.discountType === 'PERCENTAGE') {
+            return price * (1 - discount.discountValue / 100);
+        }
+        return Math.max(0, price - discount.discountValue);
     };
 
     const handleCancel = async (workshopId) => {
@@ -140,9 +170,20 @@ const WorkshopList = () => {
                                                     </div>
                                                 </div>
                                                 <div className="d-flex align-items-center gap-2">
-                                                    <span className="bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold" style={{ fontSize: '1rem' }}>
-                                                        {ws.price > 0 ? `${ws.price.toLocaleString('vi-VN')} đ` : 'Miễn phí'}
-                                                    </span>
+                                                    {appliedDiscounts[ws.id] ? (
+                                                        <>
+                                                            <span className="text-muted text-decoration-line-through small me-1">
+                                                                {ws.price.toLocaleString('vi-VN')} đ
+                                                            </span>
+                                                            <span className="bg-success text-white rounded-pill px-3 py-1 fw-bold" style={{ fontSize: '1rem' }}>
+                                                                {calculateDiscountedPrice(ws.price, appliedDiscounts[ws.id]).toLocaleString('vi-VN')} đ
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold" style={{ fontSize: '0.95rem' }}>
+                                                            {ws.price > 0 ? `${ws.price.toLocaleString('vi-VN')} đ` : 'Miễn phí'}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -161,6 +202,29 @@ const WorkshopList = () => {
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            {!ws.isBooked && ws.price > 0 && (
+                                                <div className="d-flex gap-2 mb-3">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Nhập mã Voucher..."
+                                                        className="form-control form-control-sm rounded-pill px-3"
+                                                        style={{ maxWidth: '180px', fontSize: '0.85rem' }}
+                                                        value={voucherCodes[ws.id] || ''}
+                                                        onChange={(e) => setVoucherCodes(prev => ({ ...prev, [ws.id]: e.target.value.toUpperCase() }))}
+                                                        disabled={!!appliedDiscounts[ws.id]}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className={`btn btn-sm rounded-pill px-3 fw-bold ${appliedDiscounts[ws.id] ? 'btn-success text-white' : 'btn-outline-success'}`}
+                                                        style={{ fontSize: '0.82rem', whiteSpace: 'nowrap' }}
+                                                        onClick={() => handleApplyVoucher(ws.id)}
+                                                        disabled={!!appliedDiscounts[ws.id]}
+                                                    >
+                                                        {appliedDiscounts[ws.id] ? 'Đã áp dụng' : 'Áp dụng'}
+                                                    </button>
+                                                </div>
+                                            )}
 
                                             {/* Fix button overlap: use wrap or stack on narrow viewports */}
                                             <div className="d-flex flex-wrap align-items-center justify-content-between mt-auto gap-3 pt-3 border-top border-light">

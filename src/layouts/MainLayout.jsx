@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,7 +9,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import logoCalmWhite from '../assets/logoCalmWhite.png';
 import authService from '../services/authService';
+import api from '../services/api';
 import userService from '../services/userService';
+import gamificationService from '../services/gamificationService';
 import analytics from '../utils/analytics';
 
 const MainLayout = () => {
@@ -26,6 +28,76 @@ const MainLayout = () => {
   const brandGreen = '#324d3e';
   const lightGreen = '#74c655';
   const softBg = '#f4f7f5';
+  const token = api.getToken();
+  const authKey = token ? token.slice(-16) : 'anon';
+  const meStorageKey = `me:${authKey}`;
+
+  const cachedMe = useMemo(() => {
+    if (!token) return undefined;
+    try {
+      const raw = localStorage.getItem(meStorageKey);
+      return raw ? JSON.parse(raw) : undefined;
+    } catch {
+      return undefined;
+    }
+  }, [token, meStorageKey]);
+
+  // Cross-tab realtime gamification updates (so Dashboard/LuckySlot stay in sync)
+  useEffect(() => {
+    if (!token) return;
+
+    const applyToday = (payload) => {
+      const nextBalance = payload?.spinBalance ?? 0;
+      const nextEvents = payload?.completedEvents ?? [];
+
+      // Keep LuckySlot's localStorage hydration in sync across tabs/routes
+      try {
+        localStorage.setItem(`spinBalance:${authKey}`, String(nextBalance));
+        localStorage.setItem(`completedEvents:${authKey}`, JSON.stringify(nextEvents));
+      } catch { }
+
+      queryClient.setQueryData(['spinBalance', authKey], { spinBalance: nextBalance });
+      queryClient.setQueryData(['todayMissions', authKey], payload);
+      queryClient.setQueryData(['me', authKey], (prev) => (prev ? { ...prev, spinBalance: nextBalance } : prev));
+    };
+
+    let channel;
+    const onBroadcast = (e) => {
+      const msg = e?.data;
+      if (msg?.type === 'today' && msg?.payload) applyToday(msg.payload);
+    };
+
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        channel = new BroadcastChannel('calmistry-gamification');
+        channel.addEventListener('message', onBroadcast);
+      }
+    } catch { }
+
+    const onStorage = (e) => {
+      if (e.key !== 'gamification:update' || !e.newValue) return;
+      try {
+        const msg = JSON.parse(e.newValue);
+        if (msg?.type === 'today' && msg?.payload) applyToday(msg.payload);
+      } catch { }
+    };
+    window.addEventListener('storage', onStorage);
+
+    const onCustom = (e) => {
+      const msg = e?.detail;
+      if (msg?.type === 'today' && msg?.payload) applyToday(msg.payload);
+    };
+    window.addEventListener('calmistry:gamification', onCustom);
+
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('calmistry:gamification', onCustom);
+      try {
+        channel?.removeEventListener('message', onBroadcast);
+        channel?.close();
+      } catch { }
+    };
+  }, [token, authKey, queryClient]);
 
   // Scroll effect
   useEffect(() => {
@@ -66,12 +138,31 @@ const MainLayout = () => {
     data: currentUser,
     isLoading,
   } = useQuery({
-    queryKey: ['me'],
+    queryKey: ['me', authKey],
     queryFn: userService.getMyInfo,
-    enabled: authService.isAuthenticated(),
+    enabled: !!token,
     staleTime: 5 * 60 * 1000,
     retry: false,
+    initialData: cachedMe,
+    onSuccess: (data) => {
+      try {
+        localStorage.setItem(meStorageKey, JSON.stringify(data));
+      } catch { }
+    },
   });
+
+  // Warm up gamification queries so Lucky Slot fills instantly on navigation
+  useEffect(() => {
+    if (!token) return;
+    queryClient.prefetchQuery({
+      queryKey: ['spinBalance', authKey],
+      queryFn: gamificationService.getSpinBalance,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ['todayMissions', authKey],
+      queryFn: gamificationService.getToday,
+    });
+  }, [token, authKey, queryClient]);
 
   const handleGetStarted = () => {
     analytics.logEvent('Authentication', 'click', 'register_click');
@@ -86,13 +177,17 @@ const MainLayout = () => {
 
   const handleLogout = async () => {
     setIsMobileMenuOpen(false);
+    try {
+      localStorage.removeItem(meStorageKey);
+      localStorage.removeItem(`spinBalance:${authKey}`);
+      localStorage.removeItem(`completedEvents:${authKey}`);
+    } catch { }
     await authService.logout();
-    queryClient.removeQueries(['me']);
+    queryClient.removeQueries({ queryKey: ['me'] });
     navigate('/', { replace: true });
   };
 
-  const greenFilter =
-    'invert(26%) sepia(13%) saturate(1005%) hue-rotate(101deg) brightness(33%) contrast(87%)';
+  const brandLogoSrc = logoCalmWhite;
 
   const dropdownItemStyle = {
     padding: '10px 15px',
@@ -125,13 +220,11 @@ const MainLayout = () => {
             }}
           >
             <img
-              src={logoCalmWhite}
+              src={brandLogoSrc}
               alt="Calmistry Logo"
               style={{
-                height: '40px',
+                height: '48px',
                 marginRight: '10px',
-                filter: isScrolled ? greenFilter : 'none',
-                transition: 'filter 0.4s'
               }}
             />
             Calmistry
@@ -437,7 +530,7 @@ const MainLayout = () => {
           <div className="row g-5">
             <div className="col-lg-5 col-md-12">
               <div className="d-flex align-items-center mb-4">
-                <img src={logoCalmWhite} alt="Logo" style={{ height: '40px', marginRight: '12px' }} />
+                <img src={brandLogoSrc} alt="Logo" style={{ height: '40px', marginRight: '12px' }} />
                 <span style={{
                   fontFamily: "'Lora', serif",
                   fontSize: '32px',

@@ -4,6 +4,7 @@
  */
 
 import api from './api';
+import gamificationService from './gamificationService';
 
 const authService = {
   /**
@@ -26,6 +27,8 @@ const authService = {
 
       if (authenticated && token) {
         api.setToken(token, remember);
+        gamificationService.optimisticAward('LOGIN_DAILY');
+        gamificationService.refreshTodayAndBroadcast().catch(() => { });
       }
 
       // Trả về result cho component sử dụng

@@ -27,12 +27,23 @@ const workshopService = {
         return api.delete(`/workshops/admin/${id}`);
     },
 
-    bookWorkshop: async (workshopId) => {
-        return api.post(`/workshops/${workshopId}/book`);
+    bookWorkshop: async (workshopId, voucherCode = '') => {
+        const url = voucherCode ? `/workshops/${workshopId}/book?voucherCode=${voucherCode}` : `/workshops/${id}/book`;
+        // wait, inside service context, use parameter workshopId.
+        const actualUrl = voucherCode ? `/workshops/${workshopId}/book?voucherCode=${voucherCode}` : `/workshops/${workshopId}/book`;
+        return api.post(actualUrl);
     },
 
     cancelBooking: async (workshopId) => {
         return api.delete(`/workshops/${workshopId}/cancel`);
+    },
+
+    validateVoucher: async (code) => {
+        return api.get(`/vouchers/validate?code=${code}`);
+    },
+
+    getMyVouchers: async () => {
+        return api.get('/vouchers/my-vouchers');
     }
 };
 

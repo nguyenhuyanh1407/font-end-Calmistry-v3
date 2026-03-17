@@ -7,19 +7,23 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import GuestOnboarding from '../../components/common/GuestOnboarding';
 import fuiedsService from '../../services/fuiedsService';
 import userService from '../../services/userService';
+import api from '../../services/api';
 import fileService from '../../services/fileService';
 import sleepService from '../../services/sleepService';
 import journalService from '../../services/journalService';
 import analytics from '../../utils/analytics';
 import { toast } from 'react-toastify';
+import workshopService from '../../services/workshopService';
 import {
   Smile, Meh, Frown, Sparkles,
   Moon, Clock, Zap, Book,
-  ArrowRight, MoonStar
+  ArrowRight, MoonStar, Gift
 } from 'lucide-react';
 const UserDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const token = api.getToken();
+  const authKey = token ? token.slice(-16) : 'anon';
   const brandGreen = '#324d3e';
   const lightGreen = '#74c655';
   const bgSoft = '#fcfdfd';
@@ -44,10 +48,14 @@ const UserDashboard = () => {
     tier: "Bronze",
     currentStreak: 0,
     totalPoints: 0,
+    spinBalance: 0,
     email: ""
   });
 
   const [showEditModal, setShowEditModal] = useState(false);
+  const [myVouchers, setMyVouchers] = useState([]);
+  const [isLoadingVouchers, setIsLoadingVouchers] = useState(true);
+
   const [tempProfile, setTempProfile] = useState({ ...userProfile });
 
   // --- ONBOARDING TOUR ---
@@ -133,9 +141,10 @@ const UserDashboard = () => {
 
   // Sử dụng React Query để lấy user info (cùng queryKey ['me'] với Header)
   const { data: currentUser } = useQuery({
-    queryKey: ['me'],
+    queryKey: ['me', authKey],
     queryFn: userService.getMyInfo,
     staleTime: 5 * 60 * 1000,
+    enabled: !!token,
     retry: false,
   });
 
@@ -157,6 +166,7 @@ const UserDashboard = () => {
         address: currentUser.address || prev.address || "Hà Nội, Việt Nam",
         currentStreak: currentUser.currentStreak || 0,
         totalPoints: points,
+        spinBalance: currentUser.spinBalance ?? 0,
         tier: calculatedTier
       }));
     }
@@ -186,6 +196,16 @@ const UserDashboard = () => {
         console.error('Error fetching sleep history:', error);
       } finally {
         setIsLoadingSleep(false);
+      }
+
+      // 4. Fetch My Vouchers
+      try {
+        const vouchersRes = await workshopService.getMyVouchers();
+        if (vouchersRes.code === 1000) setMyVouchers(vouchersRes.result);
+      } catch (error) {
+        console.error('Error fetching vouchers:', error);
+      } finally {
+        setIsLoadingVouchers(false);
       }
 
       // 3. Fetch Journal Stats
@@ -365,6 +385,12 @@ const UserDashboard = () => {
                         window.open('https://www.calmistry.blog/sleepManagement', '_blank');
                       }}>
                         <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
+                      </button>
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" onClick={() => {
+                        analytics.logEvent('Dashboard', 'click', 'lucky_slot_click');
+                        navigate('/lucky-slot');
+                      }}>
+                        <Gift size={18} className="me-2" /> Lucky Slot ({userProfile.spinBalance})
                       </button>
                     </div>
                 </div>
@@ -624,6 +650,63 @@ const UserDashboard = () => {
           </div>
         </div>
 
+
+                      {/* Vouchers/Offers Card */}
+              <div className="col-12 mt-4">
+                <div className="p-4 rounded-5 shadow-sm border-0 bg-white">
+                  <div className="d-flex align-items-center gap-3 mb-4">
+                    <div className="p-3 rounded-circle" style={{ backgroundColor: 'rgba(116, 198, 85, 0.1)' }}>
+                      <Gift size={24} className="text-success" />
+                    </div>
+                    <div>
+                      <h5 className="fw-bold mb-0">Ưu đãi của tôi</h5>
+                      <p className="small text-muted mb-0">Các Voucher giảm giá bạn đã thắng được từ Lucky Slot.</p>
+                    </div>
+                  </div>
+
+                  {isLoadingVouchers ? (
+                    <div className="text-center py-4"><div className="spinner-border spinner-border-sm text-success"></div></div>
+                  ) : myVouchers.length > 0 ? (
+                    <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+                      {myVouchers.map((v, idx) => (
+                        <div key={idx} className="p-3 rounded-4 border d-flex align-items-center justify-content-between" style={{ backgroundColor: '#f9f9fafb' }}>
+                          <div>
+                            <h6 className="fw-bold mb-1 text-dark" style={{ fontSize: '0.9rem' }}>{v.title}</h6>
+                            <div className="d-flex align-items-center gap-2">
+                              <span className="badge rounded-pill bg-success-subtle text-success px-2 py-1" style={{ fontSize: '9px' }}>
+                                {v.discountType === 'PERCENTAGE' ? `${v.discountValue}% OFF` : `${v.discountValue.toLocaleString()}đ OFF`}
+                              </span>
+                              <span className={`badge rounded-pill px-2 py-1 ${v.status === 'UNUSED' ? 'bg-info-subtle text-info' : 'bg-secondary-subtle text-secondary'}`} style={{ fontSize: '9px' }}>
+                                {v.status === 'UNUSED' ? 'Chưa dùng' : 'Đã dùng'}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          {v.status === 'UNUSED' && (
+                            <div className="d-flex align-items-center gap-1 bg-white rounded-pill p-1 border">
+                              <span className="small font-monospace fw-bold text-success px-2" style={{ fontSize: '0.8rem' }}>{v.code}</span>
+                              <button 
+                                className="btn btn-sm btn-success rounded-pill px-2 fw-bold" 
+                                style={{ fontSize: '0.7rem', padding: '2px 8px' }}
+                                onClick={() => {
+                                  navigator.clipboard.writeText(v.code);
+                                  toast.success("📋 Đã sao chép mã Voucher!");
+                                }}
+                              >
+                                Copy
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-3">
+                      <p className="small text-muted mb-0">Bạn chưa có voucher nào. Hãy thử vận may tại <strong style={{ cursor: 'pointer', color: '#74c655' }} onClick={() => navigate('/lucky-slot')}>Lucky Slot</strong>!</p>
+                    </div>
+                  )}
+                </div>
+              </div>
 
         {/* --- SECTION: THỐNG KÊ SỨC KHỎE (NEW REPLACEMENT) --- */}
         <div className="row mt-5 g-4 tour-health-stats">
