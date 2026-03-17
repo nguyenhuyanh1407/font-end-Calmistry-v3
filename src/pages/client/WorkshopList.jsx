@@ -1,8 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import workshopService from '../../services/workshopService';
 import { toast } from 'react-toastify';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Calendar, Users, User, MapPin, Clock, Star, Sparkles, ChevronRight } from 'lucide-react';
+import matchaWorkshopThumb from '../../assets/workshop.jpg';
+
+const STATIC_WORKSHOPS = [
+    {
+        id: 'static-matcha-date',
+        title: '🍵 Matcha Date: một buổi gặp gỡ nhỏ cùng Calmistry',
+        speakerName: 'MATCHA DATE',
+        speakerBio: 'Diễn giả chuyên môn',
+        description:
+            'Thứ Sáu này, Calmistry chúng mình sẽ chuẩn bị một buổi workshop matcha nho nhỏ, như một buổi gặp gỡ ấm áp để mọi người có thể chậm lại một chút, tạm xa deadline và có cơ hội gặp gỡ những người bạn mới.\n\n' +
+            'Trong workshop, bạn sẽ được hướng dẫn cách pha 3 tuần trà, tìm hiểu về matcha, và cùng mọi người tận hưởng thành quả của mình. Trà sư đã có kinh nghiệm tổ chức nhiều buổi workshop matcha trước đó, nên bạn hoàn toàn có thể yên tâm trải nghiệm trong một không gian nhẹ nhàng, gần gũi.\n\n' +
+            '📩 Nếu bạn đang muốn tìm một buổi hẹn nhẹ nhàng cho chính mình hoặc cùng bạn bè, Calmistry rất mong được gặp bạn trong workshop lần này.',
+        // Use UTC timestamps so VN locale shows +7h similar to existing backend formatting behavior.
+        startTime: '2026-03-12T00:00:00Z',
+        endTime: '2026-03-12T04:30:00Z',
+        location: 'FUCA Hidden Coffee - Hòa Lạc - Hà Nội',
+        price: 250000,
+        maxParticipants: 30,
+        currentParticipants: 26,
+        status: 'COMPLETED',
+        imageUrl: matchaWorkshopThumb,
+        isBooked: false,
+    },
+];
 
 const WorkshopList = () => {
     const [workshops, setWorkshops] = useState([]);
@@ -19,9 +43,12 @@ const WorkshopList = () => {
         try {
             const response = await workshopService.getUpcomingWorkshops();
             if (response && response.code === 1000) {
-                setWorkshops(response.result);
+                setWorkshops([...STATIC_WORKSHOPS, ...(response.result || [])]);
+            } else {
+                setWorkshops([...STATIC_WORKSHOPS]);
             }
         } catch (error) {
+            setWorkshops([...STATIC_WORKSHOPS]);
             toast.error("Không thể tải danh sách workshop.");
         } finally {
             setLoading(false);
@@ -130,7 +157,17 @@ const WorkshopList = () => {
                     </div>
                 ) : (
                     <div className="row g-4">
-                        {workshops.map((ws, index) => (
+                        {workshops.map((ws, index) => {
+                            const status = String(ws.status || '').toUpperCase();
+                            const isCompleted = status === 'COMPLETED';
+                            const isCancelled = status === 'CANCELLED';
+                            const isEnded = isCompleted || isCancelled;
+                            const isFull = (ws.currentParticipants ?? 0) >= (ws.maxParticipants ?? 0);
+
+                            const badgeText = isCompleted ? 'Đã kết thúc' : isCancelled ? 'Đã hủy' : isFull ? 'Hết chỗ' : 'Đang mở';
+                            const badgeDot = isEnded ? '#6c757d' : isFull ? '#dc3545' : '#28a745';
+
+                            return (
                             <motion.div
                                 key={ws.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -149,9 +186,9 @@ const WorkshopList = () => {
                                                     style={{ minHeight: '280px' }}
                                                 />
                                                 <div className="position-absolute top-0 start-0 m-3 d-flex flex-column gap-2">
-                                                    <span className="badge bg-white text-success rounded-pill px-3 py-2 shadow-sm border fw-bold" style={{ fontSize: '0.75rem' }}>
-                                                        <span className="me-1" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: ws.currentParticipants < ws.maxParticipants ? '#28a745' : '#dc3545' }}></span>
-                                                        {ws.currentParticipants < ws.maxParticipants ? 'Đang mở' : 'Hết chỗ'}
+                                                    <span className={`badge bg-white ${isEnded ? 'text-secondary' : isFull ? 'text-danger' : 'text-success'} rounded-pill px-3 py-2 shadow-sm border fw-bold`} style={{ fontSize: '0.75rem' }}>
+                                                        <span className="me-1" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: badgeDot }}></span>
+                                                        {badgeText}
                                                     </span>
                                                 </div>
                                             </div>
@@ -203,7 +240,7 @@ const WorkshopList = () => {
                                                 </div>
                                             </div>
 
-                                            {!ws.isBooked && ws.price > 0 && (
+                                            {!isEnded && !ws.isBooked && ws.price > 0 && (
                                                 <div className="d-flex gap-2 mb-3">
                                                     <input
                                                         type="text"
@@ -237,7 +274,11 @@ const WorkshopList = () => {
                                                     </span>
                                                 </div>
 
-                                                {ws.isBooked ? (
+                                                {isEnded ? (
+                                                    <span className="bg-secondary-subtle text-secondary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 small" style={{ cursor: 'default' }}>
+                                                        {badgeText}
+                                                    </span>
+                                                ) : ws.isBooked ? (
                                                     <div className="d-flex align-items-center gap-2">
                                                         <span className="bg-secondary-subtle text-secondary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 small" style={{ cursor: 'default' }}>
                                                             Đã đăng ký
@@ -275,7 +316,8 @@ const WorkshopList = () => {
                                     </div>
                                 </div>
                             </motion.div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>

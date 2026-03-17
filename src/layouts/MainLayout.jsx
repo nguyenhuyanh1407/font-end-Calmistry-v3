@@ -109,6 +109,8 @@ const MainLayout = () => {
   // Click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // When onboarding tour is showing, keep the dropdown stable so step targets don't disappear.
+      if (document.querySelector('.guest-onboarding-overlay')) return;
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }

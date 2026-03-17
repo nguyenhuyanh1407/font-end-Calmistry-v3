@@ -102,22 +102,19 @@ const Home = () => {
   const handleUserTourStepChange = (stepIndex) => {
     // Trigger opening/closing user menu based on step
     // The user-profile-target is in MainLayout.jsx
-    setTimeout(() => {
+    const ensureMenuState = (shouldOpen) => {
       const toggleBtn = document.querySelector('.user-profile-target');
-      const isMenuOpen = document.querySelector('.user-menu-list-target');
-      
-      if (stepIndex >= 1) {
-        // Should be open
-        if (toggleBtn && !isMenuOpen) {
-          toggleBtn.click();
-        }
-      } else {
-        // Step 0: Should be closed
-        if (toggleBtn && isMenuOpen) {
-          toggleBtn.click();
-        }
-      }
-    }, 100);
+      const isMenuOpen = !!document.querySelector('.user-menu-list-target');
+      if (!toggleBtn) return;
+      if (shouldOpen && !isMenuOpen) toggleBtn.click();
+      if (!shouldOpen && isMenuOpen) toggleBtn.click();
+    };
+
+    // Run a few times to survive DOM timing + outside-click handlers during the tour.
+    const shouldOpen = stepIndex >= 1;
+    [80, 220, 420].forEach((ms) => {
+      setTimeout(() => ensureMenuState(shouldOpen), ms);
+    });
   };
 
 
