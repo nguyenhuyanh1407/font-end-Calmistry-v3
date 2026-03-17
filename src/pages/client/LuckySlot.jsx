@@ -114,6 +114,7 @@ export default function LuckySlot() {
   const [winClass, setWinClass] = useState('');
   const [finalSymbols, setFinalSymbols] = useState([null, null, null]);
   const [leverPulled, setLeverPulled] = useState(false);
+  const [rewardsOpen, setRewardsOpen] = useState(false);
   const [modalData, setModalData] = useState({ show: false, title: '', message: '', type: '' });
   const [debugText, setDebugText] = useState('');
   const reelsRef = useRef([]);
@@ -559,6 +560,16 @@ export default function LuckySlot() {
             </div>
           </motion.div>
 
+          <div className="d-flex justify-content-center mt-3">
+            <button
+              type="button"
+              className="btn btn-dark rounded-pill btn-rewards"
+              onClick={() => setRewardsOpen(true)}
+            >
+              Danh sách phần quà
+            </button>
+          </div>
+
 
 
 
@@ -645,6 +656,34 @@ export default function LuckySlot() {
             <button className="btn btn-dark rounded-pill px-4" onClick={() => setModalData({ ...modalData, show: false })}>
               Đóng
             </button>
+          </motion.div>
+        </div>
+      )}
+
+      {rewardsOpen && (
+        <div className="rewards-overlay" onClick={() => setRewardsOpen(false)}>
+          <motion.div
+            initial={{ y: 16, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="rewards-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="rewards-title">Danh sách phần quà</div>
+            <div className="rewards-subtitle">Phần thưởng có thể thay đổi theo từng thời điểm.</div>
+
+            <ul className="rewards-list">
+              <li><span className="fw-semibold">Jackpot</span>: 3 biểu tượng Calmistry → Voucher 20% (nếu có).</li>
+              <li><span className="fw-semibold">Nổ hũ thường</span>: 3 biểu tượng giống nhau → Voucher 10% (nếu có).</li>
+              <li><span className="fw-semibold">Trúng cặp</span>: 2 biểu tượng giống nhau → lời chúc/động viên.</li>
+              <li><span className="fw-semibold">Không trúng</span>: thử lại khi có lượt quay mới.</li>
+            </ul>
+
+            <div className="d-flex justify-content-center mt-3">
+              <button type="button" className="btn btn-dark rounded-pill btn-rewards" onClick={() => setRewardsOpen(false)}>
+                Đóng
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
