@@ -12,6 +12,23 @@ const Blog = () => {
   const brandGreen = '#324d3e';
   const lightGreen = '#8ec339';
   const softBg = '#f8fafc';
+  const HIDDEN_BLOG_TITLE_KEYWORDS = ['EXE201', 'chết não môn EXE201'];
+
+  const filterHiddenBlogs = (list) => {
+    const hidden = (list || []).filter((post) => {
+      const title = String(post?.title || '').trim().toLowerCase();
+      if (!title) return false;
+      return HIDDEN_BLOG_TITLE_KEYWORDS.some((kw) => title.includes(String(kw).toLowerCase()));
+    });
+    if (hidden.length > 0) {
+      console.warn('Hidden blogs (frontend filter):', hidden.map((p) => ({ id: p?.id, title: p?.title })));
+    }
+    return (list || []).filter((post) => {
+      const title = String(post?.title || '').trim().toLowerCase();
+      if (!title) return true;
+      return !HIDDEN_BLOG_TITLE_KEYWORDS.some((kw) => title.includes(String(kw).toLowerCase()));
+    });
+  };
 
   const [blogs, setBlogs] = useState([]);
   const [featuredBlogs, setFeaturedBlogs] = useState([]);
@@ -66,7 +83,7 @@ const Blog = () => {
       setFeaturedLoading(true);
       try {
         const data = await blogService.getFeaturedBlogs();
-        setFeaturedBlogs(data || []);
+        setFeaturedBlogs(filterHiddenBlogs(data || []));
       } catch (error) {
         console.error("Failed to fetch featured blogs", error);
       } finally {
@@ -90,7 +107,7 @@ const Blog = () => {
           params.status = 'PUBLISHED';
           data = await blogService.searchBlogs(params);
         }
-        setBlogs(data || []);
+        setBlogs(filterHiddenBlogs(data || []));
       } catch (error) {
         console.error("Failed to fetch blogs", error);
       } finally {
