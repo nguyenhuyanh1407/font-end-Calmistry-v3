@@ -15,9 +15,9 @@ const STATIC_WORKSHOPS = [
             'Thứ Sáu này, Calmistry chúng mình sẽ chuẩn bị một buổi workshop matcha nho nhỏ, như một buổi gặp gỡ ấm áp để mọi người có thể chậm lại một chút, tạm xa deadline và có cơ hội gặp gỡ những người bạn mới.\n\n' +
             'Trong workshop, bạn sẽ được hướng dẫn cách pha 3 tuần trà, tìm hiểu về matcha, và cùng mọi người tận hưởng thành quả của mình. Trà sư đã có kinh nghiệm tổ chức nhiều buổi workshop matcha trước đó, nên bạn hoàn toàn có thể yên tâm trải nghiệm trong một không gian nhẹ nhàng, gần gũi.\n\n' +
             '📩 Nếu bạn đang muốn tìm một buổi hẹn nhẹ nhàng cho chính mình hoặc cùng bạn bè, Calmistry rất mong được gặp bạn trong workshop lần này.',
-        // Use UTC timestamps so VN locale shows +7h similar to existing backend formatting behavior.
-        startTime: '2026-03-12T00:00:00Z',
-        endTime: '2026-03-12T04:30:00Z',
+        // Local time (VN): Thứ Sáu 13/03/2026, 14:00–16:30
+        startTime: '2026-03-13T14:00:00',
+        endTime: '2026-03-13T16:30:00',
         location: 'FUCA Hidden Coffee - Hòa Lạc - Hà Nội',
         price: 250000,
         maxParticipants: 30,
