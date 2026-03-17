@@ -4,6 +4,7 @@ import AuthLayout from "../layouts/AuthLayout";
 import { AnimatePresence } from "framer-motion";
 import PrivateRoute from "./PrivateRoute";
 import OnboardingRoute from "./OnboardingRoute";
+import PlanRoute from "./PlanRoute";
 
 // Client pages
 import Home from "../pages/client/Home";
@@ -17,7 +18,7 @@ import SleepManagement from "../pages/client/SleepManagement";
 import UserDashboard from "../pages/client/UserDashboard";
 import ShareStories from "../pages/client/ShareStories";
 import GroupChat from "../pages/client/GroupChat";
-import Checkout from "../pages/client/Checkout";
+import PlanCheckout from "../pages/client/PlanCheckout";
 import FuiedsQuiz from "../pages/client/FuiedsQuiz";
 import RelaxationLibrary from '../pages/client/RelaxationLibrary';
 import LuckySlot from "../pages/client/LuckySlot";
@@ -89,7 +90,13 @@ function AppRoutes() {
               </PrivateRoute>
             } />
             <Route path="/login" element={<Login />} />
-            <Route path="/sleepManagement" element={<SleepManagement />} />
+            <Route path="/sleepManagement" element={
+              <PrivateRoute>
+                <PlanRoute>
+                  <SleepManagement />
+                </PlanRoute>
+              </PrivateRoute>
+            } />
             <Route path="/userDashboard" element={<UserDashboard />} />
             <Route path="/lucky-slot" element={
               <PrivateRoute>
@@ -100,8 +107,18 @@ function AppRoutes() {
             <Route path="/expertDashboard" element={<ExpertDashboardPro />} />
 
             <Route path="/shareStories" element={<ShareStories />} />
-            <Route path="/group-chat" element={<GroupChat />} />
-            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/group-chat" element={
+              <PrivateRoute>
+                <PlanRoute>
+                  <GroupChat />
+                </PlanRoute>
+              </PrivateRoute>
+            } />
+            <Route path="/checkout" element={
+              <PrivateRoute>
+                <PlanCheckout />
+              </PrivateRoute>
+            } />
             <Route path="/admin/accounts" element={
               <PrivateRoute>
                 <AccountManagement />
@@ -124,7 +141,9 @@ function AppRoutes() {
             {/* FUIEDS Quiz - Protected Route */}
             <Route path="/fuieds-quiz" element={
               <PrivateRoute>
-                <FuiedsQuiz />
+                <PlanRoute>
+                  <FuiedsQuiz />
+                </PlanRoute>
               </PrivateRoute>
             } />
 

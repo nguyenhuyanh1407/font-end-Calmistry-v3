@@ -148,6 +148,17 @@ const UserDashboard = () => {
     retry: false,
   });
 
+  const effectivePlan = (() => {
+    if (!currentUser) return 'SILVER';
+    const roles = Array.isArray(currentUser.roles) ? currentUser.roles : Array.from(currentUser.roles || []);
+    const hasGoldRole = roles.some((r) => ['ADMIN', 'EXPERT', 'ROLE_ADMIN', 'ROLE_EXPERT'].includes(String(r).toUpperCase()));
+    if (hasGoldRole) return 'GOLD';
+    const plan = String(currentUser.plan || '').toUpperCase();
+    return plan === 'GOLD' ? 'GOLD' : 'SILVER';
+  })();
+  const planLabel = effectivePlan === 'GOLD' ? 'Gói Vàng' : 'Gói Bạc';
+  const planTrophyColor = effectivePlan === 'GOLD' ? '#d4af37' : '#bfc5cc';
+
   // Khi currentUser thay đổi, cập nhật userProfile
   useEffect(() => {
     if (currentUser) {
@@ -360,8 +371,11 @@ const UserDashboard = () => {
                 <div className="text-center text-md-start">
                   <div className="d-flex align-items-center justify-content-center justify-content-md-start mb-2">
                     {/* Icon thay đổi theo hạng kim loại */}
-                    <i className={`bi ${currentTier.icon} me-2 fs-4`} style={{ color: currentTier.color }}></i>
                     <span className="fw-bold text-uppercase small tracking-wider" style={{ color: lightGreen }}>Hành trình hôm nay</span>
+                    <div className="d-flex align-items-center gap-2 ms-3">
+                      <i className="bi bi-trophy-fill" style={{ color: planTrophyColor }}></i>
+                      <span className="fw-semibold small" style={{ color: planTrophyColor }}>{planLabel}</span>
+                    </div>
                   </div>
 
                   {/* Giữ nguyên câu chào cũ */}

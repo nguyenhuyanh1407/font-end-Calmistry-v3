@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import moodTracker from "../../assets/moodTracker.jpg";
 import moodTracker1 from "../../assets/moodTracker1.jpg";
 import blogImg from "../../assets/blogImg.jpg";
@@ -36,6 +36,15 @@ const Home = () => {
   const [showGuestTour, setShowGuestTour] = useState(false);
   const [showUserTour, setShowUserTour] = useState(false);
   const [userData, setUserData] = useState(null);
+
+  const isGoldUser = useMemo(() => {
+    const roles = Array.isArray(userData?.roles) ? userData.roles : Array.from(userData?.roles || []);
+    const hasGoldRole = roles.some((r) =>
+      ['ADMIN', 'EXPERT', 'ROLE_ADMIN', 'ROLE_EXPERT'].includes(String(r).toUpperCase())
+    );
+    if (hasGoldRole) return true;
+    return String(userData?.plan || '').toUpperCase() === 'GOLD';
+  }, [userData]);
 
 
   // 🔥 SỬA LỖI: Tự động chạy khi Component Mount
@@ -577,9 +586,12 @@ const Home = () => {
                     </div>
                     <ul className="list-unstyled mb-5">
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Theo dõi tâm trạng hàng ngày</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Truy cập AI trợ lý cơ bản</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Đọc tất cả bài viết chữa lành</li>
-                      <li className="text-muted opacity-50 d-flex align-items-center"><Check2Circle className="me-2" /> Buổi tư vấn riêng 1-1</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Workshop: xem & đặt lịch</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Blog & cộng đồng (Share Stories)</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Thư viện thư giãn (Relaxation)</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Viết nhật ký</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> AI Chat cá nhân</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-success me-2" /> Lucky Slot (gamification)</li>
                     </ul>
                     <button className="btn btn-outline-dark w-100 rounded-pill py-3 fw-bold" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>Bắt đầu hành trình nào!</button>
                   </div>
@@ -589,20 +601,26 @@ const Home = () => {
               {/* GÓI VÀNG */}
               <div className="col-lg-4">
                 <FadeInUp delay={0.2}>
-                  <div className="pricing-card gold-plan locked-plan h-100 p-5 rounded-5 text-white shadow-lg border-0 position-relative" style={{ backgroundColor: brandGreen }}>
+                  <div className="pricing-card gold-plan h-100 p-5 rounded-5 text-white shadow-lg border-0 position-relative" style={{ backgroundColor: brandGreen }}>
                     <div className="popular-ribbon">Khuyến nghị</div>
                     <h3 className="h2 fw-bold mb-2">Gói Vàng</h3>
                     <div className="price-tag mb-4">
-                      <span className="display-4 fw-bold">49.000 VNĐ</span>
-                      <span className="opacity-75"> / tháng</span>
+                      <span className="display-4 fw-bold">2.000 VNĐ</span>
+                      <span className="opacity-75"> / test</span>
                     </div>
                     <ul className="list-unstyled mb-5">
                       <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Tất cả tính năng gói Bạc</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> 2 buổi tư vấn riêng / tháng</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Workshop chữa lành nhóm</li>
-                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Hỗ trợ chat ưu tiên</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Group Chat</li>
+                      <li className="mb-3 d-flex align-items-center"><Check2Circle className="text-warning me-2" /> Sleep / FUIEDS</li>
                     </ul>
-                    <button className="btn btn-light w-100 rounded-pill py-3 fw-bold" style={{ color: brandGreen, fontFamily: "'Be Vietnam Pro', sans-serif" }}>Sớm ra mắt</button>
+                    <button
+                      className="btn btn-light w-100 rounded-pill py-3 fw-bold"
+                      style={{ color: brandGreen, fontFamily: "'Be Vietnam Pro', sans-serif" }}
+                      disabled={isGoldUser}
+                      onClick={() => navigate('/checkout?plan=gold')}
+                    >
+                      {isGoldUser ? 'Bạn đã là thành viên Gói Vàng' : 'Nâng cấp gói Vàng'}
+                    </button>
                   </div>
                 </FadeInUp>
               </div>

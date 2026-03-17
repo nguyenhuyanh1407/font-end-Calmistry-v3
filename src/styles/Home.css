@@ -90,7 +90,7 @@
 
 .btn-get-matched:hover {
   background-color: #8ed088;
-  transform: scale(1.05);
+  transform: none;
 }
 
 /* Grid ảnh bác sĩ */
@@ -434,6 +434,8 @@
 }
 
 .pricing-card {
+  display: flex;
+  flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -442,6 +444,20 @@
 .pricing-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Keep pricing cards aligned even when content lengths differ */
+.pricing-card .price-tag {
+  min-height: 135px;
+}
+
+.pricing-card ul {
+  flex: 1 1 auto;
+  margin-bottom: 2rem !important;
+}
+
+.pricing-card button {
+  margin-top: auto;
 }
 
 .plan-badge {
@@ -478,7 +494,7 @@
 
 @media (max-width: 992px) {
   .gold-plan {
-    transform: scale(1);
+    transform: none;
   }
 }
 
@@ -909,4 +925,58 @@ h4,
   bottom: 0;
   background: rgba(255, 255, 255, 0.1);
   z-index: 10;
+}
+
+/* Locked feature tooltip (Silver -> Gold upsell) */
+.locked-feature {
+  position: relative;
+}
+
+.locked-feature[data-tooltip] {
+  cursor: not-allowed;
+}
+
+.locked-feature[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(28, 35, 31, 0.92);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  width: max-content;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+  z-index: 5;
+}
+
+.locked-feature[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: rgba(28, 35, 31, 0.92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  z-index: 5;
+}
+
+.locked-feature[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.locked-feature[data-tooltip]:hover::before {
+  opacity: 1;
 }

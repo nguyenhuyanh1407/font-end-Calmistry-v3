@@ -97,7 +97,7 @@ const Onboarding = () => {
     return (
         <div className="onboarding-container min-vh-100 d-flex align-items-center justify-content-center" style={{
             background: `linear-gradient(135deg, ${brandGreen} 0%, #1a2a22 100%)`,
-            padding: '20px'
+            padding: '85px 20px 40px'
         }}>
             {/* Background Blobs */}
             <div className="position-absolute top-0 start-0 w-100 h-100 overflow-hidden" style={{ pointerEvents: 'none' }}>

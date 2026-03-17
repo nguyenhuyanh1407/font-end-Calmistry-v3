@@ -151,6 +151,18 @@ const MainLayout = () => {
     },
   });
 
+  const effectivePlan = useMemo(() => {
+    if (!currentUser) return 'SILVER';
+    const roles = Array.isArray(currentUser.roles) ? currentUser.roles : Array.from(currentUser.roles || []);
+    const hasGoldRole = roles.some((r) => ['ADMIN', 'EXPERT', 'ROLE_ADMIN', 'ROLE_EXPERT'].includes(String(r).toUpperCase()));
+    if (hasGoldRole) return 'GOLD';
+    const plan = String(currentUser.plan || '').toUpperCase();
+    return plan === 'GOLD' ? 'GOLD' : 'SILVER';
+  }, [currentUser]);
+
+  const planLabel = effectivePlan === 'GOLD' ? 'Gói Vàng' : 'Gói Bạc';
+  const planTrophyColor = effectivePlan === 'GOLD' ? '#d4af37' : '#bfc5cc';
+
   // Warm up gamification queries so Lucky Slot fills instantly on navigation
   useEffect(() => {
     if (!token) return;
@@ -339,6 +351,10 @@ const MainLayout = () => {
                           </div>
                           <div className="text-white small opacity-75 text-truncate">
                             {currentUser.email}
+                          </div>
+                          <div className="d-flex align-items-center gap-2 mt-2">
+                            <i className="bi bi-trophy-fill" style={{ color: planTrophyColor }}></i>
+                            <div className="text-white small fw-semibold">{planLabel}</div>
                           </div>
                         </div>
                         {/* Decorative circles */}

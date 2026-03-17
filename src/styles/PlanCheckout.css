@@ -1,0 +1,139 @@
+.plan-checkout-page {
+  background: #fcf7f0;
+  min-height: calc(100vh - 80px);
+  padding: 120px 0 80px; /* push below fixed navbar */
+}
+
+.plan-checkout-banner {
+  background: linear-gradient(135deg, rgba(50, 77, 62, 0.12), rgba(142, 195, 57, 0.12));
+  border: 1px solid rgba(50, 77, 62, 0.18);
+  border-radius: 18px;
+  padding: 18px 18px;
+  color: #324d3e;
+}
+
+.plan-checkout-banner h2 {
+  margin: 0;
+  font-weight: 800;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.plan-checkout-banner p {
+  margin: 8px 0 0;
+  color: rgba(50, 77, 62, 0.8);
+}
+
+.plan-checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 22px;
+  margin-top: 22px;
+}
+
+@media (max-width: 992px) {
+  .plan-checkout-page {
+    padding: 110px 0 60px;
+  }
+  .plan-checkout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plan-card {
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+  padding: 22px;
+}
+
+.plan-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.plan-card-title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #324d3e;
+}
+
+.plan-pill {
+  background: rgba(50, 77, 62, 0.1);
+  color: #324d3e;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.plan-kv {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px 14px;
+  font-size: 0.95rem;
+  color: rgba(30, 30, 30, 0.85);
+}
+
+.plan-kv .k {
+  color: rgba(50, 77, 62, 0.7);
+  font-weight: 700;
+}
+
+.plan-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 16px 0;
+}
+
+.voucher-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.voucher-row input {
+  flex: 1;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 14px;
+  padding: 12px 14px;
+  outline: none;
+}
+
+.voucher-row input:focus {
+  border-color: rgba(50, 77, 62, 0.35);
+  box-shadow: 0 0 0 4px rgba(50, 77, 62, 0.08);
+}
+
+.checkout-btn {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-weight: 800;
+  background: #324d3e;
+  color: #fff;
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.checkout-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(50, 77, 62, 0.25);
+}
+
+.checkout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.muted-note {
+  color: rgba(50, 77, 62, 0.7);
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
