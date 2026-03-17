@@ -386,9 +386,9 @@ const UserDashboard = () => {
                       }}>
                         <MoonStar size={18} className="me-2" /> Đánh giá giấc ngủ
                       </button>
-                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center" onClick={() => {
-                        analytics.logEvent('Dashboard', 'click', 'lucky_slot_click');
-                        navigate('/lucky-slot');
+                      <button className="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold d-flex align-items-center btn-lucky-slot" onClick={() => {
+                         analytics.logEvent('Dashboard', 'click', 'lucky_slot_click');
+                         navigate('/lucky-slot');
                       }}>
                         <Gift size={18} className="me-2" /> Lucky Slot ({userProfile.spinBalance})
                       </button>

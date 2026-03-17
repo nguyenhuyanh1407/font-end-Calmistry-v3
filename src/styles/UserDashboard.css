@@ -50,6 +50,22 @@
           color: #74c655 !important;
         }
 
+        /* Lucky Slot button (pink) */
+        .btn-lucky-slot {
+          background: linear-gradient(135deg, #ffadba 0%, #ff8c94 100%) !important;
+          border: none !important;
+          color: #ffffff !important;
+          box-shadow: 0 4px 14px rgba(255, 140, 148, 0.22) !important;
+          transition: all 0.2s ease;
+        }
+
+        .btn-lucky-slot:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(255, 140, 148, 0.32) !important;
+          background: linear-gradient(135deg, #ff8c94 0%, #ffadba 100%) !important;
+          color: #ffffff !important;
+        }
+
         /* CSS cho hiệu ứng Modal Chỉnh sửa */
         .custom-modal-backdrop {
           position: fixed;

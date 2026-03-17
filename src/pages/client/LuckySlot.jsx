@@ -560,7 +560,7 @@ export default function LuckySlot() {
             </div>
           </motion.div>
 
-          <div className="d-flex justify-content-center mt-3">
+          <div className="d-flex justify-content-center mt-2">
             <button
               type="button"
               className="btn btn-dark rounded-pill btn-rewards"
