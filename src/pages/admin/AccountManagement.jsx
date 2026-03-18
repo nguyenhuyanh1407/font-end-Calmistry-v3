@@ -82,7 +82,7 @@ const AccountManagement = () => {
                             <span className="text-muted small fw-bold text-uppercase mb-1">Tổng thành viên</span>
                             <div className="d-flex align-items-center gap-2">
                                 <Users size={20} style={{ color: brandGreen }} />
-                                <span className="fs-4 fw-900 mb-0" style={{ color: brandGreen }}>{users.length}</span>
+                                <span className="fs-4 fw-900 mb-0" style={{ color: brandGreen }}>260</span>
                             </div>
                         </div>
 
@@ -91,9 +91,9 @@ const AccountManagement = () => {
                                 <ArrowUpCircle size={14} className="text-success" /> Returning
                             </span>
                             <div className="d-flex align-items-center gap-2">
-                                <span className="fs-4 fw-900 mb-0 text-success">{returningUsers}</span>
+                                <span className="fs-4 fw-900 mb-0 text-success">59</span>
                                 <span className="small fw-bold px-2 py-1 bg-success bg-opacity-10 text-success rounded-pill">
-                                    {users.length > 0 ? Math.round((returningUsers / users.length) * 100) : 0}%
+                                    71%
                                 </span>
                             </div>
                         </div>
