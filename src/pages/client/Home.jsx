@@ -602,7 +602,7 @@ const Home = () => {
                     <div className="popular-ribbon">Khuyến nghị</div>
                     <h3 className="h2 fw-bold mb-2">Gói Vàng</h3>
                     <div className="price-tag mb-4">
-                      <span className="display-4 fw-bold">2.000 VNĐ</span>
+                      <span className="display-4 fw-bold">49.000 VNĐ</span>
                       <span className="opacity-75"> / test</span>
                     </div>
                     <ul className="list-unstyled mb-5">

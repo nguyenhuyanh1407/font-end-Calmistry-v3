@@ -103,7 +103,7 @@ const PlanCheckout = () => {
         <div className="plan-checkout-banner">
           <h2>Hãy nâng cấp lên gói vàng để có thể trải nghiệm tính năng này! Calmistry xin cảm ơn!</h2>
           <p>
-            Thanh toán qua PayOS (test) • Giá gói Vàng: <strong>2.000 VNĐ</strong>
+            Thanh toán qua PayOS (test) • Giá gói Vàng: <strong>49.000 VNĐ</strong>
             {isSyncing ? ' • Đang đồng bộ trạng thái gói Vàng…' : ''}
             {alreadyGold ? ' • Bạn đã là thành viên gói Vàng.' : ''}
           </p>
@@ -159,7 +159,7 @@ const PlanCheckout = () => {
               <div className="k">Mặt hàng</div>
               <div className="v"><strong>Nâng cấp gói Vàng</strong></div>
               <div className="k">Giá tiền</div>
-              <div className="v"><strong>2.000 VNĐ</strong></div>
+              <div className="v"><strong>49.000 VNĐ</strong></div>
               <div className="k">Hình thức</div>
               <div className="v">Chuyển khoản (PayOS)</div>
             </div>
