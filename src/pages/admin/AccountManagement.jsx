@@ -82,7 +82,7 @@ const AccountManagement = () => {
                             <span className="text-muted small fw-bold text-uppercase mb-1">Tổng thành viên</span>
                             <div className="d-flex align-items-center gap-2">
                                 <Users size={20} style={{ color: brandGreen }} />
-                                <span className="fs-4 fw-900 mb-0" style={{ color: brandGreen }}>260</span>
+                                <span className="fs-4 fw-900 mb-0" style={{ color: brandGreen }}>247</span>
                             </div>
                         </div>
 
